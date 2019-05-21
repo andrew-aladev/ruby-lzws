@@ -1,0 +1,26 @@
+# Ruby bindings for lzws library.
+# Copyright (c) 2019 AUTHORS, distributed under the MIT License.
+
+require "date"
+
+require_relative "lib/lzws/version"
+
+Gem::Specification.new do |gem|
+  gem.name     = "ruby-lzws"
+  gem.summary  = "Ruby bindings for lzws library."
+  gem.homepage = "https://github.com/andrew-aladev/ruby-lzws"
+  gem.license  = "MIT"
+  gem.authors  = File.read("AUTHORS").split("\n").reject(&:empty?)
+  gem.email    = "aladjev.andrew@gmail.com"
+  gem.version  = LZWS::VERSION
+  gem.date     = Date.today.to_s
+
+  gem.add_development_dependency "minitest"
+  gem.add_development_dependency "rubocop"
+  gem.add_development_dependency "rubocop-performance"
+
+  gem.files = \
+    `git ls-files -z --directory {lib}`.split("\x0") + \
+    %w[README.md LICENSE AUTHORS]
+  gem.require_paths = %w[lib]
+end
