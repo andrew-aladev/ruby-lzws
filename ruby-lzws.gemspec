@@ -18,6 +18,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "minitest"
   gem.add_development_dependency "rubocop"
   gem.add_development_dependency "rubocop-performance"
+  gem.add_development_dependency "rubocop-rails"
 
   gem.files = \
     `git ls-files -z --directory {lib}`.split("\x0") + \
