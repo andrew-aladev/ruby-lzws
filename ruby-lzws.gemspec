@@ -1,5 +1,5 @@
 # Ruby bindings for lzws library.
-# Copyright (c) 2019 AUTHORS, distributed under the MIT License.
+# Copyright (c) 2019 AUTHORS, MIT License.
 
 require "date"
 

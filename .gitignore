@@ -1,0 +1,4 @@
+ext/lzws/Makefile
+ext/lzws/mkmf.log
+ext/lzws/*.o
+ext/lzws/*.so
