@@ -26,10 +26,14 @@ string_functions = %w[
   lzws_compress_string
   lzws_decompress_string
 ]
+.freeze
+
 file_functions = %w[
   lzws_compress_file
   lzws_decompress_file
 ]
+.freeze
+
 generic_compressor_functions = %w[
   lzws_compressor_write_magic_header
   lzws_compressor_get_initial_state
@@ -37,14 +41,37 @@ generic_compressor_functions = %w[
   lzws_flush_compressor
   lzws_compressor_free_state
 ]
+.freeze
+
 generic_decompressor_functions = %w[
   lzws_decompressor_read_magic_header
   lzws_decompressor_get_initial_state
   lzws_decompress
   lzws_decompressor_free_state
 ]
+.freeze
 
-functions = string_functions + file_functions + generic_compressor_functions + generic_decompressor_functions
+functions = (
+  string_functions +
+  file_functions +
+  generic_compressor_functions +
+  generic_decompressor_functions
+)
+.freeze
+
 require_library "lzws", functions
 
-create_makefile "lzws_ext"
+extension_name = "lzws_ext".freeze
+dir_config extension_name
+
+# rubocop:disable Style/GlobalVars
+$srcs = %w[string file main]
+  .map { |name| "src/#{extension_name}/#{name}.c" }
+  .freeze
+
+$CFLAGS << " -Wno-declaration-after-statement"
+$INCFLAGS << " -I$(srcdir)/src"
+$VPATH << "$(srcdir)/src/#{extension_name}"
+# rubocop:enable Style/GlobalVars
+
+create_makefile extension_name
