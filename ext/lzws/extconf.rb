@@ -70,8 +70,7 @@ $srcs = %w[string file main]
   .freeze
 
 $CFLAGS << " -Wno-declaration-after-statement"
-$INCFLAGS << " -I$(srcdir)/src"
-$VPATH << "$(srcdir)/src/#{extension_name}"
+$VPATH << "$(srcdir)/#{extension_name}"
 # rubocop:enable Style/GlobalVars
 
 create_makefile extension_name
