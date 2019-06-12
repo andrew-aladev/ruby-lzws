@@ -1,4 +1,4 @@
-ext/lzws/Makefile
-ext/lzws/mkmf.log
-ext/lzws/*.o
-ext/lzws/*.so
+ext/Makefile
+ext/mkmf.log
+ext/*.o
+ext/*.so

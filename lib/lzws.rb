@@ -1,2 +1,4 @@
+require "lzws/error"
 require "lzws/version"
-require "lzws/lzws_ext"
+
+require "lzws_ext"
