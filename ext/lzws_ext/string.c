@@ -3,8 +3,8 @@
 
 #include <lzws/string.h>
 
-#include "lzws_ext/common.h"
 #include "lzws_ext/macro.h"
+#include "lzws_ext/option.h"
 #include "lzws_ext/string.h"
 #include "ruby.h"
 
