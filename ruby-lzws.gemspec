@@ -21,7 +21,8 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rubocop-rails"
 
   gem.files = \
-    `git ls-files -z --directory {lib}`.split("\x0") + \
-    %w[README.md LICENSE AUTHORS]
+    `git ls-files -z --directory {ext,lib}`.split("\x0") + \
+    %w[AUTHORS LICENSE README.md]
   gem.require_paths = %w[lib]
+  gem.extensions    = %w[ext/extconf.rb]
 end

@@ -4,12 +4,14 @@
 module LZWS
   class BaseError < StandardError; end
 
-  class CompressorFailedError < BaseError; end
-  class DecompressorFailedError < BaseError; end
+  class CompressorError   < BaseError; end
+  class DecompressorError < BaseError; end
 
-  class OpenFileFailedError < BaseError; end
-  class ReadFileFailedError < BaseError; end
-  class WriteFileFailedError < BaseError; end
+  class OpenFileError < BaseError; end
+  class AccessIOError < BaseError; end
+  class ReadIOError   < BaseError; end
+  class WriteIOError  < BaseError; end
 
-  class UnexpectedError < BaseError; end
+  class UnexpectedArgumentError < BaseError; end
+  class UnexpectedError         < BaseError; end
 end

@@ -4,13 +4,13 @@
 #include <lzws/file.h>
 
 #include "lzws_ext/error.h"
-#include "lzws_ext/file.h"
+#include "lzws_ext/io.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
 #include "ruby.h"
 #include "ruby/io.h"
 
-VALUE lzws_ext_compress_file(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
+VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
 {
   Check_Type(source, T_FILE);
   Check_Type(destination, T_FILE);
@@ -25,13 +25,13 @@ VALUE lzws_ext_compress_file(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
 
   FILE *source_file = rb_io_stdio_file(source_io);
   if (source_file == NULL) {
-    lzws_ext_raise_error("OpenFileFailedError", "failed to open source file");
+    lzws_ext_raise_error("AccessIOError", "failed to access source IO");
     return Qnil;
   }
 
   FILE *destination_file = rb_io_stdio_file(destination_io);
   if (destination_file == NULL) {
-    lzws_ext_raise_error("OpenFileFailedError", "failed to open destination file");
+    lzws_ext_raise_error("AccessIOError", "failed to access destination IO");
     return Qnil;
   }
 
@@ -46,13 +46,13 @@ VALUE lzws_ext_compress_file(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   // -----
 
   if (result == LZWS_FILE_COMPRESSOR_FAILED) {
-    lzws_ext_raise_error("CompressorFailedError", "compressor failed");
+    lzws_ext_raise_error("CompressorError", "compressor failed");
   }
   else if (result == LZWS_FILE_READ_FAILED) {
-    lzws_ext_raise_error("ReadFileFailedError", "failed to read file");
+    lzws_ext_raise_error("ReadIOError", "failed to read IO");
   }
   else if (result == LZWS_FILE_WRITE_FAILED) {
-    lzws_ext_raise_error("WriteFileFailedError", "failed to write file");
+    lzws_ext_raise_error("WriteIOError", "failed to write IO");
   }
   else if (result != 0) {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
@@ -61,7 +61,7 @@ VALUE lzws_ext_compress_file(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   return Qnil;
 }
 
-VALUE lzws_ext_decompress_file(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
+VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
 {
   Check_Type(source, T_FILE);
   Check_Type(destination, T_FILE);
@@ -76,13 +76,13 @@ VALUE lzws_ext_decompress_file(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
 
   FILE *source_file = rb_io_stdio_file(source_io);
   if (source_file == NULL) {
-    lzws_ext_raise_error("OpenFileFailedError", "failed to open source file");
+    lzws_ext_raise_error("AccessIOError", "failed to access source IO");
     return Qnil;
   }
 
   FILE *destination_file = rb_io_stdio_file(destination_io);
   if (destination_file == NULL) {
-    lzws_ext_raise_error("OpenFileFailedError", "failed to open destination file");
+    lzws_ext_raise_error("AccessIOError", "failed to access destination IO");
     return Qnil;
   }
 
@@ -97,13 +97,13 @@ VALUE lzws_ext_decompress_file(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
   // -----
 
   if (result == LZWS_FILE_DECOMPRESSOR_FAILED) {
-    lzws_ext_raise_error("DecompressorFailedError", "decompressor failed");
+    lzws_ext_raise_error("DecompressorError", "decompressor failed");
   }
   else if (result == LZWS_FILE_READ_FAILED) {
-    lzws_ext_raise_error("ReadFileFailedError", "failed to read file");
+    lzws_ext_raise_error("ReadIOError", "failed to read IO");
   }
   else if (result == LZWS_FILE_WRITE_FAILED) {
-    lzws_ext_raise_error("WriteFileFailedError", "failed to write file");
+    lzws_ext_raise_error("WriteIOError", "failed to write IO");
   }
   else if (result != 0) {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");

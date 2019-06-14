@@ -65,7 +65,7 @@ extension_name = "lzws_ext".freeze
 dir_config extension_name
 
 # rubocop:disable Style/GlobalVars
-$srcs = %w[error file main option string]
+$srcs = %w[error io main option string]
   .map { |name| "src/#{extension_name}/#{name}.c" }
   .freeze
 
