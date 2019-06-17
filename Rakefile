@@ -1,12 +1,19 @@
+require "rake/extensiontask"
 require "rake/testtask"
 
-Rake::TestTask.new(:test_all) do |task|
+Rake::ExtensionTask.new do |ext|
+  ext.name           = "lzws_ext"
+  ext.ext_dir        = "ext"
+  ext.lib_dir        = "lib"
+  ext.tmp_dir        = "tmp"
+  ext.source_pattern = "*.{c,h}"
+end
+
+Rake::TestTask.new do |task|
   task.libs << %w[ext lib]
 
-  pathes = `find tests | grep -P "\.test\.rb$"`
+  pathes = `find test | grep -P "\.test\.rb$"`
   task.test_files = pathes.split "\n"
 end
 
-task :all => :test_all
-
-task :default => :test_all
+task :default => %i[compile test]
