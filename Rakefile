@@ -10,7 +10,7 @@ Rake::ExtensionTask.new do |ext|
 end
 
 Rake::TestTask.new do |task|
-  task.libs << %w[ext lib]
+  task.libs << %w[lib]
 
   pathes = `find test | grep -P "\.test\.rb$"`
   task.test_files = pathes.split "\n"

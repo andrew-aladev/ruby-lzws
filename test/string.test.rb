@@ -38,8 +38,8 @@ module LZWS
       end
 
       def test_texts
-        Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-          Common::TEXTS.each do |text|
+        Common::TEXTS.each do |text|
+          Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
             compressed_text   = Target.compress text, compressor_options
             decompressed_text = Target.decompress compressed_text, decompressor_options
 
@@ -47,8 +47,8 @@ module LZWS
           end
         end
       end
-
-      Minitest << String
     end
+
+    Minitest << String
   end
 end

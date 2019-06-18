@@ -15,11 +15,11 @@ Gem::Specification.new do |gem|
   gem.version  = LZWS::VERSION
   gem.date     = Date.today.to_s
 
-  gem.add_development_dependency "minitest"
-  gem.add_development_dependency "rake-compiler"
-  gem.add_development_dependency "rubocop"
-  gem.add_development_dependency "rubocop-performance"
-  gem.add_development_dependency "rubocop-rails"
+  gem.add_development_dependency "minitest", "~> 5.11"
+  gem.add_development_dependency "rake-compiler", "~> 1.0"
+  gem.add_development_dependency "rubocop", "~> 0.71"
+  gem.add_development_dependency "rubocop-performance", "~> 1.3"
+  gem.add_development_dependency "rubocop-rails", "~> 2.0"
 
   gem.files = \
     `git ls-files -z --directory {ext,lib}`.split("\x0") + \

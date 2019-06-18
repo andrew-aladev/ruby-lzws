@@ -14,7 +14,7 @@ module LZWS
 
     def self.open_file(path, mode, &_block)
       begin
-        io = File.open path, mode
+        io = ::File.open path, mode
       rescue StandardError
         raise OpenFileError
       end
@@ -27,8 +27,8 @@ module LZWS
     end
 
     def self.open_files(source, destination, &_block)
-      open_file(source, "r") do |source_io|
-        open_file(destination, "w") do |destination_io|
+      open_file(source, "rb") do |source_io|
+        open_file(destination, "wb") do |destination_io|
           yield source_io, destination_io
         end
       end

@@ -10,6 +10,7 @@ module LZWS
       INVALID_BOOLS    = (ALL_BASE_TYPES - [true]).freeze
       INVALID_STRINGS  = (ALL_BASE_TYPES - %w[1 a]).freeze
       INVALID_HASHES   = (ALL_BASE_TYPES - [{}]).freeze
+      INVALID_IOS      = ALL_BASE_TYPES
     end
   end
 end
