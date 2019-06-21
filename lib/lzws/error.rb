@@ -12,6 +12,7 @@ module LZWS
   class ReadIOError   < BaseError; end
   class WriteIOError  < BaseError; end
 
+  class MemoryAllocationError   < BaseError; end
   class UnexpectedArgumentError < BaseError; end
   class UnexpectedError         < BaseError; end
 end

@@ -26,13 +26,11 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
   FILE *source_file = rb_io_stdio_file(source_io);
   if (source_file == NULL) {
     lzws_ext_raise_error("AccessIOError", "failed to access source IO");
-    return Qnil;
   }
 
   FILE *destination_file = rb_io_stdio_file(destination_io);
   if (destination_file == NULL) {
     lzws_ext_raise_error("AccessIOError", "failed to access destination IO");
-    return Qnil;
   }
 
   lzws_result_t result = lzws_compress_file(
@@ -77,13 +75,11 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   FILE *source_file = rb_io_stdio_file(source_io);
   if (source_file == NULL) {
     lzws_ext_raise_error("AccessIOError", "failed to access source IO");
-    return Qnil;
   }
 
   FILE *destination_file = rb_io_stdio_file(destination_io);
   if (destination_file == NULL) {
     lzws_ext_raise_error("AccessIOError", "failed to access destination IO");
-    return Qnil;
   }
 
   lzws_result_t result = lzws_decompress_file(
