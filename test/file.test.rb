@@ -60,7 +60,8 @@ module LZWS
             Target.compress SOURCE_PATH, COMPRESSED_PATH, compressor_options
             Target.decompress COMPRESSED_PATH, DECOMPRESSED_PATH, decompressor_options
 
-            assert_equal text, ::File.read(DECOMPRESSED_PATH)
+            decompressed_text = ::File.open DECOMPRESSED_PATH, "rb", &:read
+            assert_equal text, decompressed_text
           end
         end
       end

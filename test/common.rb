@@ -1,6 +1,8 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require "securerandom"
+
 module LZWS
   module Test
     module Common
@@ -8,10 +10,9 @@ module LZWS
       TEMP_PATH = File.join(BASE_PATH, "tmp").freeze
 
       TEXTS = [
-        "hello world",
-        "tobeornottobeortobeornot",
-        "qqqqqqqqqqqqqqqqqqqqqqqq",
-        "qqqqqqqqqqqqqqqqqqqqqqqz"
+        "hello world".b,
+        "tobeornottobeortobeornot".b,
+        SecureRandom.random_bytes(1 << 15) # 32 kBytes
       ]
       .freeze
     end
