@@ -54,8 +54,19 @@ require_library "lzws", functions
 extension_name = "lzws_ext".freeze
 dir_config extension_name
 
+sources = %w[
+  stream/compressor
+  stream/decompressor
+  error
+  io
+  main
+  option
+  string
+]
+.freeze
+
 # rubocop:disable Style/GlobalVars
-$srcs = %w[stream/compressor stream/decompressor error io main option string]
+$srcs = sources
   .map { |name| "src/#{extension_name}/#{name}.c" }
   .freeze
 

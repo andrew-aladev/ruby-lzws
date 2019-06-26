@@ -38,14 +38,11 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
     destination_file, 0,
     max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
-  // Ruby itself won't flush destination file, flush is required.
-  fflush(destination_file);
-
   if (result == LZWS_FILE_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
-  else if (result == LZWS_FILE_COMPRESSOR_FAILED) {
-    lzws_ext_raise_error("CompressorError", "compressor failed");
+  else if (result == LZWS_FILE_VALIDATE_FAILED) {
+    lzws_ext_raise_error("ValidateError", "validate error");
   }
   else if (result == LZWS_FILE_READ_FAILED) {
     lzws_ext_raise_error("ReadIOError", "failed to read IO");
@@ -56,6 +53,9 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
   else if (result != 0) {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
+
+  // Ruby itself won't flush stdio file before closing fd, flush is required.
+  fflush(destination_file);
 
   return Qnil;
 }
@@ -88,14 +88,14 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
     destination_file, 0,
     msb, unaligned_bit_groups, quiet);
 
-  // Ruby itself won't flush destination file, flush is required.
-  fflush(destination_file);
-
   if (result == LZWS_FILE_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
-  else if (result == LZWS_FILE_DECOMPRESSOR_FAILED) {
-    lzws_ext_raise_error("DecompressorError", "decompressor failed");
+  else if (result == LZWS_FILE_VALIDATE_FAILED) {
+    lzws_ext_raise_error("ValidateError", "validate error");
+  }
+  else if (result == LZWS_FILE_DECOMPRESSOR_CORRUPTED_SOURCE) {
+    lzws_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
   }
   else if (result == LZWS_FILE_READ_FAILED) {
     lzws_ext_raise_error("ReadIOError", "failed to read IO");
@@ -106,6 +106,9 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   else if (result != 0) {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
+
+  // Ruby itself won't flush stdio file before closing fd, flush is required.
+  fflush(destination_file);
 
   return Qnil;
 }

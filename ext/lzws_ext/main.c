@@ -28,7 +28,6 @@ void Init_lzws_ext()
   rb_define_alloc_func(compressor, lzws_ext_allocate_compressor);
   rb_define_method(compressor, "initialize", lzws_ext_initialize_compressor, 2);
   rb_define_method(compressor, "write_magic_header", lzws_ext_compressor_write_magic_header, 1);
-  rb_define_method(compressor, "write_header", lzws_ext_compressor_write_header, 1);
   rb_define_method(compressor, "write", lzws_ext_compressor_write, 2);
   rb_define_method(compressor, "read", lzws_ext_compressor_write, 1);
   rb_define_method(compressor, "flush", lzws_ext_flush_compressor, 1);

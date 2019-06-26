@@ -61,7 +61,10 @@ VALUE lzws_ext_initialize_compressor(VALUE LZWS_EXT_UNUSED(self), VALUE options)
   if (result == LZWS_COMPRESSOR_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
-  else {
+  else if (result == LZWS_COMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
+    lzws_ext_raise_error("ValidateError", "validate error");
+  }
+  else if (result != 0) {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
@@ -93,29 +96,6 @@ VALUE lzws_ext_compressor_write_magic_header(VALUE self)
   // -----
 
   lzws_result_t result = lzws_compressor_write_magic_header(
-    &compressor_ptr->remaining_destination_buffer,
-    &compressor_ptr->remaining_destination_buffer_length);
-
-  if (result == 0) {
-    return Qtrue;
-  }
-  else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    return Qfalse;
-  }
-  else {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
-  }
-}
-
-VALUE lzws_ext_compressor_write_header(VALUE self)
-{
-  lzws_ext_compressor_t* compressor_ptr;
-  Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
-
-  // -----
-
-  lzws_result_t result = lzws_compressor_write_header(
-    compressor_ptr->state_ptr,
     &compressor_ptr->remaining_destination_buffer,
     &compressor_ptr->remaining_destination_buffer_length);
 

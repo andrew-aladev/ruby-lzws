@@ -2,6 +2,9 @@
 // Copyright (c) 2019 AUTHORS, MIT License.
 
 #include <lzws/buffer.h>
+#include <lzws/decompressor/common.h>
+#include <lzws/decompressor/header.h>
+#include <lzws/decompressor/main.h>
 #include <lzws/decompressor/state.h>
 
 #include "lzws_ext/error.h"
@@ -58,7 +61,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE LZWS_EXT_UNUSED(self), VALUE option
   if (result == LZWS_DECOMPRESSOR_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
-  else {
+  else if (result != 0) {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
@@ -81,3 +84,24 @@ VALUE lzws_ext_initialize_decompressor(VALUE LZWS_EXT_UNUSED(self), VALUE option
 
   return Qnil;
 }
+
+VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
+{
+  lzws_ext_decompressor_t* decompressor_ptr;
+  Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
+
+  Check_Type(source, T_STRING);
+
+  const char* source_data   = RSTRING_PTR(source);
+  size_t      source_length = RSTRING_LEN(source);
+
+  uint8_t* remaining_source_data   = (uint8_t*)source_data;
+  size_t   remaining_source_length = source_length;
+
+  // -----
+
+  return Qnil;
+}
+
+// VALUE lzws_ext_decompressor_read(VALUE self, VALUE source);
+// VALUE lzws_ext_decompressor_write(VALUE self);

@@ -31,8 +31,8 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
   if (result == LZWS_STRING_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
-  else if (result == LZWS_STRING_COMPRESSOR_FAILED) {
-    lzws_ext_raise_error("CompressorError", "compressor failed");
+  else if (result == LZWS_STRING_VALIDATE_FAILED) {
+    lzws_ext_raise_error("ValidateError", "validate error");
   }
   else if (result != 0) {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
@@ -68,8 +68,11 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALU
   if (result == LZWS_STRING_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
-  else if (result == LZWS_STRING_DECOMPRESSOR_FAILED) {
-    lzws_ext_raise_error("DecompressorError", "decompressor failed");
+  else if (result == LZWS_STRING_VALIDATE_FAILED) {
+    lzws_ext_raise_error("ValidateError", "validate error");
+  }
+  else if (result == LZWS_STRING_DECOMPRESSOR_CORRUPTED_SOURCE) {
+    lzws_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
   }
   else if (result != 0) {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
