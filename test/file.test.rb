@@ -20,31 +20,31 @@ module LZWS
 
       def test_invalid_arguments
         Validation::INVALID_STRINGS.each do |invalid_path|
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.compress invalid_path, COMPRESSED_PATH
           end
 
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.compress SOURCE_PATH, invalid_path
           end
 
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.decompress invalid_path, DECOMPRESSED_PATH
           end
 
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.decompress COMPRESSED_PATH, invalid_path
           end
         end
 
         Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.compress SOURCE_PATH, COMPRESSED_PATH, invalid_options
           end
         end
 
         Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.decompress COMPRESSED_PATH, DECOMPRESSED_PATH, invalid_options
           end
         end

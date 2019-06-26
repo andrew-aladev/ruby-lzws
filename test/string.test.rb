@@ -15,23 +15,23 @@ module LZWS
 
       def test_invalid_arguments
         Validation::INVALID_STRINGS.each do |invalid_string|
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.compress invalid_string
           end
 
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.decompress invalid_string
           end
         end
 
         Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.compress "", invalid_options
           end
         end
 
         Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
-          assert_raises UnexpectedArgumentError do
+          assert_raises ValidateError do
             Target.decompress "", invalid_options
           end
         end

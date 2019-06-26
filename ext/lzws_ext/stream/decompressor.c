@@ -56,7 +56,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE LZWS_EXT_UNUSED(self), VALUE option
     msb, unaligned_bit_groups, quiet);
 
   if (result == LZWS_DECOMPRESSOR_ALLOCATE_FAILED) {
-    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+    lzws_ext_raise_error("AllocateError", "allocate error");
   }
   else {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
@@ -71,7 +71,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE LZWS_EXT_UNUSED(self), VALUE option
 
   result = lzws_create_buffer_for_decompressor(&destination_buffer, &destination_buffer_length, quiet);
   if (result != 0) {
-    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+    lzws_ext_raise_error("AllocateError", "allocate error");
   }
 
   decompressor_ptr->destination_buffer                  = destination_buffer;

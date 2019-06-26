@@ -59,7 +59,7 @@ VALUE lzws_ext_initialize_compressor(VALUE LZWS_EXT_UNUSED(self), VALUE options)
     max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
   if (result == LZWS_COMPRESSOR_ALLOCATE_FAILED) {
-    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+    lzws_ext_raise_error("AllocateError", "allocate error");
   }
   else {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
@@ -74,7 +74,7 @@ VALUE lzws_ext_initialize_compressor(VALUE LZWS_EXT_UNUSED(self), VALUE options)
 
   result = lzws_create_buffer_for_compressor(&destination_buffer, &destination_buffer_length, quiet);
   if (result != 0) {
-    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+    lzws_ext_raise_error("AllocateError", "allocate error");
   }
 
   compressor_ptr->destination_buffer                  = destination_buffer;

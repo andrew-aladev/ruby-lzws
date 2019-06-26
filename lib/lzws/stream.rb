@@ -42,11 +42,11 @@ module LZWS
     end
 
     def self.validate_io(io)
-      raise UnexpectedArgumentError unless io.is_a? ::IO
+      raise ValidateError unless io.is_a? ::IO
     end
 
     def self.validate_string(string)
-      raise UnexpectedArgumentError unless string.is_a? ::String
+      raise ValidateError unless string.is_a? ::String
     end
   end
 end

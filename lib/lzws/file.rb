@@ -9,7 +9,7 @@ require_relative "option"
 module LZWS
   module File
     def self.validate_arguments(source, destination)
-      raise UnexpectedArgumentError unless source.is_a?(::String) && destination.is_a?(::String)
+      raise ValidateError unless source.is_a?(::String) && destination.is_a?(::String)
     end
 
     def self.open_file(path, mode, &_block)

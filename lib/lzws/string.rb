@@ -9,7 +9,7 @@ require_relative "option"
 module LZWS
   module String
     def self.validate_arguments(source)
-      raise UnexpectedArgumentError unless source.is_a? ::String
+      raise ValidateError unless source.is_a? ::String
     end
 
     def self.compress(source, options = {})

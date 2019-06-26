@@ -18,31 +18,31 @@ module LZWS
       def test_invalid_arguments
         ::IO.pipe do |read_io, write_io|
           Validation::INVALID_IOS.each do |invalid_io|
-            assert_raises UnexpectedArgumentError do
+            assert_raises ValidateError do
               Target.compress invalid_io, write_io
             end
 
-            assert_raises UnexpectedArgumentError do
+            assert_raises ValidateError do
               Target.compress read_io, invalid_io
             end
 
-            assert_raises UnexpectedArgumentError do
+            assert_raises ValidateError do
               Target.decompress invalid_io, write_io
             end
 
-            assert_raises UnexpectedArgumentError do
+            assert_raises ValidateError do
               Target.decompress read_io, invalid_io
             end
           end
 
           Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
-            assert_raises UnexpectedArgumentError do
+            assert_raises ValidateError do
               Target.compress read_io, write_io, invalid_options
             end
           end
 
           Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
-            assert_raises UnexpectedArgumentError do
+            assert_raises ValidateError do
               Target.decompress read_io, write_io, invalid_options
             end
           end

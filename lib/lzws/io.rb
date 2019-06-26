@@ -9,7 +9,7 @@ require_relative "option"
 module LZWS
   module IO
     def self.validate_arguments(source, destination)
-      raise UnexpectedArgumentError unless source.is_a?(::IO) && destination.is_a?(::IO)
+      raise ValidateError unless source.is_a?(::IO) && destination.is_a?(::IO)
     end
 
     def self.compress(source, destination, options = {})

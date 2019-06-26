@@ -24,19 +24,19 @@ module LZWS
     .freeze
 
     def self.get_compressor_options(options)
-      raise UnexpectedArgumentError unless options.is_a? ::Hash
+      raise ValidateError unless options.is_a? ::Hash
 
       options = COMPRESSOR_DEFAULTS.merge options
-      raise UnexpectedArgumentError unless compressor_options_valid? options
+      raise ValidateError unless compressor_options_valid? options
 
       options
     end
 
     def self.get_decompressor_options(options)
-      raise UnexpectedArgumentError unless options.is_a? ::Hash
+      raise ValidateError unless options.is_a? ::Hash
 
       options = DECOMPRESSOR_DEFAULTS.merge options
-      raise UnexpectedArgumentError unless decompressor_options_valid? options
+      raise ValidateError unless decompressor_options_valid? options
 
       options
     end
