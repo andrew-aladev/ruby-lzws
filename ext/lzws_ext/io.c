@@ -41,7 +41,10 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
   // Ruby itself won't flush destination file, flush is required.
   fflush(destination_file);
 
-  if (result == LZWS_FILE_COMPRESSOR_FAILED) {
+  if (result == LZWS_FILE_CREATE_BUFFER_FAILED) {
+    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+  }
+  else if (result == LZWS_FILE_COMPRESSOR_FAILED) {
     lzws_ext_raise_error("CompressorError", "compressor failed");
   }
   else if (result == LZWS_FILE_READ_FAILED) {
@@ -88,7 +91,10 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   // Ruby itself won't flush destination file, flush is required.
   fflush(destination_file);
 
-  if (result == LZWS_FILE_DECOMPRESSOR_FAILED) {
+  if (result == LZWS_FILE_CREATE_BUFFER_FAILED) {
+    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+  }
+  else if (result == LZWS_FILE_DECOMPRESSOR_FAILED) {
     lzws_ext_raise_error("DecompressorError", "decompressor failed");
   }
   else if (result == LZWS_FILE_READ_FAILED) {

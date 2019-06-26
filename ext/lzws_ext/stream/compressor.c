@@ -58,8 +58,11 @@ VALUE lzws_ext_initialize_compressor(VALUE LZWS_EXT_UNUSED(self), VALUE options)
     &compressor_state_ptr,
     max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
-  if (result != 0) {
-    lzws_ext_raise_error("CompressorError", "compressor error");
+  if (result == LZWS_COMPRESSOR_ALLOCATE_FAILED) {
+    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+  }
+  else {
+    lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
   compressor_ptr->state_ptr = compressor_state_ptr;

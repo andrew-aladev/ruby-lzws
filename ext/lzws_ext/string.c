@@ -28,7 +28,10 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
     (uint8_t**)&destination, &destination_length, 0,
     max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
-  if (result == LZWS_STRING_COMPRESSOR_FAILED) {
+  if (result == LZWS_STRING_CREATE_BUFFER_FAILED || result == LZWS_STRING_RESIZE_BUFFER_FAILED) {
+    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+  }
+  else if (result == LZWS_STRING_COMPRESSOR_FAILED) {
     lzws_ext_raise_error("CompressorError", "compressor failed");
   }
   else if (result != 0) {
@@ -62,7 +65,10 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALU
     (uint8_t**)&destination, &destination_length, 0,
     msb, unaligned_bit_groups, quiet);
 
-  if (result == LZWS_STRING_DECOMPRESSOR_FAILED) {
+  if (result == LZWS_STRING_CREATE_BUFFER_FAILED || result == LZWS_STRING_RESIZE_BUFFER_FAILED) {
+    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+  }
+  else if (result == LZWS_STRING_DECOMPRESSOR_FAILED) {
     lzws_ext_raise_error("DecompressorError", "decompressor failed");
   }
   else if (result != 0) {

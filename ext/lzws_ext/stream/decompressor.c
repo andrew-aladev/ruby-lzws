@@ -55,8 +55,11 @@ VALUE lzws_ext_initialize_decompressor(VALUE LZWS_EXT_UNUSED(self), VALUE option
     &decompressor_state_ptr,
     msb, unaligned_bit_groups, quiet);
 
-  if (result != 0) {
-    lzws_ext_raise_error("DecompressorError", "decompressor error");
+  if (result == LZWS_DECOMPRESSOR_ALLOCATE_FAILED) {
+    lzws_ext_raise_error("MemoryAllocationError", "memory allocation error");
+  }
+  else {
+    lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
   decompressor_ptr->state_ptr = decompressor_state_ptr;
