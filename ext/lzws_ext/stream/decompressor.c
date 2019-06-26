@@ -100,8 +100,73 @@ VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
 
   // -----
 
-  return Qnil;
+  lzws_result_t result = lzws_decompressor_read_magic_header(
+    decompressor_ptr->state_ptr,
+    &remaining_source_data,
+    &remaining_source_length);
+
+  if (result == 0) {
+    return INT2NUM(source_length - remaining_source_length);
+  }
+  else if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE) {
+    return INT2NUM(0);
+  }
+  else if (result == LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER) {
+    lzws_ext_raise_error("ValidateError", "validate error");
+  }
+  else {
+    lzws_ext_raise_error("UnexpectedError", "unexpected error");
+  }
 }
 
-// VALUE lzws_ext_decompressor_read(VALUE self, VALUE source);
-// VALUE lzws_ext_decompressor_write(VALUE self);
+VALUE lzws_ext_decompressor_read(VALUE self, VALUE source)
+{
+  lzws_ext_decompressor_t* decompressor_ptr;
+  Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
+
+  Check_Type(source, T_STRING);
+
+  const char* source_data   = RSTRING_PTR(source);
+  size_t      source_length = RSTRING_LEN(source);
+
+  uint8_t* remaining_source_data   = (uint8_t*)source_data;
+  size_t   remaining_source_length = source_length;
+
+  // -----
+
+  lzws_result_t result = lzws_decompress(
+    decompressor_ptr->state_ptr,
+    &remaining_source_data,
+    &remaining_source_length,
+    &decompressor_ptr->remaining_destination_buffer,
+    &decompressor_ptr->remaining_destination_buffer_length);
+
+  if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE) {
+    return INT2NUM(source_length);
+  }
+  else if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
+    return INT2NUM(source_length - remaining_source_length);
+  }
+  else if (result == LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
+    lzws_ext_raise_error("ValidateError", "validate error");
+  }
+  else if (result == LZWS_DECOMPRESSOR_CORRUPTED_SOURCE) {
+    lzws_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
+  }
+  else {
+    lzws_ext_raise_error("UnexpectedError", "unexpected error");
+  }
+}
+
+VALUE lzws_ext_decompressor_write(VALUE self)
+{
+  lzws_ext_compressor_t* compressor_ptr;
+  Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
+
+  // -----
+
+  uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
+  size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
+  uint8_t* remaining_destination_buffer        = compressor_ptr->remaining_destination_buffer;
+  size_t   remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
+}
