@@ -8,8 +8,32 @@ require_relative "option"
 
 module LZWS
   module File
-    def self.validate_arguments(source, destination)
-      raise ValidateError unless source.is_a?(::String) && destination.is_a?(::String)
+    def self.compress(source, destination, options = {})
+      validate_arguments source, destination
+
+      options = Option.get_compressor_options options
+
+      open_files(source, destination) do |source_io, destination_io|
+        LZWS._native_compress_io source_io, destination_io, options
+      end
+    end
+
+    def self.decompress(source, destination, options = {})
+      validate_arguments source, destination
+
+      options = Option.get_decompressor_options options
+
+      open_files(source, destination) do |source_io, destination_io|
+        LZWS._native_decompress_io source_io, destination_io, options
+      end
+    end
+
+    def self.open_files(source, destination, &_block)
+      open_file(source, "rb") do |source_io|
+        open_file(destination, "wb") do |destination_io|
+          yield source_io, destination_io
+        end
+      end
     end
 
     def self.open_file(path, mode, &_block)
@@ -26,32 +50,8 @@ module LZWS
       end
     end
 
-    def self.open_files(source, destination, &_block)
-      open_file(source, "rb") do |source_io|
-        open_file(destination, "wb") do |destination_io|
-          yield source_io, destination_io
-        end
-      end
-    end
-
-    def self.compress(source, destination, options = {})
-      validate_arguments source, destination
-
-      options = Option.get_compressor_options options
-
-      open_files(source, destination) do |source_io, destination_io|
-        LZWS._compress_io source_io, destination_io, options
-      end
-    end
-
-    def self.decompress(source, destination, options = {})
-      validate_arguments source, destination
-
-      options = Option.get_decompressor_options options
-
-      open_files(source, destination) do |source_io, destination_io|
-        LZWS._decompress_io source_io, destination_io, options
-      end
+    def self.validate_arguments(source, destination)
+      raise ValidateError unless source.is_a?(::String) && destination.is_a?(::String)
     end
   end
 end

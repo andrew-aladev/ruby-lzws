@@ -43,12 +43,12 @@ VALUE lzws_ext_allocate_compressor(VALUE klass)
   return self;
 }
 
-VALUE lzws_ext_initialize_compressor(VALUE LZWS_EXT_UNUSED(self), VALUE options)
+VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
 {
-  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
-
   lzws_ext_compressor_t* compressor_ptr;
   Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
+
+  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   // -----
 
@@ -110,7 +110,7 @@ VALUE lzws_ext_compressor_write_magic_header(VALUE self)
   }
 }
 
-VALUE lzws_ext_compressor_write(VALUE self, VALUE source)
+VALUE lzws_ext_compress(VALUE self, VALUE source)
 {
   lzws_ext_compressor_t* compressor_ptr;
   Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
@@ -143,34 +143,6 @@ VALUE lzws_ext_compressor_write(VALUE self, VALUE source)
   }
 }
 
-VALUE lzws_ext_compressor_read(VALUE self)
-{
-  lzws_ext_compressor_t* compressor_ptr;
-  Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
-
-  // -----
-
-  uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
-  size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
-  uint8_t* remaining_destination_buffer        = compressor_ptr->remaining_destination_buffer;
-  size_t   remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
-
-  const char* result_data   = (const char*)destination_buffer;
-  size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
-
-  VALUE result = rb_str_new(result_data, result_length);
-
-  // Moving remaining data to the top of the destination buffer.
-  if (destination_buffer != remaining_destination_buffer) {
-    memmove(destination_buffer, remaining_destination_buffer, remaining_destination_buffer_length);
-
-    compressor_ptr->remaining_destination_buffer        = destination_buffer;
-    compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
-  }
-
-  return result;
-}
-
 VALUE lzws_ext_flush_compressor(VALUE self)
 {
   lzws_ext_compressor_t* compressor_ptr;
@@ -192,4 +164,32 @@ VALUE lzws_ext_flush_compressor(VALUE self)
   else {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
+}
+
+VALUE lzws_ext_compressor_read_result(VALUE self)
+{
+  lzws_ext_compressor_t* compressor_ptr;
+  Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
+
+  // -----
+
+  uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
+  size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
+  uint8_t* remaining_destination_buffer        = compressor_ptr->remaining_destination_buffer;
+  size_t   remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
+
+  const char* result_data   = (const char*)destination_buffer;
+  size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
+
+  VALUE result = rb_str_new(result_data, result_length);
+
+  // Moving remaining data to the top of the destination buffer.
+  if (destination_buffer != remaining_destination_buffer && remaining_destination_buffer_length != 0) {
+    memmove(destination_buffer, remaining_destination_buffer, remaining_destination_buffer_length);
+
+    compressor_ptr->remaining_destination_buffer        = destination_buffer;
+    compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+  }
+
+  return result;
 }

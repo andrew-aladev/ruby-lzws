@@ -16,7 +16,7 @@ module LZWS
       ENCODING = "#{Encoding::BINARY}:#{Encoding::BINARY}".freeze
 
       def test_invalid_arguments
-        ::IO.pipe do |read_io, write_io|
+        ::IO.pipe(ENCODING) do |read_io, write_io|
           Validation::INVALID_IOS.each do |invalid_io|
             assert_raises ValidateError do
               Target.compress invalid_io, write_io

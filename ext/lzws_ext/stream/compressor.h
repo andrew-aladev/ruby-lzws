@@ -19,8 +19,8 @@ typedef struct {
 VALUE lzws_ext_allocate_compressor(VALUE klass);
 VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options);
 VALUE lzws_ext_compressor_write_magic_header(VALUE self);
-VALUE lzws_ext_compressor_write(VALUE self, VALUE source);
-VALUE lzws_ext_compressor_read(VALUE self);
+VALUE lzws_ext_compress(VALUE self, VALUE source);
 VALUE lzws_ext_flush_compressor(VALUE self);
+VALUE lzws_ext_compressor_read_result(VALUE self);
 
 #endif // LZWS_EXT_STREAM_COMPRESSOR_H

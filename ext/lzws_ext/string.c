@@ -13,10 +13,10 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
 {
   Check_Type(source, T_STRING);
 
-  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
-
   const char* source_data   = RSTRING_PTR(source);
   size_t      source_length = RSTRING_LEN(source);
+
+  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   // -----
 
@@ -50,10 +50,10 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALU
 {
   Check_Type(source, T_STRING);
 
-  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
-
   const char* source_data   = RSTRING_PTR(source);
   size_t      source_length = RSTRING_LEN(source);
+
+  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   // -----
 

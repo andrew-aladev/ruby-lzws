@@ -19,8 +19,6 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
   GetOpenFile(source, source_io);
   GetOpenFile(destination, destination_io);
 
-  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
-
   FILE *source_file = rb_io_stdio_file(source_io);
   if (source_file == NULL) {
     lzws_ext_raise_error("AccessIOError", "failed to access source IO");
@@ -30,6 +28,8 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
   if (destination_file == NULL) {
     lzws_ext_raise_error("AccessIOError", "failed to access destination IO");
   }
+
+  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   // -----
 
@@ -69,8 +69,6 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   GetOpenFile(source, source_io);
   GetOpenFile(destination, destination_io);
 
-  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
-
   FILE *source_file = rb_io_stdio_file(source_io);
   if (source_file == NULL) {
     lzws_ext_raise_error("AccessIOError", "failed to access source IO");
@@ -80,6 +78,8 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   if (destination_file == NULL) {
     lzws_ext_raise_error("AccessIOError", "failed to access destination IO");
   }
+
+  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   // -----
 

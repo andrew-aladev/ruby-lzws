@@ -43,12 +43,12 @@ VALUE lzws_ext_allocate_decompressor(VALUE klass)
   return self;
 }
 
-VALUE lzws_ext_initialize_decompressor(VALUE LZWS_EXT_UNUSED(self), VALUE options)
+VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
 {
-  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
-
   lzws_ext_decompressor_t* decompressor_ptr;
   Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
+
+  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   // -----
 
@@ -119,7 +119,7 @@ VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
   }
 }
 
-VALUE lzws_ext_decompressor_read(VALUE self, VALUE source)
+VALUE lzws_ext_decompress(VALUE self, VALUE source)
 {
   lzws_ext_decompressor_t* decompressor_ptr;
   Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
@@ -158,15 +158,30 @@ VALUE lzws_ext_decompressor_read(VALUE self, VALUE source)
   }
 }
 
-VALUE lzws_ext_decompressor_write(VALUE self)
+VALUE lzws_ext_decompressor_read_result(VALUE self)
 {
-  lzws_ext_compressor_t* compressor_ptr;
-  Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
+  lzws_ext_decompressor_t* decompressor_ptr;
+  Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
 
   // -----
 
-  uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
-  size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
-  uint8_t* remaining_destination_buffer        = compressor_ptr->remaining_destination_buffer;
-  size_t   remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
+  uint8_t* destination_buffer                  = decompressor_ptr->destination_buffer;
+  size_t   destination_buffer_length           = decompressor_ptr->destination_buffer_length;
+  uint8_t* remaining_destination_buffer        = decompressor_ptr->remaining_destination_buffer;
+  size_t   remaining_destination_buffer_length = decompressor_ptr->remaining_destination_buffer_length;
+
+  const char* result_data   = (const char*)destination_buffer;
+  size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
+
+  VALUE result = rb_str_new(result_data, result_length);
+
+  // Moving remaining data to the top of the destination buffer.
+  if (destination_buffer != remaining_destination_buffer && remaining_destination_buffer_length != 0) {
+    memmove(destination_buffer, remaining_destination_buffer, remaining_destination_buffer_length);
+
+    decompressor_ptr->remaining_destination_buffer        = destination_buffer;
+    decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+  }
+
+  return result;
 }
