@@ -175,7 +175,6 @@ VALUE lzws_ext_compressor_read_result(VALUE self)
 
   uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
   size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
-  uint8_t* remaining_destination_buffer        = compressor_ptr->remaining_destination_buffer;
   size_t   remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
 
   const char* result_data   = (const char*)destination_buffer;
@@ -183,13 +182,8 @@ VALUE lzws_ext_compressor_read_result(VALUE self)
 
   VALUE result = rb_str_new(result_data, result_length);
 
-  // Moving remaining data to the top of the destination buffer.
-  if (destination_buffer != remaining_destination_buffer && remaining_destination_buffer_length != 0) {
-    memmove(destination_buffer, remaining_destination_buffer, remaining_destination_buffer_length);
-
-    compressor_ptr->remaining_destination_buffer        = destination_buffer;
-    compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
-  }
+  compressor_ptr->remaining_destination_buffer        = destination_buffer;
+  compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
 
   return result;
 }

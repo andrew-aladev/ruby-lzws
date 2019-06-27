@@ -2,6 +2,7 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require_relative "error"
+require_relative "validation"
 
 module LZWS
   module Option
@@ -24,52 +25,35 @@ module LZWS
     .freeze
 
     def self.get_compressor_options(options)
-      raise ValidateError unless options.is_a? ::Hash
+      Validation.validate_hash options
 
       options = COMPRESSOR_DEFAULTS.merge options
-      raise ValidateError unless compressor_options_valid? options
+
+      max_code_bit_length = options[:max_code_bit_length]
+      Validation.validate_integer max_code_bit_length
+
+      raise ValidateError if
+        max_code_bit_length < LOWEST_MAX_CODE_BIT_LENGTH ||
+        max_code_bit_length > BIGGEST_MAX_CODE_BIT_LENGTH
+
+      Validation.validate_bool options[:block_mode]
+      Validation.validate_bool options[:msb]
+      Validation.validate_bool options[:unaligned_bit_groups]
+      Validation.validate_bool options[:quiet]
 
       options
     end
 
     def self.get_decompressor_options(options)
-      raise ValidateError unless options.is_a? ::Hash
+      Validation.validate_hash options
 
       options = DECOMPRESSOR_DEFAULTS.merge options
-      raise ValidateError unless decompressor_options_valid? options
+
+      Validation.validate_bool options[:msb]
+      Validation.validate_bool options[:unaligned_bit_groups]
+      Validation.validate_bool options[:quiet]
 
       options
-    end
-
-    private_class_method def self.compressor_options_valid?(options)
-      return false unless options.is_a? ::Hash
-
-      max_code_bit_length = options[:max_code_bit_length]
-      return false unless
-        max_code_bit_length.is_a?(::Integer) &&
-        max_code_bit_length >= LOWEST_MAX_CODE_BIT_LENGTH &&
-        max_code_bit_length <= BIGGEST_MAX_CODE_BIT_LENGTH
-
-      (
-        bool?(options[:block_mode]) &&
-        bool?(options[:msb]) &&
-        bool?(options[:unaligned_bit_groups]) &&
-        bool?(options[:quiet])
-      )
-    end
-
-    private_class_method def self.decompressor_options_valid?(options)
-      return false unless options.is_a? ::Hash
-
-      (
-        bool?(options[:msb]) &&
-        bool?(options[:unaligned_bit_groups]) &&
-        bool?(options[:quiet])
-      )
-    end
-
-    private_class_method def self.bool?(value)
-      value.is_a?(::TrueClass) || value.is_a?(::FalseClass)
     end
   end
 end

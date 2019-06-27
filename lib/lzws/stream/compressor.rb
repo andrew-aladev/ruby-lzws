@@ -3,22 +3,20 @@
 
 require "lzws_ext"
 
-require_relative "../error"
 require_relative "../option"
+require_relative "../validation"
 
 module LZWS
   module Stream
     class Compressor
       def initialize(reader, writer, options = {})
+        Validation.validate_proc reader
+        Validation.validate_proc writer
+
         options = Option.get_compressor_options options
 
         @native_compressor = NativeCompressor.new options
-
-        @source = StringIO.new
-        @source.set_encoding Encoding::BINARY
       end
-
-      # proc.is_a? ::Proc or proc.is_a? Method or proc.is_a? UnboundMethod
     end
   end
 end

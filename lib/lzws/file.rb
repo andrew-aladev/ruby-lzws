@@ -5,11 +5,13 @@ require "lzws_ext"
 
 require_relative "error"
 require_relative "option"
+require_relative "validation"
 
 module LZWS
   module File
     def self.compress(source, destination, options = {})
-      validate_arguments source, destination
+      Validation.validate_string source
+      Validation.validate_string destination
 
       options = Option.get_compressor_options options
 
@@ -19,7 +21,8 @@ module LZWS
     end
 
     def self.decompress(source, destination, options = {})
-      validate_arguments source, destination
+      Validation.validate_string source
+      Validation.validate_string destination
 
       options = Option.get_decompressor_options options
 
@@ -48,10 +51,6 @@ module LZWS
       ensure
         io.close
       end
-    end
-
-    def self.validate_arguments(source, destination)
-      raise ValidateError unless source.is_a?(::String) && destination.is_a?(::String)
     end
   end
 end
