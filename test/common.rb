@@ -10,9 +10,10 @@ module LZWS
       TEMP_PATH = File.join(BASE_PATH, "tmp").freeze
 
       TEXTS = [
+        "".b,
         "hello world".b,
         "tobeornottobeortobeornot".b,
-        SecureRandom.random_bytes(1 << 15) # 32 kBytes
+        SecureRandom.random_bytes(1 << 15) # 32 KB
       ]
       .freeze
     end
