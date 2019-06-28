@@ -43,14 +43,14 @@ VALUE lzws_ext_allocate_decompressor(VALUE klass)
   return self;
 }
 
-VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
-{
-  lzws_ext_decompressor_t* decompressor_ptr;
+#define GET_DECOMPRESSOR(self)               \
+  lzws_ext_decompressor_t* decompressor_ptr; \
   Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
 
+VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
+{
+  GET_DECOMPRESSOR(self);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
-
-  // -----
 
   lzws_decompressor_state_t* decompressor_state_ptr;
 
@@ -85,20 +85,19 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   return Qnil;
 }
 
+#define GET_STRING(source)                         \
+  Check_Type(source, T_STRING);                    \
+                                                   \
+  const char* source_data   = RSTRING_PTR(source); \
+  size_t      source_length = RSTRING_LEN(source);
+
 VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
 {
-  lzws_ext_decompressor_t* decompressor_ptr;
-  Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
-
-  Check_Type(source, T_STRING);
-
-  const char* source_data   = RSTRING_PTR(source);
-  size_t      source_length = RSTRING_LEN(source);
+  GET_DECOMPRESSOR(self);
+  GET_STRING(source);
 
   uint8_t* remaining_source_data   = (uint8_t*)source_data;
   size_t   remaining_source_length = source_length;
-
-  // -----
 
   lzws_result_t result = lzws_decompressor_read_magic_header(
     decompressor_ptr->state_ptr,
@@ -121,18 +120,11 @@ VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
 
 VALUE lzws_ext_decompress(VALUE self, VALUE source)
 {
-  lzws_ext_decompressor_t* decompressor_ptr;
-  Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
-
-  Check_Type(source, T_STRING);
-
-  const char* source_data   = RSTRING_PTR(source);
-  size_t      source_length = RSTRING_LEN(source);
+  GET_DECOMPRESSOR(self);
+  GET_STRING(source);
 
   uint8_t* remaining_source_data   = (uint8_t*)source_data;
   size_t   remaining_source_length = source_length;
-
-  // -----
 
   lzws_result_t result = lzws_decompress(
     decompressor_ptr->state_ptr,
@@ -160,10 +152,7 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source)
 
 VALUE lzws_ext_decompressor_read_result(VALUE self)
 {
-  lzws_ext_decompressor_t* decompressor_ptr;
-  Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
-
-  // -----
+  GET_DECOMPRESSOR(self);
 
   uint8_t* destination_buffer                  = decompressor_ptr->destination_buffer;
   size_t   destination_buffer_length           = decompressor_ptr->destination_buffer_length;

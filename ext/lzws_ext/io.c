@@ -10,28 +10,22 @@
 #include "ruby.h"
 #include "ruby/io.h"
 
+#define GET_FILE(target)                                          \
+  Check_Type(target, T_FILE);                                     \
+                                                                  \
+  rb_io_t *target##_io;                                           \
+  GetOpenFile(target, target##_io);                               \
+                                                                  \
+  FILE *target##_file = rb_io_stdio_file(target##_io);            \
+  if (target##_file == NULL) {                                    \
+    lzws_ext_raise_error("AccessIOError", "failed to access IO"); \
+  }
+
 VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
 {
-  Check_Type(source, T_FILE);
-  Check_Type(destination, T_FILE);
-
-  rb_io_t *source_io, *destination_io;
-  GetOpenFile(source, source_io);
-  GetOpenFile(destination, destination_io);
-
-  FILE *source_file = rb_io_stdio_file(source_io);
-  if (source_file == NULL) {
-    lzws_ext_raise_error("AccessIOError", "failed to access source IO");
-  }
-
-  FILE *destination_file = rb_io_stdio_file(destination_io);
-  if (destination_file == NULL) {
-    lzws_ext_raise_error("AccessIOError", "failed to access destination IO");
-  }
-
+  GET_FILE(source);
+  GET_FILE(destination);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
-
-  // -----
 
   lzws_result_t result = lzws_compress_file(
     source_file, 0,
@@ -62,26 +56,9 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
 
 VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
 {
-  Check_Type(source, T_FILE);
-  Check_Type(destination, T_FILE);
-
-  rb_io_t *source_io, *destination_io;
-  GetOpenFile(source, source_io);
-  GetOpenFile(destination, destination_io);
-
-  FILE *source_file = rb_io_stdio_file(source_io);
-  if (source_file == NULL) {
-    lzws_ext_raise_error("AccessIOError", "failed to access source IO");
-  }
-
-  FILE *destination_file = rb_io_stdio_file(destination_io);
-  if (destination_file == NULL) {
-    lzws_ext_raise_error("AccessIOError", "failed to access destination IO");
-  }
-
+  GET_FILE(source);
+  GET_FILE(destination);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
-
-  // -----
 
   lzws_result_t result = lzws_decompress_file(
     source_file, 0,

@@ -12,8 +12,6 @@ void Init_lzws_ext()
 {
   VALUE root = rb_define_module(LZWS_EXT_MODULE_NAME);
 
-  // -----
-
   // It is better to use these functions internally and prepare pretty wrappers for public usage.
   rb_define_module_function(root, "_native_compress_io", RUBY_METHOD_FUNC(lzws_ext_compress_io), 3);
   rb_define_module_function(root, "_native_decompress_io", RUBY_METHOD_FUNC(lzws_ext_decompress_io), 3);

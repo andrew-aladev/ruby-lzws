@@ -9,16 +9,16 @@
 #include "lzws_ext/string.h"
 #include "ruby.h"
 
-VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE options)
-{
-  Check_Type(source, T_STRING);
-
-  const char* source_data   = RSTRING_PTR(source);
+#define GET_STRING(source)                         \
+  Check_Type(source, T_STRING);                    \
+                                                   \
+  const char* source_data   = RSTRING_PTR(source); \
   size_t      source_length = RSTRING_LEN(source);
 
+VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE options)
+{
+  GET_STRING(source);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
-
-  // -----
 
   char*  destination;
   size_t destination_length;
@@ -38,8 +38,6 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
-  // -----
-
   // Ruby copies string on initialization.
   VALUE result_string = rb_str_new(destination, destination_length);
   free(destination);
@@ -48,14 +46,8 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
 
 VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE options)
 {
-  Check_Type(source, T_STRING);
-
-  const char* source_data   = RSTRING_PTR(source);
-  size_t      source_length = RSTRING_LEN(source);
-
+  GET_STRING(source);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
-
-  // -----
 
   char*  destination;
   size_t destination_length;
@@ -77,8 +69,6 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALU
   else if (result != 0) {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
-
-  // -----
 
   // Ruby copies string on initialization.
   VALUE result_string = rb_str_new(destination, destination_length);

@@ -43,14 +43,14 @@ VALUE lzws_ext_allocate_compressor(VALUE klass)
   return self;
 }
 
-VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
-{
-  lzws_ext_compressor_t* compressor_ptr;
+#define GET_COMPRESSOR(self)             \
+  lzws_ext_compressor_t* compressor_ptr; \
   Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
 
+VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
+{
+  GET_COMPRESSOR(self);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
-
-  // -----
 
   lzws_compressor_state_t* compressor_state_ptr;
 
@@ -90,10 +90,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
 
 VALUE lzws_ext_compressor_write_magic_header(VALUE self)
 {
-  lzws_ext_compressor_t* compressor_ptr;
-  Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
-
-  // -----
+  GET_COMPRESSOR(self);
 
   lzws_result_t result = lzws_compressor_write_magic_header(
     &compressor_ptr->remaining_destination_buffer,
@@ -110,20 +107,19 @@ VALUE lzws_ext_compressor_write_magic_header(VALUE self)
   }
 }
 
+#define GET_STRING(source)                         \
+  Check_Type(source, T_STRING);                    \
+                                                   \
+  const char* source_data   = RSTRING_PTR(source); \
+  size_t      source_length = RSTRING_LEN(source);
+
 VALUE lzws_ext_compress(VALUE self, VALUE source)
 {
-  lzws_ext_compressor_t* compressor_ptr;
-  Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
-
-  Check_Type(source, T_STRING);
-
-  const char* source_data   = RSTRING_PTR(source);
-  size_t      source_length = RSTRING_LEN(source);
+  GET_COMPRESSOR(self);
+  GET_STRING(source);
 
   uint8_t* remaining_source_data   = (uint8_t*)source_data;
   size_t   remaining_source_length = source_length;
-
-  // -----
 
   lzws_result_t result = lzws_compress(
     compressor_ptr->state_ptr,
@@ -145,10 +141,7 @@ VALUE lzws_ext_compress(VALUE self, VALUE source)
 
 VALUE lzws_ext_flush_compressor(VALUE self)
 {
-  lzws_ext_compressor_t* compressor_ptr;
-  Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
-
-  // -----
+  GET_COMPRESSOR(self);
 
   lzws_result_t result = lzws_flush_compressor(
     compressor_ptr->state_ptr,
@@ -168,10 +161,7 @@ VALUE lzws_ext_flush_compressor(VALUE self)
 
 VALUE lzws_ext_compressor_read_result(VALUE self)
 {
-  lzws_ext_compressor_t* compressor_ptr;
-  Data_Get_Struct(self, lzws_ext_compressor_t, compressor_ptr);
-
-  // -----
+  GET_COMPRESSOR(self);
 
   uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
   size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
