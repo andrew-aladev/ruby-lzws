@@ -16,6 +16,8 @@ module LZWS
         SecureRandom.random_bytes(1 << 15) # 32 KB
       ]
       .freeze
+
+      TEXT_PORTION_LENGTH = 1 << 10 # 1 KB
     end
   end
 end

@@ -4,11 +4,13 @@
 module LZWS
   class BaseError < StandardError; end
 
-  class DecompressorCorruptedSourceError < BaseError; end
-
-  class AllocateError   < BaseError; end
   class ValidateError   < BaseError; end
+  class AllocateError   < BaseError; end
   class UnexpectedError < BaseError; end
+
+  class NotEnoughDestinationBufferError < BaseError; end
+
+  class DecompressorCorruptedSourceError < BaseError; end
 
   class OpenFileError < BaseError; end
   class AccessIOError < BaseError; end

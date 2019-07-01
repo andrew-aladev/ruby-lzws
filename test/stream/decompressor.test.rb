@@ -37,7 +37,7 @@ module LZWS
         def test_texts
           Common::TEXTS.each do |text|
             Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-              Target.new NOOP_PROC, NOOP_PROC, decompressor_options
+              decompressor = Target.new NOOP_PROC, NOOP_PROC, decompressor_options
             end
           end
         end
