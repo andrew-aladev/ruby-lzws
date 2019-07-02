@@ -51,6 +51,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
 {
   GET_COMPRESSOR(self);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
+  LZWS_EXT_UNUSED_VARIABLE(without_magic_header);
 
   lzws_compressor_state_t* compressor_state_ptr;
 

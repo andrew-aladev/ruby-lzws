@@ -12,6 +12,7 @@ module LZWS
     BIGGEST_MAX_CODE_BIT_LENGTH = 16
 
     DECOMPRESSOR_DEFAULTS = {
+      :without_magic_header => false,
       :msb                  => false,
       :unaligned_bit_groups => false,
       :quiet                => false
@@ -36,6 +37,7 @@ module LZWS
         max_code_bit_length < LOWEST_MAX_CODE_BIT_LENGTH ||
         max_code_bit_length > BIGGEST_MAX_CODE_BIT_LENGTH
 
+      Validation.validate_bool options[:without_magic_header]
       Validation.validate_bool options[:block_mode]
       Validation.validate_bool options[:msb]
       Validation.validate_bool options[:unaligned_bit_groups]
@@ -49,6 +51,7 @@ module LZWS
 
       options = DECOMPRESSOR_DEFAULTS.merge options
 
+      Validation.validate_bool options[:without_magic_header]
       Validation.validate_bool options[:msb]
       Validation.validate_bool options[:unaligned_bit_groups]
       Validation.validate_bool options[:quiet]

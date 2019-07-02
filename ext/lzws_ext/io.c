@@ -30,7 +30,7 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
   lzws_result_t result = lzws_compress_file(
     source_file, 0,
     destination_file, 0,
-    max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
+    without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
   if (result == LZWS_FILE_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");
@@ -63,7 +63,7 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   lzws_result_t result = lzws_decompress_file(
     source_file, 0,
     destination_file, 0,
-    msb, unaligned_bit_groups, quiet);
+    without_magic_header, msb, unaligned_bit_groups, quiet);
 
   if (result == LZWS_FILE_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");

@@ -21,20 +21,21 @@ module LZWS
 
         @native_decompressor = NativeDecompressor.new options
 
-        @source = ""
+        @source = String.new "", :encoding => Encoding::BINARY
       end
 
       def read_magic_header
-        # @source = @reader.call
-        #
-        # processed_source_length = @native_compressor.read_magic_header source
-        # if processed_source_length.zero?
-        # end
+        loop do
+          source = @reader.call
+          @source << source
 
-        # loop do
-        # end
+          processed_source_length = @native_compressor.read_magic_header @source
+          next if processed_source_length.zero?
 
-        nil
+          @source = @source[processed_source_length..-1]
+
+          return nil
+        end
       end
 
       protected def flush_destination_buffer

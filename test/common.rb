@@ -13,11 +13,16 @@ module LZWS
         "".b,
         "hello world".b,
         "tobeornottobeortobeornot".b,
-        SecureRandom.random_bytes(1 << 15) # 32 KB
+        SecureRandom.random_bytes(1 << 13) # 8 KB
       ]
       .freeze
 
-      TEXT_PORTION_LENGTH = 1 << 10 # 1 KB
+      TEXT_PORTION_LENGTHS = [
+        1,
+        2,
+        1 << 9 # 512 B
+      ]
+      .freeze
     end
   end
 end

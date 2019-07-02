@@ -16,8 +16,7 @@ module LZWS
         Target = LZWS::Stream::Compressor
         String = LZWS::String
 
-        TEXT_PORTION_LENGTH = Common::TEXT_PORTION_LENGTH
-        NOOP_PROC           = Validation::NOOP_PROC
+        NOOP_PROC = Validation::NOOP_PROC
 
         def test_invalid_initialize
           Validation::INVALID_PROCS.each do |invalid_proc|
@@ -40,32 +39,34 @@ module LZWS
         def test_texts
           Common::TEXTS.each do |text|
             Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-              portion_offset = 0
+              Common::TEXT_PORTION_LENGTHS.each do |text_portion_length|
+                portion_offset = 0
 
-              reader = proc do
-                next nil if !portion_offset.zero? && portion_offset >= text.length
+                reader = proc do
+                  next nil if !portion_offset.zero? && portion_offset >= text.length
 
-                next_portion_offset = portion_offset + TEXT_PORTION_LENGTH
-                portion = text[portion_offset...next_portion_offset]
+                  next_portion_offset = portion_offset + text_portion_length
+                  portion = text[portion_offset...next_portion_offset]
 
-                portion_offset = next_portion_offset
+                  portion_offset = next_portion_offset
 
-                portion
+                  portion
+                end
+
+                compressed_buffer = StringIO.new
+                compressed_buffer.set_encoding Encoding::BINARY
+
+                writer = proc { |portion| compressed_buffer << portion }
+
+                compressor = Target.new reader, writer, compressor_options
+                compressor.write_magic_header unless compressor_options[:without_magic_header]
+                compressor.write
+
+                compressed_text = compressed_buffer.string
+                decompressed_text = String.decompress compressed_text, decompressor_options
+
+                assert_equal text, decompressed_text
               end
-
-              compressed_buffer = StringIO.new
-              compressed_buffer.set_encoding Encoding::BINARY
-
-              writer = proc { |portion| compressed_buffer << portion }
-
-              compressor = Target.new reader, writer, compressor_options
-              compressor.write_magic_header
-              compressor.write
-
-              compressed_text = compressed_buffer.string
-              decompressed_text = String.decompress compressed_text, decompressor_options
-
-              assert_equal text, decompressed_text
             end
           end
         end

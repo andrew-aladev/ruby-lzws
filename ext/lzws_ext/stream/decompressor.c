@@ -51,6 +51,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
 {
   GET_DECOMPRESSOR(self);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
+  LZWS_EXT_UNUSED_VARIABLE(without_magic_header);
 
   lzws_decompressor_state_t* decompressor_state_ptr;
 

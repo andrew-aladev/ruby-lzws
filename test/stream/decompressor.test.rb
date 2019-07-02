@@ -2,6 +2,7 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require "lzws/stream/decompressor"
+require "lzws/string"
 
 require_relative "../common"
 require_relative "../minitest"
@@ -13,6 +14,7 @@ module LZWS
     module Stream
       class Decompressor < Minitest::Unit::TestCase
         Target = LZWS::Stream::Decompressor
+        String = LZWS::String
 
         NOOP_PROC = Validation::NOOP_PROC
 

@@ -12,6 +12,7 @@ module LZWS
         Validation::INVALID_HASHES,
         Validation::INVALID_BOOLS.flat_map do |invalid_bool|
           [
+            { :without_magic_header => invalid_bool },
             { :msb => invalid_bool },
             { :unaligned_bit_groups => invalid_bool },
             { :quiet => invalid_bool }
@@ -40,6 +41,9 @@ module LZWS
       # -----
 
       DECOMPRESSOR_OPTION_DATA = [
+        [true, false].map do |value|
+          { :without_magic_header => value }
+        end,
         [true, false].map do |value|
           { :msb => value }
         end,
@@ -87,6 +91,7 @@ module LZWS
       COMPATIBLE_OPTION_COMBINATIONS = (
         COMPRESSOR_OPTION_COMBINATIONS.map do |compressor_options|
           decompressor_options = {
+            :without_magic_header => compressor_options[:without_magic_header],
             :msb                  => compressor_options[:msb],
             :unaligned_bit_groups => compressor_options[:unaligned_bit_groups],
             :quiet                => compressor_options[:quiet]
