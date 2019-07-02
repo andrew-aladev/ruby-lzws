@@ -34,6 +34,13 @@ module LZWS
               Target.new NOOP_PROC, NOOP_PROC, invalid_options
             end
           end
+
+          invalid_reader     = proc { nil }
+          invalid_compressor = Target.new invalid_reader, NOOP_PROC
+
+          assert_raises NotEnoughSourceError do
+            invalid_compressor.write
+          end
         end
 
         def test_texts

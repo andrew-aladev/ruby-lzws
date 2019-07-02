@@ -5,6 +5,7 @@ module LZWS
   module Test
     module Validation
       NOOP_PROC = proc {}
+
       TYPES = [
         nil,
         1,
