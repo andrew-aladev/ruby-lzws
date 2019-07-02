@@ -28,8 +28,8 @@ module LZWS
           { :max_code_bit_length => LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1 },
           { :max_code_bit_length => LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1 }
         ],
-        Validation::INVALID_INTEGERS.map do |invalid_integer|
-          { :max_code_bit_length => invalid_integer }
+        Validation::INVALID_POSITIVE_INTEGERS.map do |invalid_positive_integer|
+          { :max_code_bit_length => invalid_positive_integer }
         end,
         Validation::INVALID_BOOLS.map do |invalid_bool|
           { :block_mode => invalid_bool }

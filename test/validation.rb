@@ -26,6 +26,8 @@ module LZWS
       INVALID_HASHES   = (TYPES - [{}]).freeze
       INVALID_IOS      = (TYPES - [STDOUT]).freeze
       INVALID_PROCS    = (TYPES - [NOOP_PROC]).freeze
+
+      INVALID_POSITIVE_INTEGERS = (INVALID_INTEGERS + [-1]).freeze
     end
   end
 end

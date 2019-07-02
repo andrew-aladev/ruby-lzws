@@ -43,12 +43,11 @@ module LZWS
                 portion_offset = 0
 
                 reader = proc do
-                  next nil if !portion_offset.zero? && portion_offset >= text.length
+                  next nil if !portion_offset == 0 && portion_offset >= text.length
 
                   next_portion_offset = portion_offset + text_portion_length
-                  portion = text[portion_offset...next_portion_offset]
-
-                  portion_offset = next_portion_offset
+                  portion             = text[portion_offset...next_portion_offset]
+                  portion_offset      = next_portion_offset
 
                   portion
                 end
@@ -62,7 +61,7 @@ module LZWS
                 compressor.write_magic_header unless compressor_options[:without_magic_header]
                 compressor.write
 
-                compressed_text = compressed_buffer.string
+                compressed_text   = compressed_buffer.string
                 decompressed_text = String.decompress compressed_text, decompressor_options
 
                 assert_equal text, decompressed_text

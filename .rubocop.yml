@@ -81,9 +81,6 @@ Style/FrozenStringLiteralComment:
 Style/MultipleComparison:
   Enabled: false
 
-Style/Not:
-  Enabled: false
-
 Style/NumericPredicate:
   Enabled: false
 

@@ -9,8 +9,8 @@ module LZWS
       raise ValidateError unless value.is_a?(TrueClass) || value.is_a?(FalseClass)
     end
 
-    def self.validate_integer(value)
-      raise ValidateError unless value.is_a? Integer
+    def self.validate_positive_integer(value)
+      raise ValidateError unless value.is_a?(Integer) && value > 0
     end
 
     def self.validate_string(value)

@@ -31,7 +31,7 @@ module LZWS
       options = COMPRESSOR_DEFAULTS.merge options
 
       max_code_bit_length = options[:max_code_bit_length]
-      Validation.validate_integer max_code_bit_length
+      Validation.validate_positive_integer max_code_bit_length
 
       raise ValidateError if
         max_code_bit_length < LOWEST_MAX_CODE_BIT_LENGTH ||

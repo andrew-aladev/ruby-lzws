@@ -17,30 +17,38 @@ module LZWS
         Validation.validate_proc writer
         @writer = writer
 
-        options = Option.get_decompressor_options options
-
+        options              = Option.get_decompressor_options options
         @native_decompressor = NativeDecompressor.new options
 
-        @source = String.new "", :encoding => Encoding::BINARY
+        @source = nil
       end
 
       def read_magic_header
-        loop do
-          source = @reader.call
-          @source << source
-
-          processed_source_length = @native_compressor.read_magic_header @source
-          next if processed_source_length.zero?
-
-          @source = @source[processed_source_length..-1]
-
-          return nil
-        end
+        # loop do
+        #   source = @reader.call
+        #   @source << source
+        #
+        #   processed_source_length = @native_compressor.read_magic_header @source
+        #   next if processed_source_length == 0
+        #
+        #   @source = @source[processed_source_length..-1]
+        #
+        #   return nil
+        # end
       end
+
+      # protected def read_more_source
+      #   next_source = @reader.call
+      #   raise NotEnoughSourceError if @source.nil? && next_source.nil?
+      #
+      #   @source = next_source
+      #
+      #   nil
+      # end
 
       protected def flush_destination_buffer
         result_length = write_result
-        raise NotEnoughDestinationBufferError if result_length == 0
+        raise NotEnoughDestinationError if result_length == 0
       end
 
       protected def write_result
