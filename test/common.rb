@@ -6,8 +6,8 @@ require "securerandom"
 module LZWS
   module Test
     module Common
-      BASE_PATH = File.expand_path File.join(File.dirname(__FILE__), "..").freeze
-      TEMP_PATH = File.join(BASE_PATH, "tmp").freeze
+      BASE_PATH = ::File.expand_path ::File.join(::File.dirname(__FILE__), "..").freeze
+      TEMP_PATH = ::File.join(BASE_PATH, "tmp").freeze
 
       TEXTS = [
         "".b,

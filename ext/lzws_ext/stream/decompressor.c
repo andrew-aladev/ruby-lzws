@@ -105,11 +105,10 @@ VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
     &remaining_source_data,
     &remaining_source_length);
 
-  if (result == 0) {
-    return INT2NUM(source_length - remaining_source_length);
-  }
-  else if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE) {
-    return INT2NUM(0);
+  VALUE read_length = INT2NUM(source_length - remaining_source_length);
+
+  if (result == 0 || result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE) {
+    return read_length;
   }
   else if (result == LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER) {
     lzws_ext_raise_error("ValidateError", "validate error");
@@ -134,11 +133,13 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source)
     &decompressor_ptr->remaining_destination_buffer,
     &decompressor_ptr->remaining_destination_buffer_length);
 
+  VALUE read_length = INT2NUM(source_length - remaining_source_length);
+
   if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE) {
-    return INT2NUM(source_length);
+    return rb_ary_new_from_args(2, read_length, Qfalse);
   }
   else if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
-    return INT2NUM(source_length - remaining_source_length);
+    return rb_ary_new_from_args(2, read_length, Qtrue);
   }
   else if (result == LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
     lzws_ext_raise_error("ValidateError", "validate error");

@@ -24,27 +24,57 @@ module LZWS
       end
 
       def read_magic_header
-        # loop do
-        #   source = @reader.call
-        #   @source << source
-        #
-        #   processed_source_length = @native_compressor.read_magic_header @source
-        #   next if processed_source_length == 0
-        #
-        #   @source = @source[processed_source_length..-1]
-        #
-        #   return nil
-        # end
+        @source = @reader.call
+        raise NotEnoughSourceError if @source.nil?
+
+        loop do
+          read_length = @native_decompressor.read_magic_header @source
+
+          if read_length == 0
+            # Compressor is not able to read full magic header.
+
+            next_source = @reader.call
+            raise NotEnoughSourceError if next_source.nil?
+
+            @source << next_source
+
+            next
+          end
+
+          @source = @source[read_length..-1]
+
+          break
+        end
+
+        nil
       end
 
-      # protected def read_more_source
-      #   next_source = @reader.call
-      #   raise NotEnoughSourceError if @source.nil? && next_source.nil?
-      #
-      #   @source = next_source
-      #
-      #   nil
-      # end
+      def read
+        if @source.nil?
+          @source = @reader.call
+          raise NotEnoughSourceError if @source.nil?
+        end
+
+        loop do
+          read_length, need_more_destination = @native_decompressor.read @source
+
+          @source = @source[read_length..-1]
+
+          if need_more_destination
+            flush_destination_buffer
+            next
+          end
+
+          next_source = @reader.call
+          break if next_source.nil?
+
+          @source << next_source
+        end
+
+        read_result
+
+        nil
+      end
 
       protected def flush_destination_buffer
         result_length = read_result

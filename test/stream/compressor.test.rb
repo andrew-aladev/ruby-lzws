@@ -45,8 +45,8 @@ module LZWS
 
         def test_texts
           Common::TEXTS.each do |text|
-            Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-              Common::TEXT_PORTION_LENGTHS.each do |text_portion_length|
+            Common::TEXT_PORTION_LENGTHS.each do |text_portion_length|
+              Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                 portion_offset = 0
 
                 reader = proc do

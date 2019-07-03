@@ -24,13 +24,16 @@ module LZWS
       def write_magic_header
         loop do
           need_more_destination = @native_compressor.write_magic_header
+
           if need_more_destination
             flush_destination_buffer
             next
           end
 
-          return nil
+          break
         end
+
+        nil
       end
 
       def write
@@ -39,10 +42,16 @@ module LZWS
 
         loop do
           read_length, need_more_destination = @native_compressor.write source
+
           if need_more_destination
-            flush_destination_buffer
             source = source[read_length..-1]
+            flush_destination_buffer
             next
+          end
+
+          if read_length != source.length
+            # Compressor write should eat all provided bytes without remainder.
+            raise UnexpectedError
           end
 
           source = @reader.call
@@ -57,14 +66,18 @@ module LZWS
       protected def flush
         loop do
           need_more_destination = @native_compressor.flush
+
           if need_more_destination
             flush_destination_buffer
             next
           end
 
           read_result
-          return nil
+
+          break
         end
+
+        nil
       end
 
       protected def flush_destination_buffer

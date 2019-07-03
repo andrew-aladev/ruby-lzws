@@ -111,6 +111,7 @@ module LZWS
       COMPATIBLE_OPTION_COMBINATIONS = (
         COMPRESSOR_OPTION_COMBINATIONS.map do |compressor_options|
           decompressor_options = {
+            :buffer_length        => compressor_options[:buffer_length],
             :without_magic_header => compressor_options[:without_magic_header],
             :msb                  => compressor_options[:msb],
             :unaligned_bit_groups => compressor_options[:unaligned_bit_groups],

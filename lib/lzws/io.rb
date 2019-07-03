@@ -15,6 +15,8 @@ module LZWS
       options = Option.get_compressor_options options
 
       LZWS._native_compress_io source, destination, options
+
+      nil
     end
 
     def self.decompress(source, destination, options = {})
@@ -24,6 +26,8 @@ module LZWS
       options = Option.get_decompressor_options options
 
       LZWS._native_decompress_io source, destination, options
+
+      nil
     end
   end
 end
