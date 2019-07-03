@@ -71,7 +71,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   // -----
 
   uint8_t* destination_buffer;
-  size_t   destination_buffer_length = 0;
+  size_t   destination_buffer_length = buffer_length;
 
   result = lzws_create_buffer_for_decompressor(&destination_buffer, &destination_buffer_length, quiet);
   if (result != 0) {

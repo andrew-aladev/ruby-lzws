@@ -17,13 +17,6 @@ module LZWS
       ]
       .freeze
 
-      BUFFER_LENGTHS = [
-        0,
-        2,
-        1 << 9 # 512 B
-      ]
-      .freeze
-
       TEXT_PORTION_LENGTHS = [
         1,
         2,

@@ -28,7 +28,8 @@ module LZWS
       INVALID_IOS      = (TYPES - [STDOUT]).freeze
       INVALID_PROCS    = (TYPES - [NOOP_PROC]).freeze
 
-      INVALID_POSITIVE_INTEGERS = (INVALID_INTEGERS + [-1]).freeze
+      INVALID_POSITIVE_INTEGERS     = (INVALID_INTEGERS + [0, -1]).freeze
+      INVALID_NOT_NEGATIVE_INTEGERS = (INVALID_POSITIVE_INTEGERS - [0]).freeze
     end
   end
 end

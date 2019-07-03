@@ -74,7 +74,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
   // -----
 
   uint8_t* destination_buffer;
-  size_t   destination_buffer_length = 0;
+  size_t   destination_buffer_length = buffer_length;
 
   result = lzws_create_buffer_for_compressor(&destination_buffer, &destination_buffer_length, quiet);
   if (result != 0) {
@@ -98,10 +98,10 @@ VALUE lzws_ext_compressor_write_magic_header(VALUE self)
     &compressor_ptr->remaining_destination_buffer_length);
 
   if (result == 0) {
-    return Qtrue;
+    return Qfalse;
   }
   else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    return Qfalse;
+    return Qtrue;
   }
   else {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
@@ -130,10 +130,10 @@ VALUE lzws_ext_compress(VALUE self, VALUE source)
     &compressor_ptr->remaining_destination_buffer_length);
 
   if (result == LZWS_COMPRESSOR_NEEDS_MORE_SOURCE) {
-    return INT2NUM(source_length);
+    return rb_ary_new_from_args(2, INT2NUM(source_length), Qfalse);
   }
   else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    return INT2NUM(source_length - remaining_source_length);
+    return rb_ary_new_from_args(2, INT2NUM(source_length - remaining_source_length), Qtrue);
   }
   else {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
@@ -150,10 +150,10 @@ VALUE lzws_ext_flush_compressor(VALUE self)
     &compressor_ptr->remaining_destination_buffer_length);
 
   if (result == 0) {
-    return Qtrue;
+    return Qfalse;
   }
   else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    return Qfalse;
+    return Qtrue;
   }
   else {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");

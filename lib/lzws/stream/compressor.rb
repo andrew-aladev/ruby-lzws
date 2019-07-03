@@ -19,36 +19,34 @@ module LZWS
 
         options            = Option.get_compressor_options options
         @native_compressor = NativeCompressor.new options
-
-        @source = nil
       end
 
       def write_magic_header
         loop do
-          is_finished = @native_compressor.write_magic_header
-          return nil if is_finished
-
-          flush_destination_buffer
-        end
-      end
-
-      # Write eats all source bytes.
-      # If it can't eat something - we need to flush destination.
-
-      def write
-        read_next_source
-
-        loop do
-          break if @source.nil?
-
-          processed_source_length = @native_compressor.write @source
-          if processed_source_length == @source.length
-            read_next_source
+          need_more_destination = @native_compressor.write_magic_header
+          if need_more_destination
+            flush_destination_buffer
             next
           end
 
-          @source = @source[processed_source_length..-1]
-          flush_destination_buffer
+          return nil
+        end
+      end
+
+      def write
+        source = @reader.call
+        raise NotEnoughSourceError if source.nil?
+
+        loop do
+          read_length, need_more_destination = @native_compressor.write source
+          if need_more_destination
+            flush_destination_buffer
+            source = source[read_length..-1]
+            next
+          end
+
+          source = @reader.call
+          break if source.nil?
         end
 
         flush
@@ -58,31 +56,23 @@ module LZWS
 
       protected def flush
         loop do
-          is_finished = @native_compressor.flush
-          if is_finished
-            write_result
-            return nil
+          need_more_destination = @native_compressor.flush
+          if need_more_destination
+            flush_destination_buffer
+            next
           end
 
-          flush_destination_buffer
+          read_result
+          return nil
         end
       end
 
-      protected def read_next_source
-        next_source = @reader.call
-        raise NotEnoughSourceError if @source.nil? && next_source.nil?
-
-        @source = next_source
-
-        nil
-      end
-
       protected def flush_destination_buffer
-        result_length = write_result
+        result_length = read_result
         raise NotEnoughDestinationError if result_length == 0
       end
 
-      protected def write_result
+      protected def read_result
         result = @native_compressor.read_result
         @writer.call result
 

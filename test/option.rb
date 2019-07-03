@@ -10,6 +10,9 @@ module LZWS
     module Option
       INVALID_DECOMPRESSOR_OPTIONS = [
         Validation::INVALID_HASHES,
+        Validation::INVALID_NOT_NEGATIVE_INTEGERS.map do |invalid_integer|
+          { :buffer_length => invalid_integer }
+        end,
         Validation::INVALID_BOOLS.flat_map do |invalid_bool|
           [
             { :without_magic_header => invalid_bool },
@@ -28,8 +31,8 @@ module LZWS
           { :max_code_bit_length => LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1 },
           { :max_code_bit_length => LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1 }
         ],
-        Validation::INVALID_POSITIVE_INTEGERS.map do |invalid_positive_integer|
-          { :max_code_bit_length => invalid_positive_integer }
+        Validation::INVALID_POSITIVE_INTEGERS.map do |invalid_integer|
+          { :max_code_bit_length => invalid_integer }
         end,
         Validation::INVALID_BOOLS.map do |invalid_bool|
           { :block_mode => invalid_bool }
@@ -40,18 +43,35 @@ module LZWS
 
       # -----
 
+      BUFFER_LENGTHS = [
+        0,
+        2,
+        3,
+        512
+      ]
+      .freeze
+      BOOLS = [true, false].freeze
+      MAX_CODE_BIT_LENGTHS = Range.new(
+        LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH,
+        LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH
+      )
+      .freeze
+
       DECOMPRESSOR_OPTION_DATA = [
-        [true, false].map do |value|
-          { :without_magic_header => value }
+        BUFFER_LENGTHS.map do |buffer_length|
+          { :buffer_length => buffer_length }
         end,
-        [true, false].map do |value|
-          { :msb => value }
+        BOOLS.map do |without_magic_header|
+          { :without_magic_header => without_magic_header }
         end,
-        [true, false].map do |value|
-          { :unaligned_bit_groups => value }
+        BOOLS.map do |msb|
+          { :msb => msb }
         end,
-        [true, false].map do |value|
-          { :quiet => value }
+        BOOLS.map do |unaligned_bit_groups|
+          { :unaligned_bit_groups => unaligned_bit_groups }
+        end,
+        BOOLS.map do |quiet|
+          { :quiet => quiet }
         end
       ]
       .freeze
@@ -59,11 +79,11 @@ module LZWS
       COMPRESSOR_OPTION_DATA = [
         DECOMPRESSOR_OPTION_DATA,
         [
-          Range.new(LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH, LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH).map do |value|
-            { :max_code_bit_length => value }
+          MAX_CODE_BIT_LENGTHS.map do |max_code_bit_length|
+            { :max_code_bit_length => max_code_bit_length }
           end,
-          [true, false].map do |value|
-            { :block_mode => value }
+          BOOLS.map do |block_mode|
+            { :block_mode => block_mode }
           end
         ]
       ]

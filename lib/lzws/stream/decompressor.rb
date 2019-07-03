@@ -47,11 +47,11 @@ module LZWS
       # end
 
       protected def flush_destination_buffer
-        result_length = write_result
+        result_length = read_result
         raise NotEnoughDestinationError if result_length == 0
       end
 
-      protected def write_result
+      protected def read_result
         result = @native_decompressor.read_result
         @writer.call result
 

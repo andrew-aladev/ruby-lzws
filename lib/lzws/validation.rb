@@ -13,6 +13,10 @@ module LZWS
       raise ValidateError unless value.is_a?(Integer) && value > 0
     end
 
+    def self.validate_not_negative_integer(value)
+      raise ValidateError unless value.is_a?(Integer) && value >= 0
+    end
+
     def self.validate_string(value)
       raise ValidateError unless value.is_a? ::String
     end

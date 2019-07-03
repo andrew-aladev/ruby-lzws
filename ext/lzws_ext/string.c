@@ -25,7 +25,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
 
   lzws_result_t result = lzws_compress_string(
     (uint8_t*)source_data, source_length,
-    (uint8_t**)&destination, &destination_length, 0,
+    (uint8_t**)&destination, &destination_length, buffer_length,
     without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
   if (result == LZWS_STRING_ALLOCATE_FAILED) {
@@ -54,7 +54,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALU
 
   lzws_result_t result = lzws_decompress_string(
     (uint8_t*)source_data, source_length,
-    (uint8_t**)&destination, &destination_length, 0,
+    (uint8_t**)&destination, &destination_length, buffer_length,
     without_magic_header, msb, unaligned_bit_groups, quiet);
 
   if (result == LZWS_STRING_ALLOCATE_FAILED) {
