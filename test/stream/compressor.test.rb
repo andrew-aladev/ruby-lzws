@@ -41,6 +41,14 @@ module LZWS
           assert_raises NotEnoughSourceError do
             invalid_compressor.write
           end
+
+          invalid_compressor.destroy
+
+          %i[write_magic_header write flush destroy].each do |method|
+            assert_raises UsedAfterDestroyError do
+              invalid_compressor.send method
+            end
+          end
         end
 
         def test_texts
@@ -67,6 +75,8 @@ module LZWS
                 compressor = Target.new reader, writer, compressor_options
                 compressor.write_magic_header unless compressor_options[:without_magic_header]
                 compressor.write
+                compressor.flush
+                compressor.destroy
 
                 compressed_text   = compressed_buffer.string
                 decompressed_text = String.decompress compressed_text, decompressor_options

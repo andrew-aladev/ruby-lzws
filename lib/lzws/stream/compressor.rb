@@ -17,11 +17,15 @@ module LZWS
         Validation.validate_proc writer
         @writer = writer
 
-        options            = Option.get_compressor_options options
+        options = Option.get_compressor_options options
         @native_compressor = NativeCompressor.new options
+
+        @is_destroyed = false
       end
 
       def write_magic_header
+        raise UsedAfterDestroyError, "compressor used after destroy" if @is_destroyed
+
         loop do
           need_more_destination = @native_compressor.write_magic_header
 
@@ -37,8 +41,10 @@ module LZWS
       end
 
       def write
+        raise UsedAfterDestroyError, "compressor used after destroy" if @is_destroyed
+
         source = @reader.call
-        raise NotEnoughSourceError if source.nil?
+        raise NotEnoughSourceError, "not enough source" if source.nil?
 
         loop do
           read_length, need_more_destination = @native_compressor.write source
@@ -51,19 +57,19 @@ module LZWS
 
           if read_length != source.length
             # Compressor write should eat all provided bytes without remainder.
-            raise UnexpectedError
+            raise UnexpectedError, "unexpected error"
           end
 
           source = @reader.call
           break if source.nil?
         end
 
-        flush
-
         nil
       end
 
-      protected def flush
+      def flush
+        raise UsedAfterDestroyError, "compressor used after destroy" if @is_destroyed
+
         loop do
           need_more_destination = @native_compressor.flush
 
@@ -80,9 +86,19 @@ module LZWS
         nil
       end
 
+      def destroy
+        raise UsedAfterDestroyError, "compressor used after destroy" if @is_destroyed
+
+        @native_compressor.destroy
+
+        @is_destroyed = true
+
+        nil
+      end
+
       protected def flush_destination_buffer
         result_length = read_result
-        raise NotEnoughDestinationError if result_length == 0
+        raise NotEnoughDestinationError, "not enough destination" if result_length == 0
       end
 
       protected def read_result

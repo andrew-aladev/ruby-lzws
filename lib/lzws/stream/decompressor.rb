@@ -20,21 +20,24 @@ module LZWS
         options              = Option.get_decompressor_options options
         @native_decompressor = NativeDecompressor.new options
 
-        @source = nil
+        @source       = nil
+        @is_destroyed = false
       end
 
       def read_magic_header
+        raise UsedAfterDestroyError, "decompressor used after destroy" if @is_destroyed
+
         @source = @reader.call
-        raise NotEnoughSourceError if @source.nil?
+        raise NotEnoughSourceError, "not enough source" if @source.nil?
 
         loop do
           read_length = @native_decompressor.read_magic_header @source
 
           if read_length == 0
-            # Compressor is not able to read full magic header.
+            # Decompressor is not able to read full magic header.
 
             next_source = @reader.call
-            raise NotEnoughSourceError if next_source.nil?
+            raise NotEnoughSourceError, "not enough source" if next_source.nil?
 
             @source << next_source
 
@@ -50,9 +53,11 @@ module LZWS
       end
 
       def read
+        raise UsedAfterDestroyError, "decompressor used after destroy" if @is_destroyed
+
         if @source.nil?
           @source = @reader.call
-          raise NotEnoughSourceError if @source.nil?
+          raise NotEnoughSourceError, "not enough source" if @source.nil?
         end
 
         loop do
@@ -76,9 +81,19 @@ module LZWS
         nil
       end
 
+      def destroy
+        raise UsedAfterDestroyError, "decompressor used after destroy" if @is_destroyed
+
+        @native_decompressor.destroy
+
+        @is_destroyed = true
+
+        nil
+      end
+
       protected def flush_destination_buffer
         result_length = read_result
-        raise NotEnoughDestinationError if result_length == 0
+        raise NotEnoughDestinationError, "not enough destination" if result_length == 0
       end
 
       protected def read_result

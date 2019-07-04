@@ -84,9 +84,6 @@ Style/MultipleComparison:
 Style/NumericPredicate:
   Enabled: false
 
-Style/RaiseArgs:
-  Enabled: false
-
 Style/RegexpLiteral:
   EnforcedStyle: percent_r
 

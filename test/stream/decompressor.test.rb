@@ -35,15 +35,21 @@ module LZWS
             end
           end
 
-          invalid_reader     = proc { nil }
-          invalid_compressor = Target.new invalid_reader, NOOP_PROC
+          invalid_reader       = proc { nil }
+          invalid_decompressor = Target.new invalid_reader, NOOP_PROC
 
-          assert_raises NotEnoughSourceError do
-            invalid_compressor.read_magic_header
+          %i[read_magic_header read].each do |method|
+            assert_raises NotEnoughSourceError do
+              invalid_decompressor.send method
+            end
           end
 
-          assert_raises NotEnoughSourceError do
-            invalid_compressor.read
+          invalid_decompressor.destroy
+
+          %i[read_magic_header read destroy].each do |method|
+            assert_raises UsedAfterDestroyError do
+              invalid_decompressor.send method
+            end
           end
         end
 
@@ -71,8 +77,9 @@ module LZWS
                 writer = proc { |portion| decompressed_buffer << portion }
 
                 decompressor = Target.new reader, writer, decompressor_options
-                decompressor.read_magic_header unless compressor_options[:without_magic_header]
+                decompressor.read_magic_header unless decompressor_options[:without_magic_header]
                 decompressor.read
+                decompressor.destroy
 
                 decompressed_text = decompressed_buffer.string
                 assert_equal text, decompressed_text

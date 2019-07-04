@@ -29,6 +29,7 @@ void Init_lzws_ext()
   rb_define_method(compressor, "write", lzws_ext_compress, 1);
   rb_define_method(compressor, "flush", lzws_ext_flush_compressor, 0);
   rb_define_method(compressor, "read_result", lzws_ext_compressor_read_result, 0);
+  rb_define_method(compressor, "destroy", lzws_ext_compressor_destroy, 0);
 
   VALUE decompressor = rb_define_class_under(stream, "NativeDecompressor", rb_cObject);
   rb_define_alloc_func(decompressor, lzws_ext_allocate_decompressor);
@@ -36,4 +37,5 @@ void Init_lzws_ext()
   rb_define_method(decompressor, "read_magic_header", lzws_ext_decompressor_read_magic_header, 1);
   rb_define_method(decompressor, "read", lzws_ext_decompress, 1);
   rb_define_method(decompressor, "read_result", lzws_ext_decompressor_read_result, 0);
+  rb_define_method(decompressor, "destroy", lzws_ext_decompressor_destroy, 0);
 }

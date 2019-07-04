@@ -89,9 +89,15 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
   return Qnil;
 }
 
+#define DO_NOT_USE_AFTER_DESTROY(compressor_ptr)                                         \
+  if (compressor_ptr->state_ptr == NULL || compressor_ptr->destination_buffer == NULL) { \
+    lzws_ext_raise_error("UsedAfterDestroyError", "compressor used after destroy");      \
+  }
+
 VALUE lzws_ext_compressor_write_magic_header(VALUE self)
 {
   GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
 
   lzws_result_t result = lzws_compressor_write_magic_header(
     &compressor_ptr->remaining_destination_buffer,
@@ -117,6 +123,7 @@ VALUE lzws_ext_compressor_write_magic_header(VALUE self)
 VALUE lzws_ext_compress(VALUE self, VALUE source)
 {
   GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
   GET_STRING(source);
 
   uint8_t* remaining_source_data   = (uint8_t*)source_data;
@@ -145,6 +152,7 @@ VALUE lzws_ext_compress(VALUE self, VALUE source)
 VALUE lzws_ext_flush_compressor(VALUE self)
 {
   GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
 
   lzws_result_t result = lzws_flush_compressor(
     compressor_ptr->state_ptr,
@@ -165,6 +173,7 @@ VALUE lzws_ext_flush_compressor(VALUE self)
 VALUE lzws_ext_compressor_read_result(VALUE self)
 {
   GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
 
   uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
   size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
@@ -179,4 +188,29 @@ VALUE lzws_ext_compressor_read_result(VALUE self)
   compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
 
   return result;
+}
+
+VALUE lzws_ext_compressor_destroy(VALUE self)
+{
+  GET_COMPRESSOR(self);
+  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
+
+  lzws_compressor_state_t* state_ptr = compressor_ptr->state_ptr;
+  if (state_ptr != NULL) {
+    lzws_compressor_free_state(state_ptr);
+
+    compressor_ptr->state_ptr = NULL;
+  }
+
+  uint8_t* destination_buffer = compressor_ptr->destination_buffer;
+  if (destination_buffer != NULL) {
+    free(destination_buffer);
+
+    compressor_ptr->destination_buffer = NULL;
+  }
+
+  // It is possible to keep "destination_buffer_length", "remaining_destination_buffer"
+  //   and "remaining_destination_buffer_length" uninitialized.
+
+  return Qnil;
 }

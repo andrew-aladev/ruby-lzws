@@ -43,7 +43,7 @@ module LZWS
       begin
         io = ::File.open path, mode
       rescue StandardError
-        raise OpenFileError
+        raise OpenFileError, "open file failed"
       end
 
       begin

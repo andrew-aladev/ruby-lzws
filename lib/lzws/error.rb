@@ -10,6 +10,7 @@ module LZWS
 
   class NotEnoughSourceError      < BaseError; end
   class NotEnoughDestinationError < BaseError; end
+  class UsedAfterDestroyError     < BaseError; end
 
   class DecompressorCorruptedSourceError < BaseError; end
 
