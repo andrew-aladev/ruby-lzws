@@ -20,7 +20,7 @@ module LZWS
       TEXT_PORTION_LENGTHS = [
         1,
         2,
-        1 << 9 # 512 B
+        512
       ]
       .freeze
     end

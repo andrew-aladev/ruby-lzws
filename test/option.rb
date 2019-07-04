@@ -43,6 +43,9 @@ module LZWS
 
       # -----
 
+      # "0" means default buffer length.
+      # "2" bytes is the minimal buffer length for compressor and decompressor.
+      # "3" bytes should be enough for reading/writing magic and regular header.
       BUFFER_LENGTHS = [
         0,
         2,
