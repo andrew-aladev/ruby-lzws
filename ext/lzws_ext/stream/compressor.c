@@ -89,15 +89,15 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
   return Qnil;
 }
 
-#define DO_NOT_USE_AFTER_DESTROY(compressor_ptr)                                         \
+#define DO_NOT_USE_AFTER_CLOSE(compressor_ptr)                                           \
   if (compressor_ptr->state_ptr == NULL || compressor_ptr->destination_buffer == NULL) { \
-    lzws_ext_raise_error("UsedAfterDestroyError", "compressor used after destroy");      \
+    lzws_ext_raise_error("UsedAfterCloseError", "compressor used after closed");         \
   }
 
 VALUE lzws_ext_compressor_write_magic_header(VALUE self)
 {
   GET_COMPRESSOR(self);
-  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
   lzws_result_t result = lzws_compressor_write_magic_header(
     &compressor_ptr->remaining_destination_buffer,
@@ -123,7 +123,7 @@ VALUE lzws_ext_compressor_write_magic_header(VALUE self)
 VALUE lzws_ext_compress(VALUE self, VALUE source)
 {
   GET_COMPRESSOR(self);
-  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
   GET_STRING(source);
 
   uint8_t* remaining_source_data   = (uint8_t*)source_data;
@@ -136,13 +136,13 @@ VALUE lzws_ext_compress(VALUE self, VALUE source)
     &compressor_ptr->remaining_destination_buffer,
     &compressor_ptr->remaining_destination_buffer_length);
 
-  VALUE read_length = INT2NUM(source_length - remaining_source_length);
+  VALUE write_length = INT2NUM(source_length - remaining_source_length);
 
   if (result == LZWS_COMPRESSOR_NEEDS_MORE_SOURCE) {
-    return rb_ary_new_from_args(2, read_length, Qfalse);
+    return rb_ary_new_from_args(2, write_length, Qfalse);
   }
   else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    return rb_ary_new_from_args(2, read_length, Qtrue);
+    return rb_ary_new_from_args(2, write_length, Qtrue);
   }
   else {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
@@ -152,7 +152,7 @@ VALUE lzws_ext_compress(VALUE self, VALUE source)
 VALUE lzws_ext_flush_compressor(VALUE self)
 {
   GET_COMPRESSOR(self);
-  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
   lzws_result_t result = lzws_flush_compressor(
     compressor_ptr->state_ptr,
@@ -173,7 +173,7 @@ VALUE lzws_ext_flush_compressor(VALUE self)
 VALUE lzws_ext_compressor_read_result(VALUE self)
 {
   GET_COMPRESSOR(self);
-  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
   uint8_t* destination_buffer                  = compressor_ptr->destination_buffer;
   size_t   destination_buffer_length           = compressor_ptr->destination_buffer_length;
@@ -190,10 +190,10 @@ VALUE lzws_ext_compressor_read_result(VALUE self)
   return result;
 }
 
-VALUE lzws_ext_compressor_destroy(VALUE self)
+VALUE lzws_ext_compressor_close(VALUE self)
 {
   GET_COMPRESSOR(self);
-  DO_NOT_USE_AFTER_DESTROY(compressor_ptr);
+  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
   lzws_compressor_state_t* state_ptr = compressor_ptr->state_ptr;
   if (state_ptr != NULL) {

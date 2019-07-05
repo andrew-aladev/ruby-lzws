@@ -3,31 +3,57 @@
 
 require "lzws_ext"
 
+require_relative "abstract"
 require_relative "../error"
 require_relative "../option"
-require_relative "../validation"
 
 module LZWS
   module Stream
-    class Compressor
-      def initialize(reader, writer, options = {})
-        Validation.validate_proc reader
-        @reader = reader
+    class Compressor < Abstract
+      def initialize(writer, options = {})
+        options       = Option.get_compressor_options options
+        native_stream = NativeCompressor.new options
 
-        Validation.validate_proc writer
-        @writer = writer
+        super writer, native_stream
 
-        options = Option.get_compressor_options options
-        @native_compressor = NativeCompressor.new options
-
-        @is_destroyed = false
+        @need_to_write_magic_header = !options[:without_magic_header]
       end
 
-      def write_magic_header
-        raise UsedAfterDestroyError, "compressor used after destroy" if @is_destroyed
+      def write(source)
+        do_not_use_after_close
+
+        if @need_to_write_magic_header
+          write_magic_header
+          @need_to_write_magic_header = false
+        end
+
+        total_write_length = 0
 
         loop do
-          need_more_destination = @native_compressor.write_magic_header
+          write_length, need_more_destination = @native_stream.write source
+
+          total_write_length += write_length
+
+          if need_more_destination
+            source = source[write_length..-1]
+            flush_destination_buffer
+            next
+          end
+
+          if write_length != source.length
+            # Compressor write should eat all provided "source" without remainder.
+            raise UnexpectedError, "unexpected error"
+          end
+
+          break
+        end
+
+        total_write_length
+      end
+
+      protected def write_magic_header
+        loop do
+          need_more_destination = @native_stream.write_magic_header
 
           if need_more_destination
             flush_destination_buffer
@@ -35,77 +61,30 @@ module LZWS
           end
 
           break
-        end
-
-        nil
-      end
-
-      def write
-        raise UsedAfterDestroyError, "compressor used after destroy" if @is_destroyed
-
-        source = @reader.call
-        raise NotEnoughSourceError, "not enough source" if source.nil?
-
-        loop do
-          read_length, need_more_destination = @native_compressor.write source
-
-          if need_more_destination
-            source = source[read_length..-1]
-            flush_destination_buffer
-            next
-          end
-
-          if read_length != source.length
-            # Compressor write should eat all provided bytes without remainder.
-            raise UnexpectedError, "unexpected error"
-          end
-
-          source = @reader.call
-          break if source.nil?
         end
 
         nil
       end
 
       def flush
-        raise UsedAfterDestroyError, "compressor used after destroy" if @is_destroyed
+        do_not_use_after_close
 
         loop do
-          need_more_destination = @native_compressor.flush
+          need_more_destination = @native_stream.flush
 
           if need_more_destination
             flush_destination_buffer
             next
           end
 
-          read_result
-
           break
         end
 
-        nil
+        super
       end
 
-      def destroy
-        raise UsedAfterDestroyError, "compressor used after destroy" if @is_destroyed
-
-        @native_compressor.destroy
-
-        @is_destroyed = true
-
-        nil
-      end
-
-      protected def flush_destination_buffer
-        result_length = read_result
-        raise NotEnoughDestinationError, "not enough destination" if result_length == 0
-      end
-
-      protected def read_result
-        result = @native_compressor.read_result
-        @writer.call result
-
-        result.length
+      protected def do_not_use_after_close
+        raise UsedAfterCloseError, "compressor used after close" if @is_closed
       end
     end
   end

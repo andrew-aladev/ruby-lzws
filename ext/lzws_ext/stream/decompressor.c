@@ -92,15 +92,15 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   const char* source_data   = RSTRING_PTR(source); \
   size_t      source_length = RSTRING_LEN(source);
 
-#define DO_NOT_USE_AFTER_DESTROY(decompressor_ptr)                                           \
+#define DO_NOT_USE_AFTER_CLOSE(decompressor_ptr)                                             \
   if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
-    lzws_ext_raise_error("UsedAfterDestroyError", "decompressor used after destroy");        \
+    lzws_ext_raise_error("UsedAfterCloseError", "decompressor used after close");            \
   }
 
 VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
 {
   GET_DECOMPRESSOR(self);
-  DO_NOT_USE_AFTER_DESTROY(decompressor_ptr);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
   GET_STRING(source);
 
   uint8_t* remaining_source_data   = (uint8_t*)source_data;
@@ -127,7 +127,7 @@ VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
 VALUE lzws_ext_decompress(VALUE self, VALUE source)
 {
   GET_DECOMPRESSOR(self);
-  DO_NOT_USE_AFTER_DESTROY(decompressor_ptr);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
   GET_STRING(source);
 
   uint8_t* remaining_source_data   = (uint8_t*)source_data;
@@ -162,7 +162,7 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source)
 VALUE lzws_ext_decompressor_read_result(VALUE self)
 {
   GET_DECOMPRESSOR(self);
-  DO_NOT_USE_AFTER_DESTROY(decompressor_ptr);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
 
   uint8_t* destination_buffer                  = decompressor_ptr->destination_buffer;
   size_t   destination_buffer_length           = decompressor_ptr->destination_buffer_length;
@@ -179,10 +179,10 @@ VALUE lzws_ext_decompressor_read_result(VALUE self)
   return result;
 }
 
-VALUE lzws_ext_decompressor_destroy(VALUE self)
+VALUE lzws_ext_decompressor_close(VALUE self)
 {
   GET_DECOMPRESSOR(self);
-  DO_NOT_USE_AFTER_DESTROY(decompressor_ptr);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
 
   lzws_decompressor_state_t* state_ptr = decompressor_ptr->state_ptr;
   if (state_ptr != NULL) {

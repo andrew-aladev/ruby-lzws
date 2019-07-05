@@ -21,62 +21,54 @@ module LZWS
         def test_invalid_initialize
           Validation::INVALID_PROCS.each do |invalid_proc|
             assert_raises ValidateError do
-              Target.new invalid_proc, NOOP_PROC
-            end
-
-            assert_raises ValidateError do
-              Target.new NOOP_PROC, invalid_proc
+              Target.new invalid_proc
             end
           end
 
           Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
             assert_raises ValidateError do
-              Target.new NOOP_PROC, NOOP_PROC, invalid_options
+              Target.new NOOP_PROC, invalid_options
             end
           end
 
-          invalid_reader     = proc { nil }
-          invalid_compressor = Target.new invalid_reader, NOOP_PROC
+          compressor = Target.new NOOP_PROC
+          compressor.close
 
-          assert_raises NotEnoughSourceError do
-            invalid_compressor.write
+          assert_raises UsedAfterCloseError do
+            compressor.write ""
           end
 
-          invalid_compressor.destroy
-
-          %i[write_magic_header write flush destroy].each do |method|
-            assert_raises UsedAfterDestroyError do
-              invalid_compressor.send method
-            end
+          assert_raises UsedAfterCloseError do
+            compressor.flush
           end
         end
 
         def test_texts
           Common::TEXTS.each do |text|
-            Common::TEXT_PORTION_LENGTHS.each do |text_portion_length|
+            Common::PORTION_LENGTHS.each do |portion_length|
               Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                portion_offset = 0
-
-                reader = proc do
-                  next nil if !portion_offset == 0 && portion_offset >= text.length
-
-                  next_portion_offset = portion_offset + text_portion_length
-                  portion             = text[portion_offset...next_portion_offset]
-                  portion_offset      = next_portion_offset
-
-                  portion
-                end
-
                 compressed_buffer = StringIO.new
                 compressed_buffer.set_encoding Encoding::BINARY
 
-                writer = proc { |portion| compressed_buffer << portion }
+                writer     = proc { |portion| compressed_buffer << portion }
+                compressor = Target.new writer, compressor_options
 
-                compressor = Target.new reader, writer, compressor_options
-                compressor.write_magic_header unless compressor_options[:without_magic_header]
-                compressor.write
+                text_offset = 0
+                source      = "".b
+
+                loop do
+                  portion = text[text_offset...(text_offset + portion_length)]
+                  break if portion.nil?
+
+                  text_offset += portion_length
+                  source << portion
+
+                  write_length = compressor.write source
+                  source       = source[write_length..-1]
+                end
+
                 compressor.flush
-                compressor.destroy
+                compressor.close
 
                 compressed_text   = compressed_buffer.string
                 decompressed_text = String.decompress compressed_text, decompressor_options

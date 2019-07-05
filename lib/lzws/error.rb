@@ -8,9 +8,8 @@ module LZWS
   class AllocateError   < BaseError; end
   class UnexpectedError < BaseError; end
 
-  class NotEnoughSourceError      < BaseError; end
   class NotEnoughDestinationError < BaseError; end
-  class UsedAfterDestroyError     < BaseError; end
+  class UsedAfterCloseError       < BaseError; end
 
   class DecompressorCorruptedSourceError < BaseError; end
 

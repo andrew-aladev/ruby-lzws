@@ -17,7 +17,7 @@ module LZWS
       ]
       .freeze
 
-      TEXT_PORTION_LENGTHS = [
+      PORTION_LENGTHS = [
         1,
         2,
         512

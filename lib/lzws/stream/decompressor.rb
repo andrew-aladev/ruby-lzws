@@ -3,104 +3,65 @@
 
 require "lzws_ext"
 
+require_relative "abstract"
 require_relative "../error"
 require_relative "../option"
-require_relative "../validation"
 
 module LZWS
   module Stream
-    class Decompressor
-      def initialize(reader, writer, options = {})
-        Validation.validate_proc reader
-        @reader = reader
+    class Decompressor < Abstract
+      def initialize(writer, options = {})
+        options       = Option.get_decompressor_options options
+        native_stream = NativeDecompressor.new options
 
-        Validation.validate_proc writer
-        @writer = writer
+        super writer, native_stream
 
-        options              = Option.get_decompressor_options options
-        @native_decompressor = NativeDecompressor.new options
-
-        @source       = nil
-        @is_destroyed = false
+        @need_to_read_magic_header = !options[:without_magic_header]
       end
 
-      def read_magic_header
-        raise UsedAfterDestroyError, "decompressor used after destroy" if @is_destroyed
+      def read(source)
+        do_not_use_after_close
 
-        @source = @reader.call
-        raise NotEnoughSourceError, "not enough source" if @source.nil?
+        total_read_length = 0
 
-        loop do
-          read_length = @native_decompressor.read_magic_header @source
-
+        if @need_to_read_magic_header
+          read_length = @native_stream.read_magic_header source
           if read_length == 0
             # Decompressor is not able to read full magic header.
-
-            next_source = @reader.call
-            raise NotEnoughSourceError, "not enough source" if next_source.nil?
-
-            @source << next_source
-
-            next
+            return 0
           end
 
-          @source = @source[read_length..-1]
+          total_read_length += read_length
+          source             = source[read_length..-1]
 
-          break
-        end
-
-        nil
-      end
-
-      def read
-        raise UsedAfterDestroyError, "decompressor used after destroy" if @is_destroyed
-
-        if @source.nil?
-          @source = @reader.call
-          raise NotEnoughSourceError, "not enough source" if @source.nil?
+          @need_to_read_magic_header = false
         end
 
         loop do
-          read_length, need_more_destination = @native_decompressor.read @source
+          read_length, need_more_destination = @native_stream.read source
 
-          @source = @source[read_length..-1]
+          total_read_length += read_length
 
           if need_more_destination
+            source = source[read_length..-1]
             flush_destination_buffer
             next
           end
 
-          next_source = @reader.call
-          break if next_source.nil?
-
-          @source << next_source
+          break
         end
 
-        read_result
-
-        nil
+        total_read_length
       end
 
-      def destroy
-        raise UsedAfterDestroyError, "decompressor used after destroy" if @is_destroyed
+      def flush
+        do_not_use_after_close
 
-        @native_decompressor.destroy
-
-        @is_destroyed = true
-
-        nil
+        super
       end
 
-      protected def flush_destination_buffer
-        result_length = read_result
-        raise NotEnoughDestinationError, "not enough destination" if result_length == 0
-      end
-
-      protected def read_result
-        result = @native_decompressor.read_result
-        @writer.call result
-
-        result.length
+      protected def do_not_use_after_close
+        raise UsedAfterCloseError, "decompressor used after close" if @is_closed
       end
     end
   end
