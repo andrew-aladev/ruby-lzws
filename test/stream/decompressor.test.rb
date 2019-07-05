@@ -70,7 +70,10 @@ module LZWS
                 end
 
                 decompressor.flush
+
+                refute decompressor.closed?
                 decompressor.close
+                assert decompressor.closed?
 
                 decompressed_text = decompressed_buffer.string
                 assert_equal text, decompressed_text

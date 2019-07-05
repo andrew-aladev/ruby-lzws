@@ -68,7 +68,10 @@ module LZWS
                 end
 
                 compressor.flush
+
+                refute compressor.closed?
                 compressor.close
+                assert compressor.closed?
 
                 compressed_text   = compressed_buffer.string
                 decompressed_text = String.decompress compressed_text, decompressor_options
