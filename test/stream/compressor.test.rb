@@ -19,27 +19,40 @@ module LZWS
         NOOP_PROC = Validation::NOOP_PROC
 
         def test_invalid_initialize
-          Validation::INVALID_PROCS.each do |invalid_proc|
-            assert_raises ValidateError do
-              Target.new invalid_proc
-            end
-          end
-
           Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
             assert_raises ValidateError do
-              Target.new NOOP_PROC, invalid_options
+              Target.new invalid_options
             end
           end
 
-          compressor = Target.new NOOP_PROC
-          compressor.close
+          compressor = Target.new
 
-          assert_raises UsedAfterCloseError do
+          Validation::INVALID_STRINGS.each do |invalid_string|
+            assert_raises ValidateError do
+              compressor.write(invalid_string, &NOOP_PROC)
+            end
+          end
+
+          assert_raises ValidateError do
             compressor.write ""
           end
 
-          assert_raises UsedAfterCloseError do
+          assert_raises ValidateError do
             compressor.flush
+          end
+
+          assert_raises ValidateError do
+            compressor.close
+          end
+
+          compressor.close(&NOOP_PROC)
+
+          assert_raises UsedAfterCloseError do
+            compressor.write("", &NOOP_PROC)
+          end
+
+          assert_raises UsedAfterCloseError do
+            compressor.flush(&NOOP_PROC)
           end
         end
 
@@ -51,7 +64,7 @@ module LZWS
                 compressed_buffer.set_encoding Encoding::BINARY
 
                 writer     = proc { |portion| compressed_buffer << portion }
-                compressor = Target.new writer, compressor_options
+                compressor = Target.new compressor_options
 
                 text_offset = 0
                 source      = "".b
@@ -63,14 +76,14 @@ module LZWS
                   text_offset += portion_length
                   source << portion
 
-                  write_length = compressor.write source
+                  write_length = compressor.write(source, &writer)
                   source       = source[write_length..-1]
                 end
 
-                compressor.flush
+                compressor.flush(&writer)
 
                 refute compressor.closed?
-                compressor.close
+                compressor.close(&writer)
                 assert compressor.closed?
 
                 compressed_text   = compressed_buffer.string

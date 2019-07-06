@@ -19,27 +19,40 @@ module LZWS
         NOOP_PROC = Validation::NOOP_PROC
 
         def test_invalid_initialize
-          Validation::INVALID_PROCS.each do |invalid_proc|
-            assert_raises ValidateError do
-              Target.new invalid_proc
-            end
-          end
-
           Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
             assert_raises ValidateError do
-              Target.new NOOP_PROC, invalid_options
+              Target.new invalid_options
             end
           end
 
-          decompressor = Target.new NOOP_PROC
-          decompressor.close
+          decompressor = Target.new
 
-          assert_raises UsedAfterCloseError do
+          Validation::INVALID_STRINGS.each do |invalid_string|
+            assert_raises ValidateError do
+              decompressor.read(invalid_string, &NOOP_PROC)
+            end
+          end
+
+          assert_raises ValidateError do
             decompressor.read ""
           end
 
-          assert_raises UsedAfterCloseError do
+          assert_raises ValidateError do
             decompressor.flush
+          end
+
+          assert_raises ValidateError do
+            decompressor.close
+          end
+
+          decompressor.close(&NOOP_PROC)
+
+          assert_raises UsedAfterCloseError do
+            decompressor.read("", &NOOP_PROC)
+          end
+
+          assert_raises UsedAfterCloseError do
+            decompressor.flush(&NOOP_PROC)
           end
         end
 
@@ -53,7 +66,7 @@ module LZWS
                 decompressed_buffer.set_encoding Encoding::BINARY
 
                 writer       = proc { |portion| decompressed_buffer << portion }
-                decompressor = Target.new writer, decompressor_options
+                decompressor = Target.new decompressor_options
 
                 compressed_text_offset = 0
                 source                 = "".b
@@ -65,14 +78,14 @@ module LZWS
                   compressed_text_offset += portion_length
                   source << portion
 
-                  read_length = decompressor.read source
+                  read_length = decompressor.read(source, &writer)
                   source      = source[read_length..-1]
                 end
 
-                decompressor.flush
+                decompressor.flush(&writer)
 
                 refute decompressor.closed?
-                decompressor.close
+                decompressor.close(&writer)
                 assert decompressor.closed?
 
                 decompressed_text = decompressed_buffer.string

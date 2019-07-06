@@ -6,21 +6,25 @@ require "lzws_ext"
 require_relative "abstract"
 require_relative "../error"
 require_relative "../option"
+require_relative "../validation"
 
 module LZWS
   module Stream
     class Decompressor < Abstract
-      def initialize(writer, options = {})
+      def initialize(options = {})
         options       = Option.get_decompressor_options options
         native_stream = NativeDecompressor.new options
 
-        super writer, native_stream
+        super native_stream
 
         @need_to_read_magic_header = !options[:without_magic_header]
       end
 
-      def read(source)
+      def read(source, &writer)
         do_not_use_after_close
+
+        Validation.validate_string source
+        Validation.validate_proc writer
 
         total_read_length = 0
 
@@ -44,7 +48,7 @@ module LZWS
 
           if need_more_destination
             source = source[read_length..-1]
-            flush_destination_buffer
+            flush_destination_buffer(&writer)
             next
           end
 
@@ -54,10 +58,14 @@ module LZWS
         total_read_length
       end
 
-      def flush
+      def flush(&writer)
         do_not_use_after_close
 
-        super
+        Validation.validate_proc writer
+
+        write_result(&writer)
+
+        nil
       end
 
       protected def do_not_use_after_close

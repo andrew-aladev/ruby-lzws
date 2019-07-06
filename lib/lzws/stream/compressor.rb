@@ -6,24 +6,28 @@ require "lzws_ext"
 require_relative "abstract"
 require_relative "../error"
 require_relative "../option"
+require_relative "../validation"
 
 module LZWS
   module Stream
     class Compressor < Abstract
-      def initialize(writer, options = {})
+      def initialize(options = {})
         options       = Option.get_compressor_options options
         native_stream = NativeCompressor.new options
 
-        super writer, native_stream
+        super native_stream
 
         @need_to_write_magic_header = !options[:without_magic_header]
       end
 
-      def write(source)
+      def write(source, &writer)
         do_not_use_after_close
 
+        Validation.validate_string source
+        Validation.validate_proc writer
+
         if @need_to_write_magic_header
-          write_magic_header
+          write_magic_header(&writer)
           @need_to_write_magic_header = false
         end
 
@@ -36,7 +40,7 @@ module LZWS
 
           if need_more_destination
             source = source[write_length..-1]
-            flush_destination_buffer
+            flush_destination_buffer(&writer)
             next
           end
 
@@ -51,12 +55,12 @@ module LZWS
         total_write_length
       end
 
-      protected def write_magic_header
+      protected def write_magic_header(&writer)
         loop do
           need_more_destination = @native_stream.write_magic_header
 
           if need_more_destination
-            flush_destination_buffer
+            flush_destination_buffer(&writer)
             next
           end
 
@@ -66,21 +70,25 @@ module LZWS
         nil
       end
 
-      def flush
+      def flush(&writer)
         do_not_use_after_close
+
+        Validation.validate_proc writer
 
         loop do
           need_more_destination = @native_stream.flush
 
           if need_more_destination
-            flush_destination_buffer
+            flush_destination_buffer(&writer)
             next
           end
 
           break
         end
 
-        super
+        write_result(&writer)
+
+        nil
       end
 
       protected def do_not_use_after_close
