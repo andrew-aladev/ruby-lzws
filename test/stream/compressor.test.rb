@@ -24,7 +24,9 @@ module LZWS
               Target.new invalid_options
             end
           end
+        end
 
+        def test_invalid_write
           compressor = Target.new
 
           Validation::INVALID_STRINGS.each do |invalid_string|
@@ -37,22 +39,32 @@ module LZWS
             compressor.write ""
           end
 
-          assert_raises ValidateError do
-            compressor.flush
-          end
-
-          assert_raises ValidateError do
-            compressor.close
-          end
-
           compressor.close(&NOOP_PROC)
 
           assert_raises UsedAfterCloseError do
             compressor.write("", &NOOP_PROC)
           end
+        end
+
+        def test_invalid_flush
+          compressor = Target.new
+
+          assert_raises ValidateError do
+            compressor.flush
+          end
+
+          compressor.close(&NOOP_PROC)
 
           assert_raises UsedAfterCloseError do
             compressor.flush(&NOOP_PROC)
+          end
+        end
+
+        def test_invalid_close
+          compressor = Target.new
+
+          assert_raises ValidateError do
+            compressor.close
           end
         end
 
@@ -63,9 +75,9 @@ module LZWS
                 compressed_buffer = StringIO.new
                 compressed_buffer.set_encoding Encoding::BINARY
 
-                writer     = proc { |portion| compressed_buffer << portion }
-                compressor = Target.new compressor_options
+                writer = proc { |portion| compressed_buffer << portion }
 
+                compressor  = Target.new compressor_options
                 text_offset = 0
                 source      = "".b
 

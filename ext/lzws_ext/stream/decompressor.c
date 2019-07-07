@@ -199,7 +199,7 @@ VALUE lzws_ext_decompressor_close(VALUE self)
   }
 
   // It is possible to keep "destination_buffer_length", "remaining_destination_buffer"
-  //   and "remaining_destination_buffer_length" uninitialized.
+  //   and "remaining_destination_buffer_length" as is.
 
   return Qnil;
 }

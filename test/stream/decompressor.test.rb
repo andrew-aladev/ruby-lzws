@@ -24,7 +24,9 @@ module LZWS
               Target.new invalid_options
             end
           end
+        end
 
+        def test_invalid_read
           decompressor = Target.new
 
           Validation::INVALID_STRINGS.each do |invalid_string|
@@ -37,22 +39,32 @@ module LZWS
             decompressor.read ""
           end
 
-          assert_raises ValidateError do
-            decompressor.flush
-          end
-
-          assert_raises ValidateError do
-            decompressor.close
-          end
-
           decompressor.close(&NOOP_PROC)
 
           assert_raises UsedAfterCloseError do
             decompressor.read("", &NOOP_PROC)
           end
+        end
+
+        def test_invalid_flush
+          decompressor = Target.new
+
+          assert_raises ValidateError do
+            decompressor.flush
+          end
+
+          decompressor.close(&NOOP_PROC)
 
           assert_raises UsedAfterCloseError do
             decompressor.flush(&NOOP_PROC)
+          end
+        end
+
+        def test_invalid_close
+          decompressor = Target.new
+
+          assert_raises ValidateError do
+            decompressor.close
           end
         end
 
@@ -65,9 +77,9 @@ module LZWS
                 decompressed_buffer = StringIO.new
                 decompressed_buffer.set_encoding Encoding::BINARY
 
-                writer       = proc { |portion| decompressed_buffer << portion }
-                decompressor = Target.new decompressor_options
+                writer = proc { |portion| decompressed_buffer << portion }
 
+                decompressor           = Target.new decompressor_options
                 compressed_text_offset = 0
                 source                 = "".b
 
