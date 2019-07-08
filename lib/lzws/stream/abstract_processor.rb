@@ -32,15 +32,15 @@ module LZWS
       end
 
       protected def flush_destination_buffer(&writer)
-        result_length = write_result(&writer)
-        raise NotEnoughDestinationError, "not enough destination" if result_length == 0
+        result_bytesize = write_result(&writer)
+        raise NotEnoughDestinationError, "not enough destination" if result_bytesize == 0
       end
 
       protected def write_result(&_writer)
         result = @native_stream.read_result
         yield result
 
-        result.length
+        result.bytesize
       end
     end
   end

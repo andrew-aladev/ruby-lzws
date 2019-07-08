@@ -10,18 +10,26 @@ module LZWS
       TEMP_PATH = ::File.join(BASE_PATH, "tmp").freeze
 
       TEXTS = [
-        "".b,
-        "hello world".b,
-        "tobeornottobeortobeornot".b,
+        "",
+        "hello world",
+        "tobeornottobeortobeornot",
         SecureRandom.random_bytes(1 << 13) # 8 KB
       ]
       .freeze
 
-      PORTION_LENGTHS = [
+      PORTION_BYTESIZES = [
         1,
         2,
         512
       ]
+      .freeze
+
+      ENCODINGS = %w[
+        binary
+        UTF-8
+        UTF-16
+      ]
+      .map { |encoding_name| Encoding.find encoding_name }
       .freeze
     end
   end

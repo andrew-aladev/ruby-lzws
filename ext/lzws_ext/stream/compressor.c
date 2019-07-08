@@ -136,13 +136,13 @@ VALUE lzws_ext_compress(VALUE self, VALUE source)
     &compressor_ptr->remaining_destination_buffer,
     &compressor_ptr->remaining_destination_buffer_length);
 
-  VALUE write_length = INT2NUM(source_length - remaining_source_length);
+  VALUE bytes_written = INT2NUM(source_length - remaining_source_length);
 
   if (result == LZWS_COMPRESSOR_NEEDS_MORE_SOURCE) {
-    return rb_ary_new_from_args(2, write_length, Qfalse);
+    return rb_ary_new_from_args(2, bytes_written, Qfalse);
   }
   else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    return rb_ary_new_from_args(2, write_length, Qtrue);
+    return rb_ary_new_from_args(2, bytes_written, Qtrue);
   }
   else {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");

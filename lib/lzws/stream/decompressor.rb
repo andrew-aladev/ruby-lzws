@@ -26,28 +26,28 @@ module LZWS
         Validation.validate_string source
         Validation.validate_proc writer
 
-        total_read_length = 0
+        total_bytes_read = 0
 
         if @need_to_read_magic_header
-          read_length = @native_stream.read_magic_header source
-          if read_length == 0
+          bytes_read = @native_stream.read_magic_header source
+          if bytes_read == 0
             # Decompressor is not able to read full magic header.
             return 0
           end
 
-          total_read_length += read_length
-          source             = source[read_length..-1]
+          total_bytes_read += bytes_read
+          source            = source.byteslice bytes_read, source.bytesize - bytes_read
 
           @need_to_read_magic_header = false
         end
 
         loop do
-          read_length, need_more_destination = @native_stream.read source
+          bytes_read, need_more_destination = @native_stream.read source
 
-          total_read_length += read_length
+          total_bytes_read += bytes_read
 
           if need_more_destination
-            source = source[read_length..-1]
+            source = source.byteslice bytes_read, source.bytesize - bytes_read
             flush_destination_buffer(&writer)
             next
           end
@@ -55,7 +55,7 @@ module LZWS
           break
         end
 
-        total_read_length
+        total_bytes_read
       end
 
       def flush(&writer)

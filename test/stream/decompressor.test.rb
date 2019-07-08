@@ -70,38 +70,45 @@ module LZWS
 
         def test_texts
           Common::TEXTS.each do |text|
-            Common::PORTION_LENGTHS.each do |portion_length|
-              Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                compressed_text = String.compress text, compressor_options
+            Common::ENCODINGS.each do |encoding|
+              encoded_text = text.dup.force_encoding encoding
 
-                decompressed_buffer = StringIO.new
-                decompressed_buffer.set_encoding Encoding::BINARY
+              Common::PORTION_BYTESIZES.each do |portion_bytesize|
+                Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                  compressed_text = String.compress encoded_text, compressor_options
 
-                writer = proc { |portion| decompressed_buffer << portion }
+                  decompressor = Target.new decompressor_options
 
-                decompressor           = Target.new decompressor_options
-                compressed_text_offset = 0
-                source                 = "".b
+                  source = ""
+                  source.force_encoding Encoding::BINARY
 
-                loop do
-                  portion = compressed_text[compressed_text_offset...(compressed_text_offset + portion_length)]
-                  break if portion.nil?
+                  decompressed_buffer = StringIO.new
+                  decompressed_buffer.set_encoding Encoding::BINARY
 
-                  compressed_text_offset += portion_length
-                  source << portion
+                  writer = proc { |portion| decompressed_buffer << portion }
 
-                  read_length = decompressor.read(source, &writer)
-                  source      = source[read_length..-1]
+                  compressed_text_offset = 0
+
+                  loop do
+                    portion = compressed_text.byteslice compressed_text_offset, portion_bytesize
+                    break if portion.nil?
+
+                    compressed_text_offset += portion_bytesize
+                    source << portion
+
+                    bytes_read = decompressor.read(source, &writer)
+                    source     = source.byteslice bytes_read, source.bytesize - bytes_read
+                  end
+
+                  decompressor.flush(&writer)
+
+                  refute decompressor.closed?
+                  decompressor.close(&writer)
+                  assert decompressor.closed?
+
+                  decompressed_text = decompressed_buffer.string
+                  assert_equal text, decompressed_text
                 end
-
-                decompressor.flush(&writer)
-
-                refute decompressor.closed?
-                decompressor.close(&writer)
-                assert decompressor.closed?
-
-                decompressed_text = decompressed_buffer.string
-                assert_equal text, decompressed_text
               end
             end
           end

@@ -13,10 +13,8 @@ module LZWS
     class IO < Minitest::Unit::TestCase
       Target = LZWS::IO
 
-      ENCODING = "#{Encoding::BINARY}:#{Encoding::BINARY}".freeze
-
       def test_invalid_arguments
-        ::IO.pipe(ENCODING) do |read_io, write_io|
+        ::IO.pipe do |read_io, write_io|
           Validation::INVALID_IOS.each do |invalid_io|
             assert_raises ValidateError do
               Target.compress invalid_io, write_io
@@ -51,21 +49,25 @@ module LZWS
 
       def test_texts
         Common::TEXTS.each do |text|
-          Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-            ::IO.pipe(ENCODING) do |source_read_io, source_write_io|
-              source_write_io << text
-              source_write_io.close
+          Common::ENCODINGS.each do |encoding|
+            encoded_text = text.dup.force_encoding encoding
 
-              ::IO.pipe(ENCODING) do |compressed_read_io, compressed_write_io|
-                Target.compress source_read_io, compressed_write_io, compressor_options
-                compressed_write_io.close
+            Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              ::IO.pipe("#{encoding}:#{Encoding::BINARY}") do |source_read_io, source_write_io|
+                source_write_io << encoded_text
+                source_write_io.close
 
-                ::IO.pipe(ENCODING) do |decompressed_read_io, decompressed_write_io|
-                  Target.decompress compressed_read_io, decompressed_write_io, decompressor_options
-                  decompressed_write_io.close
+                ::IO.pipe("#{Encoding::BINARY}:#{Encoding::BINARY}") do |compressed_read_io, compressed_write_io|
+                  Target.compress source_read_io, compressed_write_io, compressor_options
+                  compressed_write_io.close
 
-                  decompressed_text = decompressed_read_io.read
-                  assert_equal text, decompressed_text
+                  ::IO.pipe("#{Encoding::BINARY}:#{encoding}") do |decompressed_read_io, decompressed_write_io|
+                    Target.decompress compressed_read_io, decompressed_write_io, decompressor_options
+                    decompressed_write_io.close
+
+                    decompressed_text = decompressed_read_io.read
+                    assert_equal text, decompressed_text
+                  end
                 end
               end
             end

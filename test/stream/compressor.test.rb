@@ -70,38 +70,45 @@ module LZWS
 
         def test_texts
           Common::TEXTS.each do |text|
-            Common::PORTION_LENGTHS.each do |portion_length|
-              Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                compressed_buffer = StringIO.new
-                compressed_buffer.set_encoding Encoding::BINARY
+            Common::ENCODINGS.each do |encoding|
+              encoded_text = text.dup.force_encoding encoding
 
-                writer = proc { |portion| compressed_buffer << portion }
+              Common::PORTION_BYTESIZES.each do |portion_bytesize|
+                Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                  compressor = Target.new compressor_options
 
-                compressor  = Target.new compressor_options
-                text_offset = 0
-                source      = "".b
+                  source = ""
+                  source.force_encoding encoding
 
-                loop do
-                  portion = text[text_offset...(text_offset + portion_length)]
-                  break if portion.nil?
+                  compressed_buffer = StringIO.new
+                  compressed_buffer.set_encoding Encoding::BINARY
 
-                  text_offset += portion_length
-                  source << portion
+                  writer = proc { |portion| compressed_buffer << portion }
 
-                  write_length = compressor.write(source, &writer)
-                  source       = source[write_length..-1]
+                  encoded_text_offset = 0
+
+                  loop do
+                    portion = encoded_text.byteslice encoded_text_offset, portion_bytesize
+                    break if portion.nil?
+
+                    encoded_text_offset += portion_bytesize
+                    source << portion
+
+                    write_bytesize = compressor.write(source, &writer)
+                    source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
+                  end
+
+                  compressor.flush(&writer)
+
+                  refute compressor.closed?
+                  compressor.close(&writer)
+                  assert compressor.closed?
+
+                  compressed_text   = compressed_buffer.string
+                  decompressed_text = String.decompress compressed_text, decompressor_options
+
+                  assert_equal text, decompressed_text
                 end
-
-                compressor.flush(&writer)
-
-                refute compressor.closed?
-                compressor.close(&writer)
-                assert compressor.closed?
-
-                compressed_text   = compressed_buffer.string
-                decompressed_text = String.decompress compressed_text, decompressor_options
-
-                assert_equal text, decompressed_text
               end
             end
           end

@@ -39,11 +39,15 @@ module LZWS
 
       def test_texts
         Common::TEXTS.each do |text|
-          Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-            compressed_text   = Target.compress text, compressor_options
-            decompressed_text = Target.decompress compressed_text, decompressor_options
+          Common::ENCODINGS.each do |encoding|
+            encoded_text = text.dup.force_encoding encoding
 
-            assert_equal text, decompressed_text
+            Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              compressed_text   = Target.compress encoded_text, compressor_options
+              decompressed_text = Target.decompress compressed_text, decompressor_options
+
+              assert_equal text, decompressed_text
+            end
           end
         end
       end

@@ -9,9 +9,6 @@ module LZWS
       # LZWS native stream is not seekable by design.
       # Related methods like "seek" and "pos=" can't be implemented.
 
-      # Internal encoding for native stream is binary only by design.
-      # You can set external encoding.
-
       attr_reader :external_encoding
       attr_reader :pos
 

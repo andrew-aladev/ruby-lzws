@@ -14,22 +14,7 @@ module LZWS
         super compressor, destination_io, *args
       end
 
-      def write(*sources)
-        # sources.each { |source| Validation.validate_string source }
-        #
-        # write_length = 0
-        #
-        # sources.each do |source|
-        #   @processor.write(source) { |portion| @io.write portion }
-        #
-        #   write_length += source.length
-        # end
-        #
-        # @pos += write_length
-        #
-        # write_length
-      end
-
+      # write
       # write_nonblock
     end
   end

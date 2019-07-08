@@ -31,20 +31,20 @@ module LZWS
           @need_to_write_magic_header = false
         end
 
-        total_write_length = 0
+        total_bytes_written = 0
 
         loop do
-          write_length, need_more_destination = @native_stream.write source
+          bytes_written, need_more_destination = @native_stream.write source
 
-          total_write_length += write_length
+          total_bytes_written += bytes_written
 
           if need_more_destination
-            source = source[write_length..-1]
+            source = source.byteslice bytes_written, source.bytesize - bytes_written
             flush_destination_buffer(&writer)
             next
           end
 
-          if write_length != source.length
+          if bytes_written != source.bytesize
             # Compressor write should eat all provided "source" without remainder.
             raise UnexpectedError, "unexpected error"
           end
@@ -52,7 +52,7 @@ module LZWS
           break
         end
 
-        total_write_length
+        total_bytes_written
       end
 
       protected def write_magic_header(&writer)
