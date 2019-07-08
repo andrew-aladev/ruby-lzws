@@ -3,14 +3,14 @@
 
 require "lzws_ext"
 
-require_relative "abstract"
+require_relative "abstract_processor"
 require_relative "../error"
 require_relative "../option"
 require_relative "../validation"
 
 module LZWS
   module Stream
-    class Compressor < Abstract
+    class Compressor < AbstractProcessor
       def initialize(options = {})
         options       = Option.get_compressor_options options
         native_stream = NativeCompressor.new options

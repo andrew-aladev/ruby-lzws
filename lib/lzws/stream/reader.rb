@@ -8,10 +8,10 @@ require_relative "../validation"
 module LZWS
   module Stream
     class Reader < AbstractIO
-      def initialize(source_io, options, *args)
+      def initialize(source_io, options = {}, *args)
         decompressor = Decompressor.new options
 
-        super source_io, decompressor, *args
+        super decompressor, source_io, *args
       end
 
       # each_byte

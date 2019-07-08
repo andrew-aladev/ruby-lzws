@@ -4,6 +4,8 @@
 require "lzws/stream/reader"
 
 require_relative "../minitest"
+require_relative "../option"
+require_relative "../validation"
 
 module LZWS
   module Test
@@ -12,6 +14,17 @@ module LZWS
         Target = LZWS::Stream::Reader
 
         def test_invalid_initialize
+          Validation::INVALID_IOS.each do |invalid_io|
+            assert_raises ValidateError do
+              Target.new invalid_io
+            end
+          end
+
+          Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
+            assert_raises ValidateError do
+              Target.new STDOUT, invalid_options
+            end
+          end
         end
       end
 

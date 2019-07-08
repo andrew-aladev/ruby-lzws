@@ -8,7 +8,7 @@ require_relative "../validation"
 
 module LZWS
   module Stream
-    class Abstract
+    class AbstractProcessor
       def initialize(native_stream)
         @native_stream = native_stream
         @is_closed     = false
