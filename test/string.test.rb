@@ -46,7 +46,9 @@ module LZWS
               compressed_text   = Target.compress encoded_text, compressor_options
               decompressed_text = Target.decompress compressed_text, decompressor_options
 
-              assert_equal text, decompressed_text
+              decompressed_text.force_encoding encoding
+
+              assert_equal encoded_text, decompressed_text
             end
           end
         end

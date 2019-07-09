@@ -8,15 +8,14 @@ require_relative "../common"
 require_relative "../minitest"
 require_relative "../option"
 require_relative "../validation"
+require_relative "abstract_processor"
 
 module LZWS
   module Test
     module Stream
-      class Decompressor < Minitest::Unit::TestCase
+      class Decompressor < AbstractProcessor
         Target = LZWS::Stream::Decompressor
         String = LZWS::String
-
-        NOOP_PROC = Validation::NOOP_PROC
 
         def test_invalid_initialize
           Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
@@ -43,28 +42,6 @@ module LZWS
 
           assert_raises UsedAfterCloseError do
             decompressor.read("", &NOOP_PROC)
-          end
-        end
-
-        def test_invalid_flush
-          decompressor = Target.new
-
-          assert_raises ValidateError do
-            decompressor.flush
-          end
-
-          decompressor.close(&NOOP_PROC)
-
-          assert_raises UsedAfterCloseError do
-            decompressor.flush(&NOOP_PROC)
-          end
-        end
-
-        def test_invalid_close
-          decompressor = Target.new
-
-          assert_raises ValidateError do
-            decompressor.close
           end
         end
 
@@ -107,7 +84,9 @@ module LZWS
                   assert decompressor.closed?
 
                   decompressed_text = decompressed_buffer.string
-                  assert_equal text, decompressed_text
+                  decompressed_text.force_encoding encoding
+
+                  assert_equal encoded_text, decompressed_text
                 end
               end
             end

@@ -6,26 +6,13 @@ require "lzws/stream/writer"
 require_relative "../minitest"
 require_relative "../option"
 require_relative "../validation"
+require_relative "abstract_io"
 
 module LZWS
   module Test
     module Stream
-      class Writer < Minitest::Unit::TestCase
+      class Writer < AbstractIO
         Target = LZWS::Stream::Writer
-
-        def test_invalid_initialize
-          Validation::INVALID_IOS.each do |invalid_io|
-            assert_raises ValidateError do
-              Target.new invalid_io
-            end
-          end
-
-          Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
-            assert_raises ValidateError do
-              Target.new STDOUT, invalid_options
-            end
-          end
-        end
       end
 
       Minitest << Writer

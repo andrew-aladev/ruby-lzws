@@ -63,7 +63,9 @@ module LZWS
               Target.decompress COMPRESSED_PATH, DECOMPRESSED_PATH, decompressor_options
 
               decompressed_text = ::File.open DECOMPRESSED_PATH, "rb", &:read
-              assert_equal text, decompressed_text
+              decompressed_text.force_encoding encoding
+
+              assert_equal encoded_text, decompressed_text
             end
           end
         end

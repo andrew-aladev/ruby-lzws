@@ -8,15 +8,14 @@ require_relative "../common"
 require_relative "../minitest"
 require_relative "../option"
 require_relative "../validation"
+require_relative "abstract_processor"
 
 module LZWS
   module Test
     module Stream
-      class Compressor < Minitest::Unit::TestCase
+      class Compressor < AbstractProcessor
         Target = LZWS::Stream::Compressor
         String = LZWS::String
-
-        NOOP_PROC = Validation::NOOP_PROC
 
         def test_invalid_initialize
           Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
@@ -43,28 +42,6 @@ module LZWS
 
           assert_raises UsedAfterCloseError do
             compressor.write("", &NOOP_PROC)
-          end
-        end
-
-        def test_invalid_flush
-          compressor = Target.new
-
-          assert_raises ValidateError do
-            compressor.flush
-          end
-
-          compressor.close(&NOOP_PROC)
-
-          assert_raises UsedAfterCloseError do
-            compressor.flush(&NOOP_PROC)
-          end
-        end
-
-        def test_invalid_close
-          compressor = Target.new
-
-          assert_raises ValidateError do
-            compressor.close
           end
         end
 
@@ -107,7 +84,9 @@ module LZWS
                   compressed_text   = compressed_buffer.string
                   decompressed_text = String.decompress compressed_text, decompressor_options
 
-                  assert_equal text, decompressed_text
+                  decompressed_text.force_encoding encoding
+
+                  assert_equal encoded_text, decompressed_text
                 end
               end
             end

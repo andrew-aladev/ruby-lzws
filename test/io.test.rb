@@ -66,7 +66,9 @@ module LZWS
                     decompressed_write_io.close
 
                     decompressed_text = decompressed_read_io.read
-                    assert_equal text, decompressed_text
+                    decompressed_text.force_encoding encoding
+
+                    assert_equal encoded_text, decompressed_text
                   end
                 end
               end
