@@ -14,8 +14,8 @@ module LZWS
         attr_reader :internal_encoding
         attr_reader :pos
 
-        def initialize(processor, io, external_encoding: nil, internal_encoding: nil, transcode_options: {})
-          @processor = processor
+        def initialize(stream, io, external_encoding: nil, internal_encoding: nil, transcode_options: {})
+          @stream = stream
 
           Validation.validate_io io
           @io = io

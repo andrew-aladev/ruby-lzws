@@ -2,7 +2,7 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require_relative "abstract"
-require_relative "../processor/compressor"
+require_relative "../compressor"
 require_relative "../../validation"
 
 module LZWS
@@ -10,7 +10,7 @@ module LZWS
     module IO
       class Writer < Abstract
         def initialize(destination_io, options = {}, *args)
-          compressor = Processor::Compressor.new options
+          compressor = Compressor.new options
 
           super compressor, destination_io, *args
         end
@@ -32,7 +32,7 @@ module LZWS
 
         protected def write_data(source)
           source = prepare_source_for_write source
-          @processor.write(source) { |portion| @io.write portion }
+          @stream.write(source) { |portion| @io.write portion }
         end
 
         def write_nonblock(object, *options)

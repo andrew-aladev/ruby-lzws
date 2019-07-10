@@ -2,7 +2,7 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require_relative "abstract"
-require_relative "../processor/decompressor"
+require_relative "../decompressor"
 require_relative "../../validation"
 
 module LZWS
@@ -10,7 +10,7 @@ module LZWS
     module IO
       class Reader < Abstract
         def initialize(source_io, options = {}, *args)
-          decompressor = Processor::Decompressor.new options
+          decompressor = Decompressor.new options
 
           super decompressor, source_io, *args
         end
