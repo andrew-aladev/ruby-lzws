@@ -16,27 +16,32 @@ module LZWS
         end
 
         def write(*objects)
+          if @buffer.bytesize > 0
+            # Write remaining buffer.
+            @io.write @buffer
+            reset_buffer
+          end
+
           total_bytes_written = 0
 
-          bytes_written        = write_data @buffer.string
-          total_bytes_written += bytes_written
-
           objects.each do |object|
-            bytes_written        = write_data object.to_s
-            @pos                += bytes_written
+            source = prepare_source_for_write object.to_s
+
+            # Stream will write all data without any remainder.
+            bytes_written = @stream.write(source) { |portion| @io.write portion }
+
             total_bytes_written += bytes_written
           end
+
+          @pos += total_bytes_written
 
           total_bytes_written
         end
 
-        protected def write_data(source)
-          source = prepare_source_for_write source
-          @stream.write(source) { |portion| @io.write portion }
-        end
-
         def write_nonblock(object, *options)
-          total_bytes_written = 0
+          if @buffer.bytesize > 0
+            # Write remaining buffer.
+          end
         end
 
         protected def prepare_source_for_write(source)

@@ -21,39 +21,17 @@ module LZWS
           @io = io
 
           set_encoding external_encoding, internal_encoding, transcode_options
-
-          @buffer = StringIO.new
-          @buffer.set_encoding Encoding::BINARY
+          reset_buffer
 
           @pos = 0
         end
 
+        protected def reset_buffer
+          @buffer = ::String.new :encoding => Encoding::BINARY
+        end
+
         def set_encoding(*args)
-          first_arg = args[0]
-
-          if first_arg.nil?
-            external_encoding = nil
-            internal_encoding = args[1]
-            transcode_options = args[2]
-          else
-            Validation.validate_string first_arg
-
-            # First argument can be "external_encoding:internal_encoding".
-            match = %r{(.+?):(.+)}.match first_arg
-
-            if match.nil?
-              external_encoding = first_arg
-              internal_encoding = args[1]
-              transcode_options = args[2]
-            else
-              external_encoding = match[0]
-              internal_encoding = match[1]
-              transcode_options = args[1]
-            end
-          end
-
-          Validation.validate_string internal_encoding unless internal_encoding.nil?
-          Validation.validate_hash transcode_options unless transcode_options.nil?
+          external_encoding, internal_encoding, transcode_options = process_set_encoding_arguments(*args)
 
           set_target_encoding :@external_encoding, external_encoding
           set_target_encoding :@internal_encoding, internal_encoding
@@ -62,19 +40,45 @@ module LZWS
           self
         end
 
+        protected def process_set_encoding_arguments(*args)
+          external_encoding = args[0]
+
+          unless external_encoding.nil?
+            Validation.validate_string external_encoding
+
+            # First argument can be "external_encoding:internal_encoding".
+            match = %r{(.+?):(.+)}.match external_encoding
+
+            unless match.nil?
+              external_encoding = match[0]
+              internal_encoding = match[1]
+
+              transcode_options = args[1]
+              Validation.validate_hash transcode_options unless transcode_options.nil?
+
+              return [external_encoding, internal_encoding, transcode_options]
+            end
+          end
+
+          internal_encoding = args[1]
+          Validation.validate_string internal_encoding unless internal_encoding.nil?
+
+          transcode_options = args[2]
+          Validation.validate_hash transcode_options unless transcode_options.nil?
+
+          [external_encoding, internal_encoding, transcode_options]
+        end
+
         protected def set_target_encoding(name, value)
-          if value.nil?
-            instance_variable_set name, nil
-            return nil
+          unless value.nil?
+            begin
+              value = Encoding.find value
+            rescue ArgumentError
+              raise ValidateError, "invalid #{name} encoding"
+            end
           end
 
-          begin
-            encoding = Encoding.find value
-          rescue ArgumentError
-            raise ValidateError, "invalid #{name} encoding"
-          end
-
-          instance_variable_set name, encoding
+          instance_variable_set name, value
         end
 
         def to_io

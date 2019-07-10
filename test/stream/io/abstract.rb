@@ -85,6 +85,10 @@ module LZWS
               assert_raises ValidateError do
                 instance.set_encoding Encoding::BINARY, Encoding::BINARY, invalid_hash
               end
+
+              assert_raises ValidateError do
+                instance.set_encoding "#{Encoding::BINARY}:#{Encoding::BINARY}", invalid_hash
+              end
             end
           end
 
