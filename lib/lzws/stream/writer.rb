@@ -2,6 +2,7 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require_relative "abstract"
+require_relative "writer_helpers"
 require_relative "raw/compressor"
 
 module LZWS
@@ -9,6 +10,8 @@ module LZWS
     class Writer < Abstract
       # It is not possible to maintain correspondance between bytes consumed from source and bytes written to destination.
       # So we will consume all source bytes and maintain buffer with remaining destination data.
+
+      include WriterHelpers
 
       def initialize(destination_io, options = {}, *args)
         @options = options
