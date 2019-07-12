@@ -8,17 +8,14 @@ module LZWS
   module Stream
     class Reader < Abstract
       def initialize(source_io, options = {}, *args)
-        decompressor = Raw::Decompressor.new options
+        @options = options
 
-        super decompressor, source_io, *args
+        super source_io, *args
       end
 
-      # each_byte
-      # eof?
-      # read
-      # read_nonblock
-      # getbyte
-      # ungetbyte
+      def create_raw_stream
+        Raw::Decompressor.new @options
+      end
     end
   end
 end

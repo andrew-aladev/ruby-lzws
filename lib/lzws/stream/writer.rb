@@ -11,9 +11,13 @@ module LZWS
       # So we will consume all source bytes and maintain buffer with remaining destination data.
 
       def initialize(destination_io, options = {}, *args)
-        compressor = Raw::Compressor.new options
+        @options = options
 
-        super compressor, destination_io, *args
+        super destination_io, *args
+      end
+
+      def create_raw_stream
+        Raw::Compressor.new @options
       end
 
       # -- synchronous --
@@ -36,11 +40,21 @@ module LZWS
       end
 
       def flush
+        finish :flush
+
+        super
+      end
+
+      def close
+        finish :close
+
+        super
+      end
+
+      protected def finish(method_name)
         write_remaining_buffer
 
-        @raw_stream.flush { |portion| @io.write portion }
-
-        nil
+        @raw_stream.send(method_name) { |portion| @io.write portion }
       end
 
       protected def write_remaining_buffer
@@ -61,7 +75,8 @@ module LZWS
         new_buffer           = self.class.new_buffer
         source_bytes_written = @raw_stream.write(source) { |portion| new_buffer << portion }
 
-        # Buffer won't be affected if "write_nonblock" will raise an error.
+        # Current buffer won't be affected if "write_nonblock" will raise an error.
+        # So same source can be provided again on the next method call.
         destination_bytes_written = @io.write_nonblock new_buffer, *options
         @buffer                   = new_buffer[destination_bytes_written..-1]
 
@@ -71,11 +86,28 @@ module LZWS
       end
 
       def flush_nonblock(*options)
+        finish_nonblock :flush, *options
+
+        flush
+      end
+
+      def close_nonblock(*options)
+        finish_nonblock :close, *options
+
+        close
+      end
+
+      protected def finish_nonblock(method_name, *options)
         return false unless write_remaining_buffer_nonblock(*options)
 
-        # @raw_stream.flush { |portion| @buffer << portion }
+        @raw_stream.send(method_name) { |portion| @buffer << portion }
 
-        true
+        # Current buffer will be written before "write_nonblock" call.
+        # So remaining buffer will be written on the next method call.
+        destination_bytes_written = @io.write_nonblock @buffer, *options
+        @buffer                   = @buffer[destination_bytes_written..-1]
+
+        @buffer.bytesize == 0
       end
 
       protected def write_remaining_buffer_nonblock(*options)

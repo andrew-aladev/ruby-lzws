@@ -14,8 +14,8 @@ module LZWS
       attr_reader :internal_encoding
       attr_reader :pos
 
-      def initialize(raw_stream, io, external_encoding: nil, internal_encoding: nil, transcode_options: {})
-        @raw_stream = raw_stream
+      def initialize(io, external_encoding: nil, internal_encoding: nil, transcode_options: {})
+        @raw_stream = create_raw_stream
 
         Validation.validate_io io
         @io = io
@@ -26,6 +26,8 @@ module LZWS
         @pos = 0
       end
 
+      # -- buffer --
+
       protected def reset_buffer
         @buffer = self.class.new_buffer
       end
@@ -33,6 +35,8 @@ module LZWS
       def self.new_buffer
         ::String.new :encoding => Encoding::BINARY
       end
+
+      # -- encoding --
 
       def set_encoding(*args)
         external_encoding, internal_encoding, transcode_options = process_set_encoding_arguments(*args)
@@ -85,15 +89,52 @@ module LZWS
         instance_variable_set name, value
       end
 
-      def to_io
+      # -- rewind --
+
+      def rewind
+        finish :close
+        process_rewind
+
+        0
+      end
+
+      def rewind_nonblock(*options)
+        finish_nonblock :close, *options
+        process_rewind
+
+        0
+      end
+
+      protected def process_rewind
+        @raw_stream.close
+        @raw_stream = create_raw_stream
+
+        @io.rewind
+
+        @pos = 0
+      end
+
+      # -- etc --
+
+      def flush
+        @io.flush
+
         self
       end
 
-      # close
-      # closed?
-      # flush
-      # pos
-      # tell
+      def close
+        @io.close
+
+        nil
+      end
+
+      def closed?
+        @raw_stream.closed? && @io.closed?
+      end
+
+      def to_io
+        self
+      end
     end
   end
 end
