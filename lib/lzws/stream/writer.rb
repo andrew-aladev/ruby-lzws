@@ -8,9 +8,6 @@ require_relative "raw/compressor"
 module LZWS
   module Stream
     class Writer < Abstract
-      # It is not possible to maintain correspondance between bytes consumed from source and bytes written to destination.
-      # So we will consume all source bytes and maintain buffer with remaining destination data.
-
       include WriterHelpers
 
       def initialize(destination_io, options = {}, *args)

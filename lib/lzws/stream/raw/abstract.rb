@@ -18,9 +18,7 @@ module LZWS
         def close(&writer)
           return nil if @is_closed
 
-          Validation.validate_proc writer
-
-          write_result(&writer)
+          flush(&writer)
 
           @native_stream.close
           @is_closed = true

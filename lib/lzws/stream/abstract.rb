@@ -1,6 +1,7 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require_relative "io_delegates"
 require_relative "../error"
 require_relative "../validation"
 
@@ -9,6 +10,11 @@ module LZWS
     class Abstract
       # LZWS native stream is not seekable by design.
       # Related methods like "seek" and "pos=" can't be implemented.
+
+      # It is not possible to maintain correspondance between bytes consumed from source and bytes written to destination by design.
+      # We will consume all source bytes and maintain buffer with remaining destination data.
+
+      include IODelegates
 
       attr_reader :external_encoding
       attr_reader :internal_encoding
@@ -22,6 +28,7 @@ module LZWS
 
         set_encoding external_encoding, internal_encoding, transcode_options
         reset_buffer
+        reset_io_advise
 
         @pos = 0
       end
@@ -34,6 +41,18 @@ module LZWS
 
       def self.new_buffer
         ::String.new :encoding => Encoding::BINARY
+      end
+
+      # -- advise --
+
+      protected def reset_io_advise
+        # Both compressor and decompressor need sequential io access.
+        @io.advise :sequential
+      end
+
+      def advise
+        # Noop
+        nil
       end
 
       # -- encoding --
@@ -110,9 +129,12 @@ module LZWS
         @raw_stream = create_raw_stream
 
         @io.rewind
+        reset_io_advise
 
         @pos = 0
       end
+
+      # -- stat --
 
       # -- etc --
 

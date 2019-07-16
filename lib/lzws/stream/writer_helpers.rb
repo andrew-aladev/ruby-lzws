@@ -30,11 +30,38 @@ module LZWS
         nil
       end
 
-      # def putc
-      # end
+      def putc(object)
+        if object.respond_to? :chr
+          write object.chr
+        elsif object.is_a? ::String
+          write object.first
+        else
+          raise ValidateError, "invalid object: \"#{object}\" for putc"
+        end
 
-      # def puts
-      # end
+        object
+      end
+
+      def puts(*objects)
+        objects.each do |object|
+          if object.is_a? ::Array
+            puts(*object)
+            next
+          end
+
+          source  = object.to_s
+          newline = "\n".encode value.encoding
+
+          # Do not add newline if source ends with newline.
+          if source.end_with? newline
+            write source
+          else
+            write source + newline
+          end
+        end
+
+        nil
+      end
     end
   end
 end

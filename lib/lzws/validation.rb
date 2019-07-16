@@ -6,15 +6,15 @@ require_relative "error"
 module LZWS
   module Validation
     def self.validate_bool(value)
-      raise ValidateError, "invalid bool" unless value.is_a?(TrueClass) || value.is_a?(FalseClass)
+      raise ValidateError, "invalid bool" unless value.is_a?(::TrueClass) || value.is_a?(::FalseClass)
     end
 
     def self.validate_positive_integer(value)
-      raise ValidateError, "invalid positive integer" unless value.is_a?(Integer) && value > 0
+      raise ValidateError, "invalid positive integer" unless value.is_a?(::Integer) && value > 0
     end
 
     def self.validate_not_negative_integer(value)
-      raise ValidateError, "invalid not negative integer" unless value.is_a?(Integer) && value >= 0
+      raise ValidateError, "invalid not negative integer" unless value.is_a?(::Integer) && value >= 0
     end
 
     def self.validate_string(value)
@@ -26,11 +26,11 @@ module LZWS
     end
 
     def self.validate_hash(value)
-      raise ValidateError, "invalid hash" unless value.is_a? Hash
+      raise ValidateError, "invalid hash" unless value.is_a? ::Hash
     end
 
     def self.validate_proc(value)
-      raise ValidateError, "invalid proc" unless value.is_a?(Proc) || value.is_a?(Method) || value.is_a?(UnboundMethod)
+      raise ValidateError, "invalid proc" unless value.is_a?(::Proc) || value.is_a?(::Method) || value.is_a?(::UnboundMethod)
     end
   end
 end

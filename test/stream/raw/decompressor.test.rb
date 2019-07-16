@@ -18,6 +18,14 @@ module LZWS
           Target = LZWS::Stream::Raw::Decompressor
           String = LZWS::String
 
+          NATIVE_SOURCE_PATH  = Common::NATIVE_SOURCE_PATH
+          NATIVE_ARCHIVE_PATH = Common::NATIVE_ARCHIVE_PATH
+          TEXTS               = Common::TEXTS
+          ENCODINGS           = Common::ENCODINGS
+          PORTION_BYTESIZES   = Common::PORTION_BYTESIZES
+
+          COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
+
           def test_invalid_initialize
             Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
               assert_raises ValidateError do
@@ -31,7 +39,7 @@ module LZWS
 
             Validation::INVALID_STRINGS.each do |invalid_string|
               assert_raises ValidateError do
-                decompressor.read(invalid_string, &NOOP_PROC)
+                decompressor.read invalid_string, &NOOP_PROC
               end
             end
 
@@ -42,23 +50,23 @@ module LZWS
             decompressor.close(&NOOP_PROC)
 
             assert_raises UsedAfterCloseError do
-              decompressor.read("", &NOOP_PROC)
+              decompressor.read "", &NOOP_PROC
             end
           end
 
           def test_texts
-            Common::TEXTS.each do |text|
-              Common::ENCODINGS.each do |encoding|
+            TEXTS.each do |text|
+              ENCODINGS.each do |encoding|
                 encoded_text = text.dup.force_encoding encoding
 
-                Common::PORTION_BYTESIZES.each do |portion_bytesize|
-                  Option::COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                PORTION_BYTESIZES.each do |portion_bytesize|
+                  COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                     compressed_text = String.compress encoded_text, compressor_options
-
-                    decompressor = Target.new decompressor_options
 
                     source = ""
                     source.force_encoding Encoding::BINARY
+
+                    decompressor = Target.new decompressor_options
 
                     decompressed_buffer = StringIO.new
                     decompressed_buffer.set_encoding Encoding::BINARY
@@ -74,7 +82,7 @@ module LZWS
                       compressed_text_offset += portion_bytesize
                       source << portion
 
-                      bytes_read = decompressor.read(source, &writer)
+                      bytes_read = decompressor.read source, &writer
                       source     = source.byteslice bytes_read, source.bytesize - bytes_read
                     end
 
@@ -90,6 +98,42 @@ module LZWS
                     assert_equal encoded_text, decompressed_text
                   end
                 end
+              end
+            end
+          end
+
+          def test_native_decompress
+            # Default options should be compatible with native util.
+
+            TEXTS.each do |text|
+              ENCODINGS.each do |encoding|
+                encoded_text = text.dup.force_encoding encoding
+
+                ::File.write NATIVE_SOURCE_PATH, encoded_text
+                Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
+
+                source = ::File.read NATIVE_ARCHIVE_PATH
+
+                decompressor = Target.new
+
+                decompressed_buffer = StringIO.new
+                decompressed_buffer.set_encoding Encoding::BINARY
+
+                writer = proc { |portion| decompressed_buffer << portion }
+
+                loop do
+                  write_bytesize = decompressor.read source, &writer
+                  source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
+
+                  break if source.empty?
+                end
+
+                decompressor.close(&writer)
+
+                decompressed_text = decompressed_buffer.string
+                decompressed_text.force_encoding encoding
+
+                assert_equal encoded_text, decompressed_text
               end
             end
           end
