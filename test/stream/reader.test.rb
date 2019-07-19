@@ -17,7 +17,6 @@ module LZWS
 
         ARCHIVE_PATH      = Common::ARCHIVE_PATH
         TEXTS             = Common::TEXTS
-        ENCODINGS         = Common::ENCODINGS
         PORTION_BYTESIZES = Common::PORTION_BYTESIZES
 
         COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS

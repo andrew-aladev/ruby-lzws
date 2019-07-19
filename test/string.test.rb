@@ -16,7 +16,6 @@ module LZWS
       NATIVE_SOURCE_PATH  = Common::NATIVE_SOURCE_PATH
       NATIVE_ARCHIVE_PATH = Common::NATIVE_ARCHIVE_PATH
       TEXTS               = Common::TEXTS
-      ENCODINGS           = Common::ENCODINGS
 
       COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
 
@@ -46,17 +45,13 @@ module LZWS
 
       def test_texts
         TEXTS.each do |text|
-          ENCODINGS.each do |encoding|
-            encoded_text = text.dup.force_encoding encoding
+          COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            compressed_text = Target.compress text, compressor_options
 
-            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-              compressed_text = Target.compress encoded_text, compressor_options
+            decompressed_text = Target.decompress compressed_text, decompressor_options
+            decompressed_text.force_encoding text.encoding
 
-              decompressed_text = Target.decompress compressed_text, decompressor_options
-              decompressed_text.force_encoding encoding
-
-              assert_equal encoded_text, decompressed_text
-            end
+            assert_equal text, decompressed_text
           end
         end
       end
@@ -65,31 +60,27 @@ module LZWS
         # Default options should be compatible with native util.
 
         TEXTS.each do |text|
-          ENCODINGS.each do |encoding|
-            encoded_text = text.dup.force_encoding encoding
+          # Native util is compressing.
 
-            # Native util is compressing.
+          ::File.write NATIVE_SOURCE_PATH, text
+          Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
+          compressed_text = ::File.read NATIVE_ARCHIVE_PATH
 
-            ::File.write NATIVE_SOURCE_PATH, encoded_text
-            Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
-            compressed_text = ::File.read NATIVE_ARCHIVE_PATH
+          decompressed_text = Target.decompress compressed_text
+          decompressed_text.force_encoding text.encoding
 
-            decompressed_text = Target.decompress compressed_text
-            decompressed_text.force_encoding encoding
+          assert_equal text, decompressed_text
 
-            assert_equal encoded_text, decompressed_text
+          # Native util is decompressing.
 
-            # Native util is decompressing.
+          compressed_text = Target.compress text
+          ::File.write NATIVE_ARCHIVE_PATH, compressed_text
+          Common.native_decompress NATIVE_ARCHIVE_PATH, NATIVE_SOURCE_PATH
 
-            compressed_text = Target.compress encoded_text
-            ::File.write NATIVE_ARCHIVE_PATH, compressed_text
-            Common.native_decompress NATIVE_ARCHIVE_PATH, NATIVE_SOURCE_PATH
+          decompressed_text = ::File.read NATIVE_SOURCE_PATH
+          decompressed_text.force_encoding text.encoding
 
-            decompressed_text = ::File.read NATIVE_SOURCE_PATH
-            decompressed_text.force_encoding encoding
-
-            assert_equal encoded_text, decompressed_text
-          end
+          assert_equal text, decompressed_text
         end
       end
     end

@@ -21,7 +21,6 @@ module LZWS
           NATIVE_SOURCE_PATH  = Common::NATIVE_SOURCE_PATH
           NATIVE_ARCHIVE_PATH = Common::NATIVE_ARCHIVE_PATH
           TEXTS               = Common::TEXTS
-          ENCODINGS           = Common::ENCODINGS
           PORTION_BYTESIZES   = Common::PORTION_BYTESIZES
 
           COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
@@ -56,45 +55,41 @@ module LZWS
 
           def test_texts
             TEXTS.each do |text|
-              ENCODINGS.each do |encoding|
-                encoded_text = text.dup.force_encoding encoding
+              PORTION_BYTESIZES.each do |portion_bytesize|
+                COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                  compressed_text = String.compress text, compressor_options
 
-                PORTION_BYTESIZES.each do |portion_bytesize|
-                  COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                    compressed_text = String.compress encoded_text, compressor_options
+                  decompressor = Target.new decompressor_options
 
-                    decompressor = Target.new decompressor_options
+                  decompressed_buffer = StringIO.new
+                  decompressed_buffer.set_encoding Encoding::BINARY
 
-                    decompressed_buffer = StringIO.new
-                    decompressed_buffer.set_encoding Encoding::BINARY
+                  writer = proc { |portion| decompressed_buffer << portion }
 
-                    writer = proc { |portion| decompressed_buffer << portion }
+                  source                 = "".b
+                  compressed_text_offset = 0
 
-                    source                 = "".b
-                    compressed_text_offset = 0
+                  loop do
+                    portion = compressed_text.byteslice compressed_text_offset, portion_bytesize
+                    break if portion.nil?
 
-                    loop do
-                      portion = compressed_text.byteslice compressed_text_offset, portion_bytesize
-                      break if portion.nil?
+                    compressed_text_offset += portion_bytesize
+                    source << portion
 
-                      compressed_text_offset += portion_bytesize
-                      source << portion
-
-                      bytes_read = decompressor.read source, &writer
-                      source     = source.byteslice bytes_read, source.bytesize - bytes_read
-                    end
-
-                    decompressor.flush(&writer)
-
-                    refute decompressor.closed?
-                    decompressor.close(&writer)
-                    assert decompressor.closed?
-
-                    decompressed_text = decompressed_buffer.string
-                    decompressed_text.force_encoding encoding
-
-                    assert_equal encoded_text, decompressed_text
+                    bytes_read = decompressor.read source, &writer
+                    source     = source.byteslice bytes_read, source.bytesize - bytes_read
                   end
+
+                  decompressor.flush(&writer)
+
+                  refute decompressor.closed?
+                  decompressor.close(&writer)
+                  assert decompressor.closed?
+
+                  decompressed_text = decompressed_buffer.string
+                  decompressed_text.force_encoding text.encoding
+
+                  assert_equal text, decompressed_text
                 end
               end
             end
@@ -104,35 +99,31 @@ module LZWS
             # Default options should be compatible with native util.
 
             TEXTS.each do |text|
-              ENCODINGS.each do |encoding|
-                encoded_text = text.dup.force_encoding encoding
+              ::File.write NATIVE_SOURCE_PATH, text
+              Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
 
-                ::File.write NATIVE_SOURCE_PATH, encoded_text
-                Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
+              decompressor = Target.new
 
-                decompressor = Target.new
+              decompressed_buffer = StringIO.new
+              decompressed_buffer.set_encoding Encoding::BINARY
 
-                decompressed_buffer = StringIO.new
-                decompressed_buffer.set_encoding Encoding::BINARY
+              writer = proc { |portion| decompressed_buffer << portion }
 
-                writer = proc { |portion| decompressed_buffer << portion }
+              source = ::File.read NATIVE_ARCHIVE_PATH
 
-                source = ::File.read NATIVE_ARCHIVE_PATH
+              loop do
+                write_bytesize = decompressor.read source, &writer
+                source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
 
-                loop do
-                  write_bytesize = decompressor.read source, &writer
-                  source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
-
-                  break if source.empty?
-                end
-
-                decompressor.close(&writer)
-
-                decompressed_text = decompressed_buffer.string
-                decompressed_text.force_encoding encoding
-
-                assert_equal encoded_text, decompressed_text
+                break if source.empty?
               end
+
+              decompressor.close(&writer)
+
+              decompressed_text = decompressed_buffer.string
+              decompressed_text.force_encoding text.encoding
+
+              assert_equal text, decompressed_text
             end
           end
         end

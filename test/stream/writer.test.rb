@@ -19,7 +19,6 @@ module LZWS
 
         ARCHIVE_PATH      = Common::ARCHIVE_PATH
         TEXTS             = Common::TEXTS
-        ENCODINGS         = Common::ENCODINGS
         PORTION_BYTESIZES = Common::PORTION_BYTESIZES
 
         COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
@@ -36,46 +35,44 @@ module LZWS
 
         def test_puts
           TEXTS.each do |text|
-            ENCODINGS.each do |encoding|
-              PORTION_BYTESIZES.each do |portion_bytesize|
-                newline = "\n".encode encoding
+            PORTION_BYTESIZES.each do |portion_bytesize|
+              newline = "\n".encode text.encoding
 
-                sources = text
-                  .bytes
-                  .each_slice(portion_bytesize)
-                  .map(&:join)
-                  .map do |source|
-                    source.encode! encoding
-                    source.delete_suffix! newline if source.end_with? newline
-                    source
-                  end
+              sources = text
+                .bytes
+                .each_slice(portion_bytesize)
+                .map(&:join)
+                .map do |source|
+                  source.encode! text.encoding
+                  source.delete_suffix! newline if source.end_with? newline
+                  source
+                end
 
-                target_text = "".encode encoding
-                sources.each { |source| target_text << source + newline }
+              target_text = "".encode text.encoding
+              sources.each { |source| target_text << source + newline }
 
-                COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                  ::File.open ARCHIVE_PATH, "wb" do |file|
-                    instance = target.new file, compressor_options
+              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                ::File.open ARCHIVE_PATH, "wb" do |file|
+                  instance = target.new file, compressor_options
 
-                    # Puts should ignore additional newlines and process arrays.
-                    args = sources.map.with_index do |source, index|
-                      if index.even?
-                        source + newline
-                      else
-                        [source]
-                      end
+                  # Puts should ignore additional newlines and process arrays.
+                  args = sources.map.with_index do |source, index|
+                    if index.even?
+                      source + newline
+                    else
+                      [source]
                     end
-
-                    instance.puts(*args)
-                    instance.close
-
-                    compressed_text = ::File.read ARCHIVE_PATH
-
-                    decompressed_text = String.decompress compressed_text, decompressor_options
-                    decompressed_text.force_encoding encoding
-
-                    assert_equal target_text, decompressed_text
                   end
+
+                  instance.puts(*args)
+                  instance.close
+
+                  compressed_text = ::File.read ARCHIVE_PATH
+
+                  decompressed_text = String.decompress compressed_text, decompressor_options
+                  decompressed_text.force_encoding text.encoding
+
+                  assert_equal target_text, decompressed_text
                 end
               end
             end

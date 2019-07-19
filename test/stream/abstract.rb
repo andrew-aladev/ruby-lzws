@@ -159,7 +159,7 @@ module LZWS
             assert_equal ioctl_result, 0
 
             size = buffer.unpack1 "i!"
-            assert_equal File.size(SOURCE_PATH), size
+            assert_equal ::File.size(SOURCE_PATH), size
 
             refute instance.isatty
             assert instance.pid.nil?

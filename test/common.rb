@@ -15,20 +15,30 @@ module LZWS
       NATIVE_SOURCE_PATH  = ::File.join(TEMP_PATH, "native_source").freeze
       NATIVE_ARCHIVE_PATH = ::File.join(TEMP_PATH, "native_archive").freeze
 
-      TEXTS = [
-        "",
-        "hello world",
-        "tobeornottobeortobeornot",
-        SecureRandom.random_bytes(1 << 13) # 8 KB
-      ]
-      .freeze
-
       ENCODINGS = %w[
         binary
         UTF-8
         UTF-16
       ]
       .map { |encoding_name| Encoding.find encoding_name }
+      .freeze
+
+      TEXTS = [
+        "",
+        "hello world",
+        "tobeornottobeortobeornot",
+        SecureRandom.random_bytes(1 << 13) # 8 KB
+      ]
+      .flat_map do |text|
+        ENCODINGS.map do |encoding|
+          text.encode(
+            encoding,
+            :invalid => :replace,
+            :undef   => :replace,
+            :replace => "?"
+          )
+        end
+      end
       .freeze
 
       PORTION_BYTESIZES = [
