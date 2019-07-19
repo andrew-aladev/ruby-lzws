@@ -31,7 +31,12 @@ module LZWS
       INVALID_POSITIVE_INTEGERS     = (INVALID_INTEGERS + [0, -1]).freeze
       INVALID_NOT_NEGATIVE_INTEGERS = (INVALID_POSITIVE_INTEGERS - [0]).freeze
 
-      INVALID_ENCODINGS = %w[ISO_8859_0 UTF-15 UTF-33].freeze
+      INVALID_ENCODINGS = %w[
+        ISO_8859_0
+        UTF-15
+        UTF-33
+      ]
+      .freeze
     end
   end
 end

@@ -29,7 +29,7 @@ module LZWS
 
       def self.included(klass)
         klass.extend Forwardable
-        klass.def_delegators @io, *IO_DELEGATES
+        klass.def_delegators :@io, *IO_DELEGATES
       end
     end
   end

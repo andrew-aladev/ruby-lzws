@@ -75,10 +75,12 @@ module LZWS
         new_buffer           = self.class.new_buffer
         source_bytes_written = @raw_stream.write(source) { |portion| new_buffer << portion }
 
-        # Current buffer won't be affected if "write_nonblock" will raise an error.
-        # So same source can be provided again on the next method call.
-        destination_bytes_written = @io.write_nonblock new_buffer, *options
-        @buffer                   = new_buffer[destination_bytes_written..-1]
+        unless new_buffer.bytesize == 0
+          # Current buffer won't be affected if "write_nonblock" will raise an error.
+          # So same source can be provided again on the next method call.
+          destination_bytes_written = @io.write_nonblock new_buffer, *options
+          @buffer                   = new_buffer[destination_bytes_written..-1]
+        end
 
         @pos += source_bytes_written
 
@@ -86,21 +88,27 @@ module LZWS
       end
 
       def flush_nonblock(*options)
-        finish_nonblock :flush, *options
+        return false unless finish_nonblock :flush, *options
 
-        flush
+        method(:flush).super_method.call
+
+        true
       end
 
       def close_nonblock(*options)
-        finish_nonblock :close, *options
+        return false unless finish_nonblock :close, *options
 
-        close
+        method(:close).super_method.call
+
+        true
       end
 
       protected def finish_nonblock(method_name, *options)
         return false unless write_remaining_buffer_nonblock(*options)
 
         @raw_stream.send(method_name) { |portion| @buffer << portion }
+
+        return true if @buffer.bytesize == 0
 
         # Current buffer will be written before "write_nonblock" call.
         # So remaining buffer will be written on the next method call.
@@ -115,7 +123,7 @@ module LZWS
 
         destination_bytes_written = @io.write_nonblock @buffer, *options
 
-        if destination_bytes_written != @buffer.bytesize
+        unless destination_bytes_written == @buffer.bytesize
           @buffer = @buffer[destination_bytes_written..-1]
           return false
         end

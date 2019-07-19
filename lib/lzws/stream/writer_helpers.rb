@@ -50,7 +50,7 @@ module LZWS
           end
 
           source  = object.to_s
-          newline = "\n".encode value.encoding
+          newline = "\n".encode source.encoding
 
           # Do not add newline if source ends with newline.
           if source.end_with? newline

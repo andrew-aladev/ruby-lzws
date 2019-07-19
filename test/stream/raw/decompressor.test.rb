@@ -63,9 +63,6 @@ module LZWS
                   COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                     compressed_text = String.compress encoded_text, compressor_options
 
-                    source = ""
-                    source.force_encoding Encoding::BINARY
-
                     decompressor = Target.new decompressor_options
 
                     decompressed_buffer = StringIO.new
@@ -73,6 +70,7 @@ module LZWS
 
                     writer = proc { |portion| decompressed_buffer << portion }
 
+                    source                 = "".b
                     compressed_text_offset = 0
 
                     loop do
@@ -112,14 +110,14 @@ module LZWS
                 ::File.write NATIVE_SOURCE_PATH, encoded_text
                 Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
 
-                source = ::File.read NATIVE_ARCHIVE_PATH
-
                 decompressor = Target.new
 
                 decompressed_buffer = StringIO.new
                 decompressed_buffer.set_encoding Encoding::BINARY
 
                 writer = proc { |portion| decompressed_buffer << portion }
+
+                source = ::File.read NATIVE_ARCHIVE_PATH
 
                 loop do
                   write_bytesize = decompressor.read source, &writer

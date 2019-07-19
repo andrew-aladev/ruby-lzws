@@ -61,9 +61,6 @@ module LZWS
 
                 PORTION_BYTESIZES.each do |portion_bytesize|
                   COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                    source = ""
-                    source.force_encoding encoding
-
                     compressor = Target.new compressor_options
 
                     compressed_buffer = StringIO.new
@@ -71,6 +68,7 @@ module LZWS
 
                     writer = proc { |portion| compressed_buffer << portion }
 
+                    source              = "".b
                     encoded_text_offset = 0
 
                     loop do
@@ -112,8 +110,8 @@ module LZWS
                 compressor = Target.new
 
                 ::File.open(ARCHIVE_PATH, "wb") do |archive|
-                  source = encoded_text.dup
                   writer = proc { |portion| archive << portion }
+                  source = encoded_text.dup
 
                   loop do
                     write_bytesize = compressor.write source, &writer

@@ -45,7 +45,7 @@ module LZWS
               next
             end
 
-            if bytes_written != source.bytesize
+            unless bytes_written == source.bytesize
               # Compressor write should eat all provided "source" without remainder.
               raise UnexpectedError, "unexpected error"
             end

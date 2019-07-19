@@ -112,20 +112,21 @@ module LZWS
 
       def rewind
         finish :close
+
         process_rewind
 
         0
       end
 
       def rewind_nonblock(*options)
-        finish_nonblock :close, *options
+        return false unless finish_nonblock :close, *options
+
         process_rewind
 
-        0
+        true
       end
 
       protected def process_rewind
-        @raw_stream.close
         @raw_stream = create_raw_stream
 
         @io.rewind
