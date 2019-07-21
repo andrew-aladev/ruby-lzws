@@ -17,9 +17,9 @@ module LZWS
         Target = LZWS::Stream::Writer
         String = LZWS::String
 
-        ARCHIVE_PATH      = Common::ARCHIVE_PATH
-        TEXTS             = Common::TEXTS
-        PORTION_BYTESIZES = Common::PORTION_BYTESIZES
+        ARCHIVE_PATH    = Common::ARCHIVE_PATH
+        TEXTS           = Common::TEXTS
+        PORTION_LENGTHS = Common::PORTION_LENGTHS
 
         COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
 
@@ -33,17 +33,54 @@ module LZWS
           super
         end
 
+        def test_invalid_putc
+          instance = target.new STDOUT
+
+          Validation::INVALID_CHARS.each do |invalid_char|
+            assert_raises ValidateError do
+              instance.putc invalid_char
+            end
+          end
+        end
+
+        def test_putc
+          TEXTS.each do |text|
+            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              ::File.open ARCHIVE_PATH, "wb" do |file|
+                instance = target.new file, compressor_options
+
+                # Putc should process numbers and strings.
+                text.chars.map.with_index do |char, index|
+                  if index.even?
+                    instance.putc char.ord, :encoding => text.encoding
+                  else
+                    instance.putc char
+                  end
+                end
+
+                instance.close
+
+                compressed_text = ::File.read ARCHIVE_PATH
+
+                decompressed_text = String.decompress compressed_text, decompressor_options
+                decompressed_text.force_encoding text.encoding
+
+                assert_equal text, decompressed_text
+              end
+            end
+          end
+        end
+
         def test_puts
           TEXTS.each do |text|
-            PORTION_BYTESIZES.each do |portion_bytesize|
+            PORTION_LENGTHS.each do |portion_length|
               newline = "\n".encode text.encoding
 
               sources = text
-                .bytes
-                .each_slice(portion_bytesize)
+                .chars
+                .each_slice(portion_length)
                 .map(&:join)
                 .map do |source|
-                  source.encode! text.encoding
                   source.delete_suffix! newline if source.end_with? newline
                   source
                 end

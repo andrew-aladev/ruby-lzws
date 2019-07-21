@@ -18,7 +18,7 @@ module LZWS
       ENCODINGS = %w[
         binary
         UTF-8
-        UTF-16
+        UTF-16LE
       ]
       .map { |encoding_name| Encoding.find encoding_name }
       .freeze
@@ -41,7 +41,7 @@ module LZWS
       end
       .freeze
 
-      PORTION_BYTESIZES = [
+      PORTION_LENGTHS = [
         1,
         2,
         512

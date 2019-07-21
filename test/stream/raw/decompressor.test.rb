@@ -21,7 +21,7 @@ module LZWS
           NATIVE_SOURCE_PATH  = Common::NATIVE_SOURCE_PATH
           NATIVE_ARCHIVE_PATH = Common::NATIVE_ARCHIVE_PATH
           TEXTS               = Common::TEXTS
-          PORTION_BYTESIZES   = Common::PORTION_BYTESIZES
+          PORTION_LENGTHS     = Common::PORTION_LENGTHS
 
           COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
 
@@ -55,7 +55,7 @@ module LZWS
 
           def test_texts
             TEXTS.each do |text|
-              PORTION_BYTESIZES.each do |portion_bytesize|
+              PORTION_LENGTHS.each do |portion_length|
                 COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                   compressed_text = String.compress text, compressor_options
 
@@ -70,10 +70,10 @@ module LZWS
                   compressed_text_offset = 0
 
                   loop do
-                    portion = compressed_text.byteslice compressed_text_offset, portion_bytesize
+                    portion = compressed_text.byteslice compressed_text_offset, portion_length
                     break if portion.nil?
 
-                    compressed_text_offset += portion_bytesize
+                    compressed_text_offset += portion_length
                     source << portion
 
                     bytes_read = decompressor.read source, &writer

@@ -30,11 +30,11 @@ module LZWS
         nil
       end
 
-      def putc(object)
-        if object.respond_to? :chr
-          write object.chr
+      def putc(object, encoding: Encoding::BINARY)
+        if object.is_a? ::Numeric
+          write object.chr(encoding)
         elsif object.is_a? ::String
-          write object.first
+          write object[0]
         else
           raise ValidateError, "invalid object: \"#{object}\" for putc"
         end

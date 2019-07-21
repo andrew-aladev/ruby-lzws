@@ -22,11 +22,13 @@ module LZWS
       .freeze
 
       INVALID_INTEGERS = (TYPES - [1]).freeze
+      INVALID_NUMBERS  = (TYPES - [1, 1.1]).freeze
       INVALID_BOOLS    = (TYPES - [true]).freeze
       INVALID_STRINGS  = (TYPES - %w[1 a]).freeze
       INVALID_HASHES   = (TYPES - [{}]).freeze
       INVALID_IOS      = (TYPES - [STDOUT]).freeze
       INVALID_PROCS    = (TYPES - [NOOP_PROC]).freeze
+      INVALID_CHARS    = (INVALID_NUMBERS & INVALID_STRINGS).freeze
 
       INVALID_POSITIVE_INTEGERS     = (INVALID_INTEGERS + [0, -1]).freeze
       INVALID_NOT_NEGATIVE_INTEGERS = (INVALID_POSITIVE_INTEGERS - [0]).freeze

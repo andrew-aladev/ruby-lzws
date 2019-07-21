@@ -15,9 +15,9 @@ module LZWS
       class Reader < Abstract
         Target = LZWS::Stream::Reader
 
-        ARCHIVE_PATH      = Common::ARCHIVE_PATH
-        TEXTS             = Common::TEXTS
-        PORTION_BYTESIZES = Common::PORTION_BYTESIZES
+        ARCHIVE_PATH    = Common::ARCHIVE_PATH
+        TEXTS           = Common::TEXTS
+        PORTION_LENGTHS = Common::PORTION_LENGTHS
 
         COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
 
