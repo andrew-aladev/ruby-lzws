@@ -120,8 +120,6 @@ module LZWS
 
                   break if source.empty?
                 end
-
-                decompressor.flush(&writer)
               ensure
                 decompressor.close(&writer)
               end

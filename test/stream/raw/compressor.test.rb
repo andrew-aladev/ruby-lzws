@@ -113,8 +113,6 @@ module LZWS
 
                   break if source.empty?
                 end
-
-                compressor.flush(&writer)
               ensure
                 compressor.close(&writer)
               end

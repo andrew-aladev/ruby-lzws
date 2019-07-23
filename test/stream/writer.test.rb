@@ -33,6 +33,43 @@ module LZWS
           super
         end
 
+        # -- synchronous --
+
+        def test_texts
+          TEXTS.each do |text|
+            PORTION_LENGTHS.each do |portion_length|
+              sources = text
+                .chars
+                .each_slice(portion_length)
+                .map(&:join)
+
+              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                ::File.open ARCHIVE_PATH, "wb" do |file|
+                  instance = target.new file, compressor_options
+
+                  begin
+                    instance.write(*sources)
+                    instance.flush
+                  ensure
+                    refute instance.closed?
+                    instance.close
+                    assert instance.closed?
+                  end
+                end
+
+                check_archive text, decompressor_options
+              end
+            end
+          end
+        end
+
+        # -- asynchronous --
+
+        def test_texts_nonblock
+        end
+
+        # -- helpers --
+
         def test_print
           TEXTS.each do |text|
             COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
@@ -49,12 +86,7 @@ module LZWS
                 end
               end
 
-              compressed_text = ::File.read ARCHIVE_PATH
-
-              decompressed_text = String.decompress compressed_text, decompressor_options
-              decompressed_text.force_encoding text.encoding
-
-              assert_equal text, decompressed_text
+              check_archive text, decompressor_options
             end
 
             # This part of test is for not empty texts only.
@@ -89,12 +121,7 @@ module LZWS
                   end
                 end
 
-                compressed_text = ::File.read ARCHIVE_PATH
-
-                decompressed_text = String.decompress compressed_text, decompressor_options
-                decompressed_text.force_encoding text.encoding
-
-                assert_equal target_text, decompressed_text
+                check_archive target_text, decompressor_options
               end
             end
           end
@@ -119,12 +146,7 @@ module LZWS
                   end
                 end
 
-                compressed_text = ::File.read ARCHIVE_PATH
-
-                decompressed_text = String.decompress compressed_text, decompressor_options
-                decompressed_text.force_encoding text.encoding
-
-                assert_equal text, decompressed_text
+                check_archive text, decompressor_options
               end
             end
           end
@@ -160,12 +182,7 @@ module LZWS
                 end
               end
 
-              compressed_text = ::File.read ARCHIVE_PATH
-
-              decompressed_text = String.decompress compressed_text, decompressor_options
-              decompressed_text.force_encoding text.encoding
-
-              assert_equal text, decompressed_text
+              check_archive text, decompressor_options
             end
           end
         end
@@ -207,15 +224,21 @@ module LZWS
                   end
                 end
 
-                compressed_text = ::File.read ARCHIVE_PATH
-
-                decompressed_text = String.decompress compressed_text, decompressor_options
-                decompressed_text.force_encoding text.encoding
-
-                assert_equal target_text, decompressed_text
+                check_archive target_text, decompressor_options
               end
             end
           end
+        end
+
+        # -----
+
+        protected def check_archive(text, decompressor_options)
+          compressed_text = ::File.read ARCHIVE_PATH
+
+          decompressed_text = String.decompress compressed_text, decompressor_options
+          decompressed_text.force_encoding text.encoding
+
+          assert_equal text, decompressed_text
         end
       end
 
