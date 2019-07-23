@@ -61,30 +61,32 @@ module LZWS
 
                   decompressor = Target.new decompressor_options
 
-                  decompressed_buffer = StringIO.new
-                  decompressed_buffer.set_encoding Encoding::BINARY
+                  begin
+                    decompressed_buffer = StringIO.new
+                    decompressed_buffer.set_encoding Encoding::BINARY
 
-                  writer = proc { |portion| decompressed_buffer << portion }
+                    writer = proc { |portion| decompressed_buffer << portion }
 
-                  source                 = "".b
-                  compressed_text_offset = 0
+                    source                 = "".b
+                    compressed_text_offset = 0
 
-                  loop do
-                    portion = compressed_text.byteslice compressed_text_offset, portion_length
-                    break if portion.nil?
+                    loop do
+                      portion = compressed_text.byteslice compressed_text_offset, portion_length
+                      break if portion.nil?
 
-                    compressed_text_offset += portion_length
-                    source << portion
+                      compressed_text_offset += portion_length
+                      source << portion
 
-                    bytes_read = decompressor.read source, &writer
-                    source     = source.byteslice bytes_read, source.bytesize - bytes_read
+                      bytes_read = decompressor.read source, &writer
+                      source     = source.byteslice bytes_read, source.bytesize - bytes_read
+                    end
+
+                    decompressor.flush(&writer)
+                  ensure
+                    refute decompressor.closed?
+                    decompressor.close(&writer)
+                    assert decompressor.closed?
                   end
-
-                  decompressor.flush(&writer)
-
-                  refute decompressor.closed?
-                  decompressor.close(&writer)
-                  assert decompressor.closed?
 
                   decompressed_text = decompressed_buffer.string
                   decompressed_text.force_encoding text.encoding
@@ -104,21 +106,25 @@ module LZWS
 
               decompressor = Target.new
 
-              decompressed_buffer = StringIO.new
-              decompressed_buffer.set_encoding Encoding::BINARY
+              begin
+                decompressed_buffer = StringIO.new
+                decompressed_buffer.set_encoding Encoding::BINARY
 
-              writer = proc { |portion| decompressed_buffer << portion }
+                writer = proc { |portion| decompressed_buffer << portion }
 
-              source = ::File.read NATIVE_ARCHIVE_PATH
+                source = ::File.read NATIVE_ARCHIVE_PATH
 
-              loop do
-                write_bytesize = decompressor.read source, &writer
-                source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
+                loop do
+                  write_bytesize = decompressor.read source, &writer
+                  source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
 
-                break if source.empty?
+                  break if source.empty?
+                end
+
+                decompressor.flush(&writer)
+              ensure
+                decompressor.close(&writer)
               end
-
-              decompressor.close(&writer)
 
               decompressed_text = decompressed_buffer.string
               decompressed_text.force_encoding text.encoding

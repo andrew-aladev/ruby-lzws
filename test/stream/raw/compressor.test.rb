@@ -59,30 +59,32 @@ module LZWS
                 COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                   compressor = Target.new compressor_options
 
-                  compressed_buffer = StringIO.new
-                  compressed_buffer.set_encoding Encoding::BINARY
+                  begin
+                    compressed_buffer = StringIO.new
+                    compressed_buffer.set_encoding Encoding::BINARY
 
-                  writer = proc { |portion| compressed_buffer << portion }
+                    writer = proc { |portion| compressed_buffer << portion }
 
-                  source      = "".b
-                  text_offset = 0
+                    source      = "".b
+                    text_offset = 0
 
-                  loop do
-                    portion = text.byteslice text_offset, portion_length
-                    break if portion.nil?
+                    loop do
+                      portion = text.byteslice text_offset, portion_length
+                      break if portion.nil?
 
-                    text_offset += portion_length
-                    source << portion
+                      text_offset += portion_length
+                      source << portion
 
-                    write_bytesize = compressor.write source, &writer
-                    source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
+                      write_bytesize = compressor.write source, &writer
+                      source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
+                    end
+
+                    compressor.flush(&writer)
+                  ensure
+                    refute compressor.closed?
+                    compressor.close(&writer)
+                    assert compressor.closed?
                   end
-
-                  compressor.flush(&writer)
-
-                  refute compressor.closed?
-                  compressor.close(&writer)
-                  assert compressor.closed?
 
                   compressed_text = compressed_buffer.string
 
@@ -112,6 +114,8 @@ module LZWS
                   break if source.empty?
                 end
 
+                compressor.flush(&writer)
+              ensure
                 compressor.close(&writer)
               end
 

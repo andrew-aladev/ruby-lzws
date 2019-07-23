@@ -33,6 +33,103 @@ module LZWS
           super
         end
 
+        def test_print
+          TEXTS.each do |text|
+            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              ::File.open ARCHIVE_PATH, "wb" do |file|
+                instance = target.new file, compressor_options
+
+                $LAST_READ_LINE = text
+
+                begin
+                  instance.print
+                ensure
+                  instance.close
+                  $LAST_READ_LINE = nil
+                end
+              end
+
+              compressed_text = ::File.read ARCHIVE_PATH
+
+              decompressed_text = String.decompress compressed_text, decompressor_options
+              decompressed_text.force_encoding text.encoding
+
+              assert_equal text, decompressed_text
+            end
+
+            # This part of test is for not empty texts only.
+            next if text.empty?
+
+            PORTION_LENGTHS.each do |portion_length|
+              field_separator  = " ".encode text.encoding
+              record_separator = "\n".encode text.encoding
+
+              sources = text
+                .chars
+                .each_slice(portion_length)
+                .map(&:join)
+
+              target_text = "".encode text.encoding
+              sources.each { |source| target_text << source + field_separator }
+              target_text << record_separator
+
+              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                ::File.open ARCHIVE_PATH, "wb" do |file|
+                  instance = target.new file, compressor_options
+
+                  $OUTPUT_FIELD_SEPARATOR  = field_separator
+                  $OUTPUT_RECORD_SEPARATOR = record_separator
+
+                  begin
+                    instance.print(*sources)
+                  ensure
+                    instance.close
+                    $OUTPUT_FIELD_SEPARATOR  = nil
+                    $OUTPUT_RECORD_SEPARATOR = nil
+                  end
+                end
+
+                compressed_text = ::File.read ARCHIVE_PATH
+
+                decompressed_text = String.decompress compressed_text, decompressor_options
+                decompressed_text.force_encoding text.encoding
+
+                assert_equal target_text, decompressed_text
+              end
+            end
+          end
+        end
+
+        def test_printf
+          TEXTS.each do |text|
+            PORTION_LENGTHS.each do |portion_length|
+              sources = text
+                .chars
+                .each_slice(portion_length)
+                .map(&:join)
+
+              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                ::File.open ARCHIVE_PATH, "wb" do |file|
+                  instance = target.new file, compressor_options
+
+                  begin
+                    sources.each { |source| instance.printf "%s", source }
+                  ensure
+                    instance.close
+                  end
+                end
+
+                compressed_text = ::File.read ARCHIVE_PATH
+
+                decompressed_text = String.decompress compressed_text, decompressor_options
+                decompressed_text.force_encoding text.encoding
+
+                assert_equal text, decompressed_text
+              end
+            end
+          end
+        end
+
         def test_invalid_putc
           instance = target.new STDOUT
 
@@ -49,24 +146,26 @@ module LZWS
               ::File.open ARCHIVE_PATH, "wb" do |file|
                 instance = target.new file, compressor_options
 
-                # Putc should process numbers and strings.
-                text.chars.map.with_index do |char, index|
-                  if index.even?
-                    instance.putc char.ord, :encoding => text.encoding
-                  else
-                    instance.putc char
+                begin
+                  # Putc should process numbers and strings.
+                  text.chars.map.with_index do |char, index|
+                    if index.even?
+                      instance.putc char.ord, :encoding => text.encoding
+                    else
+                      instance.putc char
+                    end
                   end
+                ensure
+                  instance.close
                 end
-
-                instance.close
-
-                compressed_text = ::File.read ARCHIVE_PATH
-
-                decompressed_text = String.decompress compressed_text, decompressor_options
-                decompressed_text.force_encoding text.encoding
-
-                assert_equal text, decompressed_text
               end
+
+              compressed_text = ::File.read ARCHIVE_PATH
+
+              decompressed_text = String.decompress compressed_text, decompressor_options
+              decompressed_text.force_encoding text.encoding
+
+              assert_equal text, decompressed_text
             end
           end
         end
@@ -81,7 +180,7 @@ module LZWS
                 .each_slice(portion_length)
                 .map(&:join)
                 .map do |source|
-                  source.delete_suffix! newline if source.end_with? newline
+                  source.delete_suffix! newline while source.end_with? newline
                   source
                 end
 
@@ -92,25 +191,28 @@ module LZWS
                 ::File.open ARCHIVE_PATH, "wb" do |file|
                   instance = target.new file, compressor_options
 
-                  # Puts should ignore additional newlines and process arrays.
-                  args = sources.map.with_index do |source, index|
-                    if index.even?
-                      source + newline
-                    else
-                      [source]
+                  begin
+                    # Puts should ignore additional newlines and process arrays.
+                    args = sources.map.with_index do |source, index|
+                      if index.even?
+                        source + newline
+                      else
+                        [source]
+                      end
                     end
+
+                    instance.puts(*args)
+                  ensure
+                    instance.close
                   end
-
-                  instance.puts(*args)
-                  instance.close
-
-                  compressed_text = ::File.read ARCHIVE_PATH
-
-                  decompressed_text = String.decompress compressed_text, decompressor_options
-                  decompressed_text.force_encoding text.encoding
-
-                  assert_equal target_text, decompressed_text
                 end
+
+                compressed_text = ::File.read ARCHIVE_PATH
+
+                decompressed_text = String.decompress compressed_text, decompressor_options
+                decompressed_text.force_encoding text.encoding
+
+                assert_equal target_text, decompressed_text
               end
             end
           end

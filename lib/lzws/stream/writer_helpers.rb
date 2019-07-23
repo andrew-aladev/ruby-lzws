@@ -10,7 +10,7 @@ module LZWS
 
       def print(*objects)
         if objects.empty?
-          write $LAST_READ_LINE
+          write $LAST_READ_LINE unless $LAST_READ_LINE.nil?
           return nil
         end
 
