@@ -36,11 +36,7 @@ module LZWS
       # -- buffer --
 
       protected def reset_buffer
-        @buffer = self.class.new_buffer
-      end
-
-      def self.new_buffer
-        ::String.new :encoding => Encoding::BINARY
+        @buffer = ::String.new :encoding => Encoding::BINARY
       end
 
       # -- advise --
@@ -130,6 +126,7 @@ module LZWS
         @raw_stream = create_raw_stream
 
         @io.rewind
+        reset_buffer
         reset_io_advise
 
         @pos = 0

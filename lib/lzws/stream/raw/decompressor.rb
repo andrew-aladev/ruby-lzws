@@ -43,9 +43,8 @@ module LZWS
           end
 
           loop do
-            bytes_read, need_more_destination = @native_stream.read source
-
-            total_bytes_read += bytes_read
+            bytes_read, need_more_destination  = @native_stream.read source
+            total_bytes_read                  += bytes_read
 
             if need_more_destination
               source = source.byteslice bytes_read, source.bytesize - bytes_read

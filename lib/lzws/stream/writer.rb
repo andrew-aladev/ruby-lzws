@@ -28,9 +28,7 @@ module LZWS
         source_bytes_written = 0
 
         objects.each do |object|
-          source = prepare_source_for_write object.to_s
-
-          # Stream will write all data without any remainder.
+          source                = prepare_source_for_write object.to_s
           source_bytes_written += @raw_stream.write(source) { |portion| @io.write portion }
         end
 
@@ -70,19 +68,9 @@ module LZWS
       def write_nonblock(object, *options)
         return 0 unless write_remaining_buffer_nonblock(*options)
 
-        source = prepare_source_for_write object.to_s
-
-        new_buffer           = self.class.new_buffer
-        source_bytes_written = @raw_stream.write(source) { |portion| new_buffer << portion }
-
-        unless new_buffer.bytesize == 0
-          # Current buffer won't be affected if "write_nonblock" will raise an error.
-          # So same source can be provided again on the next method call.
-          destination_bytes_written = @io.write_nonblock new_buffer, *options
-          @buffer                   = new_buffer[destination_bytes_written..-1]
-        end
-
-        @pos += source_bytes_written
+        source                = prepare_source_for_write object.to_s
+        source_bytes_written  = @raw_stream.write(source) { |portion| @buffer << portion }
+        @pos                 += source_bytes_written
 
         source_bytes_written
       end
@@ -108,30 +96,21 @@ module LZWS
 
         @raw_stream.send(method_name) { |portion| @buffer << portion }
 
-        return true if @buffer.bytesize == 0
-
-        # Current buffer will be written before "write_nonblock" call.
-        # So remaining buffer will be written on the next method call.
-        destination_bytes_written = @io.write_nonblock @buffer, *options
-        @buffer                   = @buffer[destination_bytes_written..-1]
-
-        @buffer.bytesize == 0
+        write_remaining_buffer_nonblock(*options)
       end
 
       protected def write_remaining_buffer_nonblock(*options)
         return true if @buffer.bytesize == 0
 
         destination_bytes_written = @io.write_nonblock @buffer, *options
+        return false if destination_bytes_written == 0
 
-        unless destination_bytes_written == @buffer.bytesize
-          @buffer = @buffer[destination_bytes_written..-1]
-          return false
-        end
+        @buffer = @buffer.byteslice destination_bytes_written, @buffer.bytesize - destination_bytes_written
 
-        reset_buffer
-
-        true
+        @buffer.bytesize == 0
       end
+
+      # -- common --
 
       protected def prepare_source_for_write(source)
         if @external_encoding.nil?

@@ -35,9 +35,8 @@ module LZWS
           total_bytes_written = 0
 
           loop do
-            bytes_written, need_more_destination = @native_stream.write source
-
-            total_bytes_written += bytes_written
+            bytes_written, need_more_destination  = @native_stream.write source
+            total_bytes_written                  += bytes_written
 
             if need_more_destination
               source = source.byteslice bytes_written, source.bytesize - bytes_written

@@ -10,6 +10,8 @@ require_relative "../minitest"
 require_relative "../option"
 require_relative "../validation"
 
+require "socket"
+
 module LZWS
   module Test
     module Stream
@@ -17,9 +19,10 @@ module LZWS
         Target = LZWS::Stream::Writer
         String = LZWS::String
 
-        ARCHIVE_PATH    = Common::ARCHIVE_PATH
-        TEXTS           = Common::TEXTS
-        PORTION_LENGTHS = Common::PORTION_LENGTHS
+        ARCHIVE_PATH     = Common::ARCHIVE_PATH
+        UNIX_SOCKET_PATH = Common::UNIX_SOCKET_PATH
+        TEXTS            = Common::TEXTS
+        PORTION_LENGTHS  = Common::PORTION_LENGTHS
 
         COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
 
@@ -38,10 +41,7 @@ module LZWS
         def test_texts
           TEXTS.each do |text|
             PORTION_LENGTHS.each do |portion_length|
-              sources = text
-                .chars
-                .each_slice(portion_length)
-                .map(&:join)
+              sources = get_sources text, portion_length
 
               COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
@@ -57,7 +57,9 @@ module LZWS
                   end
                 end
 
-                check_archive text, decompressor_options
+                compressed_text = ::File.read ARCHIVE_PATH
+
+                check_text text, compressed_text, decompressor_options
               end
             end
           end
@@ -66,6 +68,86 @@ module LZWS
         # -- asynchronous --
 
         def test_texts_nonblock
+          TEXTS.each do |text|
+            PORTION_LENGTHS.each do |portion_length|
+              sources = get_sources text, portion_length
+
+              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                File.delete UNIX_SOCKET_PATH if File.exist? UNIX_SOCKET_PATH
+                server = UNIXServer.new UNIX_SOCKET_PATH
+
+                compressed_text = "".b
+
+                # Real unix server will be better for testing nonblock methods.
+                server_thread = Thread.new do
+                  socket = server.accept
+
+                  # Read nonblock based on portion length will provide a great amount of wait writable on client.
+                  begin
+                    loop do
+                      compressed_text += socket.read_nonblock portion_length
+                    rescue ::IO::WaitReadable
+                      ::IO.select [socket]
+                    rescue EOFError
+                      break
+                    end
+                  ensure
+                    socket.close
+                  end
+                end
+
+                socket   = UNIXSocket.new UNIX_SOCKET_PATH
+                instance = target.new socket, compressor_options
+
+                begin
+                  sources.each do |source|
+                    loop do
+                      begin
+                        bytes_written = instance.write_nonblock source
+                      rescue IO::WaitWritable
+                        ::IO.select nil, [socket]
+                        retry
+                      end
+
+                      source = source.byteslice bytes_written, source.bytesize - bytes_written
+                      break if source.bytesize == 0
+                    end
+                  end
+
+                  loop do
+                    begin
+                      is_flushed = instance.flush_nonblock
+                    rescue IO::WaitWritable
+                      ::IO.select nil, [socket]
+                      retry
+                    end
+
+                    break if is_flushed
+                  end
+
+                ensure
+                  refute instance.closed?
+
+                  loop do
+                    begin
+                      is_closed = instance.close_nonblock
+                    rescue IO::WaitWritable
+                      ::IO.select nil, [socket]
+                      retry
+                    end
+
+                    break if is_closed
+                  end
+
+                  assert instance.closed?
+                end
+
+                server_thread.join
+
+                check_text text, compressed_text, decompressor_options
+              end
+            end
+          end
         end
 
         # -- helpers --
@@ -86,7 +168,9 @@ module LZWS
                 end
               end
 
-              check_archive text, decompressor_options
+              compressed_text = ::File.read ARCHIVE_PATH
+
+              check_text text, compressed_text, decompressor_options
             end
 
             # This part of test is for not empty texts only.
@@ -96,10 +180,7 @@ module LZWS
               field_separator  = " ".encode text.encoding
               record_separator = "\n".encode text.encoding
 
-              sources = text
-                .chars
-                .each_slice(portion_length)
-                .map(&:join)
+              sources = get_sources text, portion_length
 
               target_text = "".encode text.encoding
               sources.each { |source| target_text << source + field_separator }
@@ -121,7 +202,9 @@ module LZWS
                   end
                 end
 
-                check_archive target_text, decompressor_options
+                compressed_text = ::File.read ARCHIVE_PATH
+
+                check_text target_text, compressed_text, decompressor_options
               end
             end
           end
@@ -130,10 +213,7 @@ module LZWS
         def test_printf
           TEXTS.each do |text|
             PORTION_LENGTHS.each do |portion_length|
-              sources = text
-                .chars
-                .each_slice(portion_length)
-                .map(&:join)
+              sources = get_sources text, portion_length
 
               COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
@@ -146,7 +226,9 @@ module LZWS
                   end
                 end
 
-                check_archive text, decompressor_options
+                compressed_text = ::File.read ARCHIVE_PATH
+
+                check_text text, compressed_text, decompressor_options
               end
             end
           end
@@ -182,7 +264,9 @@ module LZWS
                 end
               end
 
-              check_archive text, decompressor_options
+              compressed_text = ::File.read ARCHIVE_PATH
+
+              check_text text, compressed_text, decompressor_options
             end
           end
         end
@@ -192,14 +276,11 @@ module LZWS
             PORTION_LENGTHS.each do |portion_length|
               newline = "\n".encode text.encoding
 
-              sources = text
-                .chars
-                .each_slice(portion_length)
-                .map(&:join)
-                .map do |source|
-                  source.delete_suffix! newline while source.end_with? newline
-                  source
-                end
+              sources = get_sources text, portion_length
+              sources = sources.map do |source|
+                source.delete_suffix! newline while source.end_with? newline
+                source
+              end
 
               target_text = "".encode text.encoding
               sources.each { |source| target_text << source + newline }
@@ -224,7 +305,9 @@ module LZWS
                   end
                 end
 
-                check_archive target_text, decompressor_options
+                compressed_text = ::File.read ARCHIVE_PATH
+
+                check_text target_text, compressed_text, decompressor_options
               end
             end
           end
@@ -232,9 +315,18 @@ module LZWS
 
         # -----
 
-        protected def check_archive(text, decompressor_options)
-          compressed_text = ::File.read ARCHIVE_PATH
+        protected def get_sources(text, portion_length)
+          sources = text
+            .chars
+            .each_slice(portion_length)
+            .map(&:join)
 
+          return [""] if sources.empty?
+
+          sources
+        end
+
+        protected def check_text(text, compressed_text, decompressor_options)
           decompressed_text = String.decompress compressed_text, decompressor_options
           decompressed_text.force_encoding text.encoding
 

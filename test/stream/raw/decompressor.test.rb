@@ -115,8 +115,8 @@ module LZWS
                 source = ::File.read NATIVE_ARCHIVE_PATH
 
                 loop do
-                  write_bytesize = decompressor.read source, &writer
-                  source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
+                  bytes_read = decompressor.read source, &writer
+                  source     = source.byteslice bytes_read, source.bytesize - bytes_read
 
                   break if source.empty?
                 end

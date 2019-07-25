@@ -15,6 +15,8 @@ module LZWS
       NATIVE_SOURCE_PATH  = ::File.join(TEMP_PATH, "native_source").freeze
       NATIVE_ARCHIVE_PATH = ::File.join(TEMP_PATH, "native_archive").freeze
 
+      UNIX_SOCKET_PATH = ::File.join(TEMP_PATH, "server.sock").freeze
+
       ENCODINGS = %w[
         binary
         UTF-8

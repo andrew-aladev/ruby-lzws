@@ -75,8 +75,8 @@ module LZWS
                       text_offset += portion_length
                       source << portion
 
-                      write_bytesize = compressor.write source, &writer
-                      source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
+                      bytes_written = compressor.write source, &writer
+                      source        = source.byteslice bytes_written, source.bytesize - bytes_written
                     end
 
                     compressor.flush(&writer)
@@ -108,8 +108,8 @@ module LZWS
                 source = text.dup
 
                 loop do
-                  write_bytesize = compressor.write source, &writer
-                  source         = source.byteslice write_bytesize, source.bytesize - write_bytesize
+                  bytes_written = compressor.write source, &writer
+                  source        = source.byteslice bytes_written, source.bytesize - bytes_written
 
                   break if source.empty?
                 end
