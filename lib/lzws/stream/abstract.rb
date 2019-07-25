@@ -1,7 +1,7 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
-require_relative "io_delegates"
+require_relative "delegates"
 require_relative "../error"
 require_relative "../validation"
 
@@ -14,7 +14,7 @@ module LZWS
       # It is not possible to maintain correspondance between bytes consumed from source and bytes written to destination by design.
       # We will consume all source bytes and maintain buffer with remaining destination data.
 
-      include IODelegates
+      include Delegates
 
       attr_reader :external_encoding
       attr_reader :internal_encoding

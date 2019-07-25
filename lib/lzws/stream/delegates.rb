@@ -5,8 +5,8 @@ require "forwardable"
 
 module LZWS
   module Stream
-    module IODelegates
-      IO_DELEGATES = %i[
+    module Delegates
+      DELEGATES = %i[
         autoclose=
         autoclose?
         binmode
@@ -29,7 +29,7 @@ module LZWS
 
       def self.included(klass)
         klass.extend ::Forwardable
-        klass.def_delegators :@io, *IO_DELEGATES
+        klass.def_delegators :@io, *DELEGATES
       end
     end
   end
