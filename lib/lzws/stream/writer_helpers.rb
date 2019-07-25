@@ -30,7 +30,7 @@ module LZWS
         nil
       end
 
-      def putc(object, encoding: Encoding::BINARY)
+      def putc(object, encoding: ::Encoding::BINARY)
         if object.is_a? ::Numeric
           write object.chr(encoding)
         elsif object.is_a? ::String

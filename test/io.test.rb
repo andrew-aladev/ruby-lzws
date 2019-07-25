@@ -56,15 +56,15 @@ module LZWS
       def test_texts
         TEXTS.each do |text|
           COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-            ::IO.pipe("#{text.encoding}:#{Encoding::BINARY}") do |source_read_io, source_write_io|
+            ::IO.pipe("#{text.encoding}:#{::Encoding::BINARY}") do |source_read_io, source_write_io|
               source_write_io << text
               source_write_io.close
 
-              ::IO.pipe("#{Encoding::BINARY}:#{Encoding::BINARY}") do |compressed_read_io, compressed_write_io|
+              ::IO.pipe("#{::Encoding::BINARY}:#{::Encoding::BINARY}") do |compressed_read_io, compressed_write_io|
                 Target.compress source_read_io, compressed_write_io, compressor_options
                 compressed_write_io.close
 
-                ::IO.pipe("#{Encoding::BINARY}:#{text.encoding}") do |decompressed_read_io, decompressed_write_io|
+                ::IO.pipe("#{::Encoding::BINARY}:#{text.encoding}") do |decompressed_read_io, decompressed_write_io|
                   Target.decompress compressed_read_io, decompressed_write_io, decompressor_options
                   decompressed_write_io.close
 
@@ -88,7 +88,7 @@ module LZWS
           ::File.write NATIVE_SOURCE_PATH, text
           Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
 
-          ::IO.pipe("#{Encoding::BINARY}:#{text.encoding}") do |decompressed_read_io, decompressed_write_io|
+          ::IO.pipe("#{::Encoding::BINARY}:#{text.encoding}") do |decompressed_read_io, decompressed_write_io|
             ::File.open(NATIVE_ARCHIVE_PATH, "rb") do |native_archive|
               Target.decompress native_archive, decompressed_write_io
               decompressed_write_io.close
@@ -102,11 +102,11 @@ module LZWS
 
           # Native util is decompressing.
 
-          ::IO.pipe("#{text.encoding}:#{Encoding::BINARY}") do |source_read_io, source_write_io|
+          ::IO.pipe("#{text.encoding}:#{::Encoding::BINARY}") do |source_read_io, source_write_io|
             source_write_io << text
             source_write_io.close
 
-            ::IO.pipe("#{Encoding::BINARY}:#{Encoding::BINARY}") do |compressed_read_io, compressed_write_io|
+            ::IO.pipe("#{::Encoding::BINARY}:#{::Encoding::BINARY}") do |compressed_read_io, compressed_write_io|
               Target.compress source_read_io, compressed_write_io
               compressed_write_io.close
 

@@ -42,7 +42,7 @@ module LZWS
     private_class_method def self.open_file(path, mode, &_block)
       begin
         io = ::File.open path, mode
-      rescue StandardError
+      rescue ::StandardError
         raise OpenFileError, "open file failed"
       end
 

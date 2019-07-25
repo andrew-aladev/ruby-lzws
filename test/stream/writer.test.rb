@@ -29,7 +29,7 @@ module LZWS
         def test_invalid_initialize
           Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
             assert_raises ValidateError do
-              target.new STDOUT, invalid_options
+              target.new ::STDOUT, invalid_options
             end
           end
 
@@ -50,6 +50,9 @@ module LZWS
                   begin
                     instance.write(*sources)
                     instance.flush
+
+                    assert instance.pos, text.bytesize
+
                   ensure
                     refute instance.closed?
                     instance.close
@@ -73,22 +76,22 @@ module LZWS
               sources = get_sources text, portion_length
 
               COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                File.delete UNIX_SOCKET_PATH if File.exist? UNIX_SOCKET_PATH
-                server = UNIXServer.new UNIX_SOCKET_PATH
+                ::File.delete UNIX_SOCKET_PATH if ::File.exist? UNIX_SOCKET_PATH
+                server = ::UNIXServer.new UNIX_SOCKET_PATH
 
                 compressed_text = "".b
 
                 # Real unix server will be better for testing nonblock methods.
-                server_thread = Thread.new do
+                server_thread = ::Thread.new do
                   socket = server.accept
 
-                  # Read nonblock based on portion length will provide a great amount of wait writable on client.
+                  # Read nonblock limited by portion length will provide a great amount of wait writable errors on client.
                   begin
                     loop do
                       compressed_text += socket.read_nonblock portion_length
                     rescue ::IO::WaitReadable
                       ::IO.select [socket]
-                    rescue EOFError
+                    rescue ::EOFError
                       break
                     end
                   ensure
@@ -96,7 +99,7 @@ module LZWS
                   end
                 end
 
-                socket   = UNIXSocket.new UNIX_SOCKET_PATH
+                socket   = ::UNIXSocket.new UNIX_SOCKET_PATH
                 instance = target.new socket, compressor_options
 
                 begin
@@ -124,6 +127,8 @@ module LZWS
 
                     break if is_flushed
                   end
+
+                  assert instance.pos, text.bytesize
 
                 ensure
                   refute instance.closed?
@@ -235,7 +240,7 @@ module LZWS
         end
 
         def test_invalid_putc
-          instance = target.new STDOUT
+          instance = target.new ::STDOUT
 
           Validation::INVALID_CHARS.each do |invalid_char|
             assert_raises ValidateError do

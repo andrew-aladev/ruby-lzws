@@ -24,7 +24,7 @@ module LZWS
         def test_invalid_initialize
           Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
             assert_raises ValidateError do
-              target.new STDOUT, invalid_options
+              target.new ::STDOUT, invalid_options
             end
           end
 

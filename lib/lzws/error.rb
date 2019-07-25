@@ -2,7 +2,7 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 module LZWS
-  class BaseError < StandardError; end
+  class BaseError < ::StandardError; end
 
   class ValidateError   < BaseError; end
   class AllocateError   < BaseError; end

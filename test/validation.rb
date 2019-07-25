@@ -16,7 +16,7 @@ module LZWS
         :a,
         {},
         [],
-        STDOUT,
+        ::STDOUT,
         NOOP_PROC
       ]
       .freeze
@@ -26,7 +26,7 @@ module LZWS
       INVALID_BOOLS    = (TYPES - [true]).freeze
       INVALID_STRINGS  = (TYPES - %w[1 a]).freeze
       INVALID_HASHES   = (TYPES - [{}]).freeze
-      INVALID_IOS      = (TYPES - [STDOUT]).freeze
+      INVALID_IOS      = (TYPES - [::STDOUT]).freeze
       INVALID_PROCS    = (TYPES - [NOOP_PROC]).freeze
       INVALID_CHARS    = (INVALID_NUMBERS & INVALID_STRINGS).freeze
 

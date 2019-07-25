@@ -62,8 +62,8 @@ module LZWS
                   decompressor = Target.new decompressor_options
 
                   begin
-                    decompressed_buffer = StringIO.new
-                    decompressed_buffer.set_encoding Encoding::BINARY
+                    decompressed_buffer = ::StringIO.new
+                    decompressed_buffer.set_encoding ::Encoding::BINARY
 
                     writer = proc { |portion| decompressed_buffer << portion }
 
@@ -107,8 +107,8 @@ module LZWS
               decompressor = Target.new
 
               begin
-                decompressed_buffer = StringIO.new
-                decompressed_buffer.set_encoding Encoding::BINARY
+                decompressed_buffer = ::StringIO.new
+                decompressed_buffer.set_encoding ::Encoding::BINARY
 
                 writer = proc { |portion| decompressed_buffer << portion }
 

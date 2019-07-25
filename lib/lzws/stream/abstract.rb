@@ -36,7 +36,7 @@ module LZWS
       # -- buffer --
 
       protected def reset_buffer
-        @buffer = ::String.new :encoding => Encoding::BINARY
+        @buffer = ::String.new :encoding => ::Encoding::BINARY
       end
 
       # -- advise --
@@ -95,8 +95,8 @@ module LZWS
       protected def set_target_encoding(name, value)
         unless value.nil?
           begin
-            value = Encoding.find value
-          rescue ArgumentError
+            value = ::Encoding.find value
+          rescue ::ArgumentError
             raise ValidateError, "invalid #{name} encoding"
           end
         end

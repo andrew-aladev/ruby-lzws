@@ -22,14 +22,14 @@ module LZWS
         UTF-8
         UTF-16LE
       ]
-      .map { |encoding_name| Encoding.find encoding_name }
+      .map { |encoding_name| ::Encoding.find encoding_name }
       .freeze
 
       TEXTS = [
         "",
         "hello world",
         "tobeornottobeortobeornot",
-        SecureRandom.random_bytes(1 << 13) # 8 KB
+        ::SecureRandom.random_bytes(1 << 13) # 8 KB
       ]
       .flat_map do |text|
         ENCODINGS.map do |encoding|

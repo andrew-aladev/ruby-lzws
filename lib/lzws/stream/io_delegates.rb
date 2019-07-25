@@ -28,7 +28,7 @@ module LZWS
       .freeze
 
       def self.included(klass)
-        klass.extend Forwardable
+        klass.extend ::Forwardable
         klass.def_delegators :@io, *IO_DELEGATES
       end
     end
