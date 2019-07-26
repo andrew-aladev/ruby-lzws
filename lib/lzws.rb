@@ -1,5 +1,5 @@
-require_relative "lzws/stream/compressor"
-require_relative "lzws/stream/decompressor"
+require_relative "lzws/stream/reader"
+require_relative "lzws/stream/writer"
 require_relative "lzws/file"
 require_relative "lzws/io"
 require_relative "lzws/string"

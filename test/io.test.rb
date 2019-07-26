@@ -1,12 +1,12 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
-require "lzws/io"
-
 require_relative "common"
 require_relative "minitest"
 require_relative "option"
 require_relative "validation"
+
+require "lzws/io"
 
 module LZWS
   module Test

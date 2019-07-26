@@ -1,9 +1,9 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
-require "lzws/option"
-
 require_relative "validation"
+
+require "lzws/option"
 
 module LZWS
   module Test

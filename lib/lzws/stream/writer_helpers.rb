@@ -1,6 +1,9 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require_relative "../error"
+require_relative "../validation"
+
 module LZWS
   module Stream
     module WriterHelpers
@@ -61,6 +64,27 @@ module LZWS
         end
 
         nil
+      end
+
+      module ClassMethods
+        def open(file_path, *args, &block)
+          Validation.validate_string file_path
+          Validation.validate_proc block
+
+          ::File.open file_path, "wb" do |file|
+            writer = new file, *args
+
+            begin
+              yield writer
+            ensure
+              writer.close
+            end
+          end
+        end
+      end
+
+      def self.included(klass)
+        klass.extend ClassMethods
       end
     end
   end

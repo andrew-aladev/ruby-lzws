@@ -1,12 +1,11 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
-require "fcntl"
-
 require_relative "../common"
 require_relative "../minitest"
-require_relative "../option"
 require_relative "../validation"
+
+require "fcntl"
 
 module LZWS
   module Test
