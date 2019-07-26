@@ -21,6 +21,7 @@ module LZWS
 
         ARCHIVE_PATH     = Common::ARCHIVE_PATH
         UNIX_SOCKET_PATH = Common::UNIX_SOCKET_PATH
+        ENCODINGS        = Common::ENCODINGS
         TEXTS            = Common::TEXTS
         PORTION_LENGTHS  = Common::PORTION_LENGTHS
 
@@ -34,6 +35,44 @@ module LZWS
           end
 
           super
+        end
+
+        def test_encoding
+          TEXTS.each do |text|
+            ENCODINGS.each do |external_encoding|
+              target_text = text.encode(
+                external_encoding,
+                :invalid => :replace,
+                :undef   => :replace,
+                :replace => "?"
+              )
+
+              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                ::File.open ARCHIVE_PATH, "wb" do |file|
+                  instance = target.new file, compressor_options, :external_encoding => text.encoding
+                  assert instance.external_encoding, text.encoding
+
+                  instance.set_encoding(
+                    external_encoding,
+                    nil,
+                    :invalid => :replace,
+                    :undef   => :replace,
+                    :replace => "?"
+                  )
+                  assert instance.external_encoding, external_encoding
+
+                  begin
+                    instance.write text
+                  ensure
+                    instance.close
+                  end
+                end
+
+                compressed_text = ::File.read ARCHIVE_PATH
+                check_text target_text, compressed_text, decompressor_options
+              end
+            end
+          end
         end
 
         # -- synchronous --
@@ -50,9 +89,7 @@ module LZWS
                   begin
                     instance.write(*sources)
                     instance.flush
-
                     assert instance.pos, text.bytesize
-
                   ensure
                     refute instance.closed?
                     instance.close
@@ -61,9 +98,40 @@ module LZWS
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
-
                 check_text text, compressed_text, decompressor_options
               end
+            end
+          end
+        end
+
+        def test_rewind
+          COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            compressed_texts = []
+
+            ::File.open ARCHIVE_PATH, "wb" do |file|
+              instance = target.new file, compressor_options
+
+              begin
+                TEXTS.each do |text|
+                  instance.write text
+                  instance.flush
+                  assert instance.pos, text.bytesize
+
+                  compressed_texts << ::File.read(ARCHIVE_PATH)
+
+                  instance.rewind
+                  assert instance.pos, 0
+
+                  file.truncate 0
+                end
+              ensure
+                instance.close
+              end
+            end
+
+            TEXTS.each.with_index do |text, index|
+              compressed_text = compressed_texts[index]
+              check_text text, compressed_text, decompressor_options
             end
           end
         end
@@ -76,10 +144,10 @@ module LZWS
               sources = get_sources text, portion_length
 
               COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                compressed_text = "".b
+
                 ::File.delete UNIX_SOCKET_PATH if ::File.exist? UNIX_SOCKET_PATH
                 server = ::UNIXServer.new UNIX_SOCKET_PATH
-
-                compressed_text = "".b
 
                 # Real unix server will be better for testing nonblock methods.
                 server_thread = ::Thread.new do
@@ -107,7 +175,7 @@ module LZWS
                     loop do
                       begin
                         bytes_written = instance.write_nonblock source
-                      rescue IO::WaitWritable
+                      rescue ::IO::WaitWritable
                         ::IO.select nil, [socket]
                         retry
                       end
@@ -120,7 +188,7 @@ module LZWS
                   loop do
                     begin
                       is_flushed = instance.flush_nonblock
-                    rescue IO::WaitWritable
+                    rescue ::IO::WaitWritable
                       ::IO.select nil, [socket]
                       retry
                     end
@@ -136,7 +204,7 @@ module LZWS
                   loop do
                     begin
                       is_closed = instance.close_nonblock
-                    rescue IO::WaitWritable
+                    rescue ::IO::WaitWritable
                       ::IO.select nil, [socket]
                       retry
                     end
@@ -151,6 +219,48 @@ module LZWS
 
                 check_text text, compressed_text, decompressor_options
               end
+            end
+          end
+        end
+
+        def test_rewind_nonblock
+          COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            compressed_texts = []
+
+            ::File.open ARCHIVE_PATH, "wb" do |file|
+              instance = target.new file, compressor_options
+
+              begin
+                TEXTS.each do |text|
+                  instance.write text
+                  instance.flush
+                  assert instance.pos, text.bytesize
+
+                  compressed_texts << ::File.read(ARCHIVE_PATH)
+
+                  loop do
+                    begin
+                      is_rewinded = instance.rewind_nonblock
+                    rescue ::IO::WaitWritable
+                      ::IO.select nil, [socket]
+                      retry
+                    end
+
+                    break if is_rewinded
+                  end
+
+                  assert instance.pos, 0
+
+                  file.truncate 0
+                end
+              ensure
+                instance.close
+              end
+            end
+
+            TEXTS.each.with_index do |text, index|
+              compressed_text = compressed_texts[index]
+              check_text text, compressed_text, decompressor_options
             end
           end
         end
@@ -174,7 +284,6 @@ module LZWS
               end
 
               compressed_text = ::File.read ARCHIVE_PATH
-
               check_text text, compressed_text, decompressor_options
             end
 
@@ -182,10 +291,10 @@ module LZWS
             next if text.empty?
 
             PORTION_LENGTHS.each do |portion_length|
+              sources = get_sources text, portion_length
+
               field_separator  = " ".encode text.encoding
               record_separator = "\n".encode text.encoding
-
-              sources = get_sources text, portion_length
 
               target_text = "".encode text.encoding
               sources.each { |source| target_text << source + field_separator }
@@ -208,7 +317,6 @@ module LZWS
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
-
                 check_text target_text, compressed_text, decompressor_options
               end
             end
@@ -232,7 +340,6 @@ module LZWS
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
-
                 check_text text, compressed_text, decompressor_options
               end
             end
@@ -270,7 +377,6 @@ module LZWS
               end
 
               compressed_text = ::File.read ARCHIVE_PATH
-
               check_text text, compressed_text, decompressor_options
             end
           end
@@ -311,7 +417,6 @@ module LZWS
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
-
                 check_text target_text, compressed_text, decompressor_options
               end
             end

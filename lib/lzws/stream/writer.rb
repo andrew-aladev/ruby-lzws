@@ -116,7 +116,7 @@ module LZWS
         if @external_encoding.nil?
           source
         else
-          source.encode @external_encoding
+          source.encode @external_encoding, @transcode_options
         end
       end
     end

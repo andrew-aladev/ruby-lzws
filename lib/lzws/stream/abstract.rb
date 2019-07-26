@@ -2,6 +2,7 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require_relative "delegates"
+require_relative "stat"
 require_relative "../error"
 require_relative "../validation"
 
@@ -16,6 +17,8 @@ module LZWS
 
       include Delegates
 
+      attr_reader :io
+      attr_reader :stat
       attr_reader :external_encoding
       attr_reader :internal_encoding
       attr_reader :pos
@@ -25,6 +28,8 @@ module LZWS
 
         Validation.validate_io io
         @io = io
+
+        @stat = Stat.new @io.stat
 
         set_encoding external_encoding, internal_encoding, transcode_options
         reset_buffer
@@ -66,7 +71,7 @@ module LZWS
       protected def process_set_encoding_arguments(*args)
         external_encoding = args[0]
 
-        unless external_encoding.nil?
+        unless external_encoding.nil? || external_encoding.is_a?(::Encoding)
           Validation.validate_string external_encoding
 
           # First argument can be "external_encoding:internal_encoding".
@@ -84,7 +89,8 @@ module LZWS
         end
 
         internal_encoding = args[1]
-        Validation.validate_string internal_encoding unless internal_encoding.nil?
+        Validation.validate_string internal_encoding \
+          unless internal_encoding.nil? || internal_encoding.is_a?(::Encoding)
 
         transcode_options = args[2]
         Validation.validate_hash transcode_options unless transcode_options.nil?
@@ -93,7 +99,7 @@ module LZWS
       end
 
       protected def set_target_encoding(name, value)
-        unless value.nil?
+        unless value.nil? || value.is_a?(::Encoding)
           begin
             value = ::Encoding.find value
           rescue ::ArgumentError
@@ -131,8 +137,6 @@ module LZWS
 
         @pos = 0
       end
-
-      # -- stat --
 
       # -- etc --
 

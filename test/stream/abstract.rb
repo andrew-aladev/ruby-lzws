@@ -172,6 +172,17 @@ module LZWS
           end
         end
 
+        def test_stat
+          instance = target.new ::STDOUT
+
+          refute instance.stat.file?
+          refute instance.stat.pipe?
+          refute instance.stat.socket?
+
+          assert instance.stat.readable?
+          assert instance.stat.writable?
+        end
+
         # -----
 
         protected def target
