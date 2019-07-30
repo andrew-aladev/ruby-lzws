@@ -35,6 +35,35 @@ module LZWS
           super
         end
 
+        # -- synchronous --
+
+        def test_texts
+          TEXTS.each do |text|
+            PORTION_LENGTHS.each do |portion_length|
+              sources = get_sources text, portion_length
+
+              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                ::File.open ARCHIVE_PATH, "wb" do |file|
+                  instance = target.new file, compressor_options
+
+                  begin
+                    instance.write(*sources)
+                    instance.flush
+                    assert instance.pos, text.bytesize
+                  ensure
+                    refute instance.closed?
+                    instance.close
+                    assert instance.closed?
+                  end
+                end
+
+                compressed_text = ::File.read ARCHIVE_PATH
+                check_text text, compressed_text, decompressor_options
+              end
+            end
+          end
+        end
+
         def test_encoding
           TEXTS.each do |text|
             ENCODINGS.each do |external_encoding|
@@ -68,35 +97,6 @@ module LZWS
 
                 compressed_text = ::File.read ARCHIVE_PATH
                 check_text target_text, compressed_text, decompressor_options
-              end
-            end
-          end
-        end
-
-        # -- synchronous --
-
-        def test_texts
-          TEXTS.each do |text|
-            PORTION_LENGTHS.each do |portion_length|
-              sources = get_sources text, portion_length
-
-              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                ::File.open ARCHIVE_PATH, "wb" do |file|
-                  instance = target.new file, compressor_options
-
-                  begin
-                    instance.write(*sources)
-                    instance.flush
-                    assert instance.pos, text.bytesize
-                  ensure
-                    refute instance.closed?
-                    instance.close
-                    assert instance.closed?
-                  end
-                end
-
-                compressed_text = ::File.read ARCHIVE_PATH
-                check_text text, compressed_text, decompressor_options
               end
             end
           end

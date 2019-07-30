@@ -140,12 +140,6 @@ module LZWS
 
       # -- etc --
 
-      def flush
-        @io.flush
-
-        self
-      end
-
       def close
         @io.close
 

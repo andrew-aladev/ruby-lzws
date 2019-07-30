@@ -29,12 +29,40 @@ module LZWS
         def test_invalid_initialize
           Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
             assert_raises ValidateError do
-              target.new ::STDOUT, invalid_options
+              target.new ::STDIN, invalid_options
+            end
+          end
+
+          (Validation::INVALID_POSITIVE_INTEGERS - [nil]).each do |invalid_integer|
+            assert_raises ValidateError do
+              target.new ::STDIN, :io_chunk_size => invalid_integer
             end
           end
 
           super
         end
+
+        # -- synchronous --
+
+        def test_invalid_read
+          instance = target.new ::STDIN
+
+          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
+            assert_raises ValidateError do
+              instance.read invalid_integer
+            end
+          end
+
+          (Validation::INVALID_STRINGS - [nil]).each do |invalid_string|
+            assert_raises ValidateError do
+              instance.read nil, invalid_string
+            end
+          end
+        end
+
+        # -- asynchronous --
+
+        # -----
       end
 
       Minitest << Reader

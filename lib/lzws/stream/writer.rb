@@ -29,7 +29,7 @@ module LZWS
 
         objects.each do |object|
           source                = prepare_source_for_write object.to_s
-          source_bytes_written += @raw_stream.write(source) { |portion| @io.write portion }
+          source_bytes_written += raw_proxy :write, source
         end
 
         @pos += source_bytes_written
@@ -40,7 +40,9 @@ module LZWS
       def flush
         finish :flush
 
-        super
+        @io.flush
+
+        self
       end
 
       def close
@@ -52,7 +54,7 @@ module LZWS
       protected def finish(method_name)
         write_remaining_buffer
 
-        @raw_stream.send(method_name) { |portion| @io.write portion }
+        raw_proxy method_name
       end
 
       protected def write_remaining_buffer
@@ -63,13 +65,17 @@ module LZWS
         reset_buffer
       end
 
+      protected def raw_proxy(method_name, *args)
+        @raw_stream.send(method_name, *args) { |portion| @io.write portion }
+      end
+
       # -- asynchronous --
 
       def write_nonblock(object, *options)
         return 0 unless write_remaining_buffer_nonblock(*options)
 
         source                = prepare_source_for_write object.to_s
-        source_bytes_written  = @raw_stream.write(source) { |portion| @buffer << portion }
+        source_bytes_written  = raw_nonblock_proxy :write, source
         @pos                 += source_bytes_written
 
         source_bytes_written
@@ -78,7 +84,7 @@ module LZWS
       def flush_nonblock(*options)
         return false unless finish_nonblock :flush, *options
 
-        method(:flush).super_method.call
+        @io.flush
 
         true
       end
@@ -94,7 +100,7 @@ module LZWS
       protected def finish_nonblock(method_name, *options)
         return false unless write_remaining_buffer_nonblock(*options)
 
-        @raw_stream.send(method_name) { |portion| @buffer << portion }
+        raw_nonblock_proxy method_name
 
         write_remaining_buffer_nonblock(*options)
       end
@@ -108,6 +114,10 @@ module LZWS
         @buffer = @buffer.byteslice destination_bytes_written, @buffer.bytesize - destination_bytes_written
 
         @buffer.bytesize == 0
+      end
+
+      protected def raw_nonblock_proxy(method_name, *args)
+        @raw_stream.send(method_name, *args) { |portion| @buffer << portion }
       end
 
       # -- common --
