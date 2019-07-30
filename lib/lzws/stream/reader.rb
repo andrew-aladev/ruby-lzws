@@ -40,27 +40,48 @@ module LZWS
         unless bytes_to_read.nil?
           return nil if eof?
 
-          out_buffer = ::String.new if out_buffer.nil?
-          out_buffer.force_encoding Encoding::BINARY unless out_buffer.encoding == Encoding::BINARY
+          read_more_buffer until @buffer.bytesize >= bytes_to_read || @io.eof?
 
-          while @buffer.bytesize < bytes_to_read
-            read_more_buffer
-            break if @io.eof?
-          end
+          bytes_read = Math.min @buffer.bytesize, bytes_to_read
 
-          # TODO
+          # Result uses buffer binary encoding.
+          result   = @buffer.byteslice 0, bytes_read
+          @buffer  = @buffer.byteslice bytes_read, @buffer.bytesize - bytes_read
+          @pos    += bytes_read
+
+          result = out_buffer.replace result unless out_buffer.nil?
+
+          return result
         end
 
-        # TODO
-        "".b
+        read_more_buffer until @io.eof?
+
+        result = @buffer
+        reset_buffer
+        @pos += result.bytesize
+
+        # Transcoding result from external to internal encoding.
+        result.force_encoding @external_encoding unless @external_encoding.nil?
+        result = @buffer.encode @internal_encoding, @transcode_options unless @internal_encoding.nil?
+        result = out_buffer.replace result unless out_buffer.nil?
+
+        result
       end
 
       protected def read_more_buffer
         chunk = @io.read @io_chunk_size
+        raw_wrapper :read, chunk
 
-        raw_proxy :read, chunk
-        raw_proxy :close if @io.eof?
+        raw_wrapper :flush if @io.eof?
       end
+
+      def close
+        raw_wrapper :close
+
+        super
+      end
+
+      # -- asynchronous --
 
       # -- common --
 
@@ -68,15 +89,7 @@ module LZWS
         @io.eof? && @buffer.bytesize == 0
       end
 
-      protected def prepare_destination_for_read(source)
-        if @internal_encoding.nil?
-          source
-        else
-          source.encode @internal_encoding, @transcode_options
-        end
-      end
-
-      protected def raw_proxy(method_name, *args)
+      protected def raw_wrapper(method_name, *args)
         @raw_stream.send(method_name, *args) { |portion| @buffer << portion }
       end
     end

@@ -25,16 +25,16 @@ module LZWS
       def write(*objects)
         write_remaining_buffer
 
-        source_bytes_written = 0
+        bytes_written = 0
 
         objects.each do |object|
-          source                = prepare_source_for_write object.to_s
-          source_bytes_written += raw_proxy :write, source
+          source         = prepare_source_for_write object.to_s
+          bytes_written += raw_wrapper :write, source
         end
 
-        @pos += source_bytes_written
+        @pos += bytes_written
 
-        source_bytes_written
+        bytes_written
       end
 
       def flush
@@ -54,7 +54,7 @@ module LZWS
       protected def finish(method_name)
         write_remaining_buffer
 
-        raw_proxy method_name
+        raw_wrapper method_name
       end
 
       protected def write_remaining_buffer
@@ -65,7 +65,7 @@ module LZWS
         reset_buffer
       end
 
-      protected def raw_proxy(method_name, *args)
+      protected def raw_wrapper(method_name, *args)
         @raw_stream.send(method_name, *args) { |portion| @io.write portion }
       end
 
@@ -74,11 +74,11 @@ module LZWS
       def write_nonblock(object, *options)
         return 0 unless write_remaining_buffer_nonblock(*options)
 
-        source                = prepare_source_for_write object.to_s
-        source_bytes_written  = raw_nonblock_proxy :write, source
-        @pos                 += source_bytes_written
+        source         = prepare_source_for_write object.to_s
+        bytes_written  = raw_nonblock_wrapper :write, source
+        @pos          += bytes_written
 
-        source_bytes_written
+        bytes_written
       end
 
       def flush_nonblock(*options)
@@ -100,7 +100,7 @@ module LZWS
       protected def finish_nonblock(method_name, *options)
         return false unless write_remaining_buffer_nonblock(*options)
 
-        raw_nonblock_proxy method_name
+        raw_nonblock_wrapper method_name
 
         write_remaining_buffer_nonblock(*options)
       end
@@ -108,15 +108,15 @@ module LZWS
       protected def write_remaining_buffer_nonblock(*options)
         return true if @buffer.bytesize == 0
 
-        destination_bytes_written = @io.write_nonblock @buffer, *options
-        return false if destination_bytes_written == 0
+        bytes_written = @io.write_nonblock @buffer, *options
+        return false if bytes_written == 0
 
-        @buffer = @buffer.byteslice destination_bytes_written, @buffer.bytesize - destination_bytes_written
+        @buffer = @buffer.byteslice bytes_written, @buffer.bytesize - bytes_written
 
         @buffer.bytesize == 0
       end
 
-      protected def raw_nonblock_proxy(method_name, *args)
+      protected def raw_nonblock_wrapper(method_name, *args)
         @raw_stream.send(method_name, *args) { |portion| @buffer << portion }
       end
 
