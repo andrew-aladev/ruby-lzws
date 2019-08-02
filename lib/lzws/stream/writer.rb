@@ -28,7 +28,7 @@ module LZWS
         bytes_written = 0
 
         objects.each do |object|
-          source         = prepare_source_for_write object.to_s
+          source         = transcode object.to_s
           bytes_written += raw_wrapper :write, source
         end
 
@@ -43,6 +43,12 @@ module LZWS
         @io.flush
 
         self
+      end
+
+      def rewind
+        finish :close
+
+        super
       end
 
       def close
@@ -74,7 +80,7 @@ module LZWS
       def write_nonblock(object, *options)
         return 0 unless write_remaining_buffer_nonblock(*options)
 
-        source         = prepare_source_for_write object.to_s
+        source         = transcode object.to_s
         bytes_written  = raw_nonblock_wrapper :write, source
         @pos          += bytes_written
 
@@ -85,6 +91,14 @@ module LZWS
         return false unless finish_nonblock :flush, *options
 
         @io.flush
+
+        true
+      end
+
+      def rewind_nonblock(*options)
+        return false unless finish_nonblock :close, *options
+
+        method(:rewind).super_method.call
 
         true
       end
@@ -122,12 +136,9 @@ module LZWS
 
       # -- common --
 
-      protected def prepare_source_for_write(source)
-        if @external_encoding.nil?
-          source
-        else
-          source.encode @external_encoding, @transcode_options
-        end
+      protected def transcode(source)
+        source = source.encode @external_encoding, @transcode_options unless @external_encoding.nil?
+        source
       end
     end
   end

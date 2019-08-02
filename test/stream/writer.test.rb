@@ -37,7 +37,7 @@ module LZWS
 
         # -- synchronous --
 
-        def test_texts
+        def test_write
           TEXTS.each do |text|
             PORTION_LENGTHS.each do |portion_length|
               sources = get_sources text, portion_length
@@ -117,7 +117,7 @@ module LZWS
 
                   compressed_texts << ::File.read(ARCHIVE_PATH)
 
-                  instance.rewind
+                  assert_equal instance.rewind, 0
                   assert instance.pos, 0
 
                   file.truncate 0
@@ -136,7 +136,7 @@ module LZWS
 
         # -- asynchronous --
 
-        def test_texts_nonblock
+        def test_write_nonblock
           TEXTS.each do |text|
             PORTION_LENGTHS.each do |portion_length|
               sources = get_sources text, portion_length
@@ -271,7 +271,7 @@ module LZWS
             .each_slice(portion_length)
             .map(&:join)
 
-          return [""] if sources.empty?
+          return ["".b] if sources.empty?
 
           sources
         end

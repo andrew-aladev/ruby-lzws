@@ -91,42 +91,6 @@ module LZWS
           end
         end
 
-        def test_basic_rewind
-          ::File.open SOURCE_PATH do |file|
-            instance = target.new file
-
-            assert_equal instance.rewind, 0
-            assert instance.rewind_nonblock
-          end
-        end
-
-        def test_basic_flush
-          ::File.open SOURCE_PATH do |file|
-            instance = target.new file
-
-            instance.flush
-            assert instance.flush_nonblock
-          end
-        end
-
-        def test_basic_close
-          ::File.open SOURCE_PATH do |file|
-            instance = target.new file
-
-            refute instance.closed?
-            instance.close
-            assert instance.closed?
-          end
-
-          ::File.open SOURCE_PATH do |file|
-            instance = target.new file
-
-            refute instance.closed?
-            assert instance.close_nonblock
-            assert instance.closed?
-          end
-        end
-
         def test_to_io
           instance = target.new ::STDOUT
           assert_equal instance.to_io, instance

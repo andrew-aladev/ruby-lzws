@@ -72,9 +72,6 @@ module LZWS
         end,
         BOOLS.map do |unaligned_bit_groups|
           { :unaligned_bit_groups => unaligned_bit_groups }
-        end,
-        BOOLS.map do |quiet|
-          { :quiet => quiet }
         end
       ]
       .freeze
@@ -117,8 +114,7 @@ module LZWS
             :buffer_length        => compressor_options[:buffer_length],
             :without_magic_header => compressor_options[:without_magic_header],
             :msb                  => compressor_options[:msb],
-            :unaligned_bit_groups => compressor_options[:unaligned_bit_groups],
-            :quiet                => compressor_options[:quiet]
+            :unaligned_bit_groups => compressor_options[:unaligned_bit_groups]
           }
           [compressor_options, decompressor_options]
         end

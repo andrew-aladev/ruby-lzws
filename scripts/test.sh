@@ -1,0 +1,35 @@
+#!/bin/sh
+set -e
+
+cd "$(dirname $0)"
+
+tmp="../tmp"
+build="$tmp/lzws-build"
+
+mkdir -p "$build"
+cd "$build"
+
+git clone "https://github.com/andrew-aladev/lzws.git" lzws
+cd "lzws/build"
+
+for dictionary in "linked-list" "sparse-array"; do
+  echo "dictionary: $dictionary"
+
+  find . \( -name "CMake*" -o -name "*.cmake" \) -exec rm -rf {} +
+
+  cmake ".." \
+    -DLZWS_COMPRESSOR_DICTIONARY="$dictionary" \
+    -DLZWS_CLI=OFF \
+    -DLZWS_TESTS=OFF \
+    -DLZWS_EXAMPLES=OFF \
+    -DLZWS_MAN=OFF \
+    -DCMAKE_BUILD_TYPE="RELEASE" \
+    -DCMAKE_C_FLAGS_RELEASE="-O2 -march=native"
+  make clean
+  make -j2
+  make install
+
+  sh -c 'cd ../../../.. && rake clean && rake'
+
+  make uninstall
+done

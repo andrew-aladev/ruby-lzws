@@ -110,25 +110,9 @@ module LZWS
         instance_variable_set name, value
       end
 
-      # -- rewind --
+      # -- etc --
 
       def rewind
-        finish :close
-
-        process_rewind
-
-        0
-      end
-
-      def rewind_nonblock(*options)
-        return false unless finish_nonblock :close, *options
-
-        process_rewind
-
-        true
-      end
-
-      protected def process_rewind
         @raw_stream = create_raw_stream
 
         @io.rewind
@@ -136,9 +120,9 @@ module LZWS
         reset_io_advise
 
         @pos = 0
-      end
 
-      # -- etc --
+        0
+      end
 
       def close
         @io.close

@@ -1,0 +1,19 @@
+language: c
+
+os:
+  - linux
+  - osx
+
+dist: xenial
+osx_image: xcode10.2
+
+addons:
+  apt:
+    packages:
+      - libgmp-dev
+  homebrew:
+    packages:
+      - gmp
+
+script:
+  - scripts/test.sh

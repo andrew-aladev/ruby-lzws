@@ -55,6 +55,7 @@ module LZWS
             break
           end
 
+          # Please remember that "total_bytes_read" can not be equal to "source.bytesize".
           total_bytes_read
         end
 
