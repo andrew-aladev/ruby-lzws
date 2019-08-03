@@ -1,5 +1,9 @@
 image: Ubuntu1804
 
+environment:
+  matrix:
+    - RUBY_VERSION: 22
+
 init:
   - sh: sudo apt-get install -y libgmp-dev
 
