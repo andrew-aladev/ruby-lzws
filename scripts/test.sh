@@ -30,7 +30,7 @@ for dictionary in "linked-list" "sparse-array"; do
     -DCMAKE_C_FLAGS_RELEASE="-O2 -march=native"
   make clean
   make -j2
-  make install
+  sudo make install
 
   sh -c '\
     cd ../../../.. && \
