@@ -34,8 +34,9 @@ for dictionary in "linked-list" "sparse-array"; do
 
   sh -c '\
     cd ../../../.. && \
+    gem install bundler &&
     bundle install && \
-    rake clean && \
-    rake \
+    bundle exec rake clean && \
+    bundle exec rake \
   '
 done
