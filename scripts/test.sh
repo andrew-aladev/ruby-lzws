@@ -3,13 +3,16 @@ set -e
 
 cd "$(dirname $0)"
 
+LZWS_BRANCH="v1.1.0"
+
 tmp="../tmp"
 build="$tmp/lzws-build"
 
 mkdir -p "$build"
 cd "$build"
 
-git clone "https://github.com/andrew-aladev/lzws.git" lzws
+rm -rf "lzws"
+git clone --depth 1 --branch "$LZWS_BRANCH" "https://github.com/andrew-aladev/lzws.git" "lzws"
 cd "lzws/build"
 
 for dictionary in "linked-list" "sparse-array"; do
@@ -29,7 +32,10 @@ for dictionary in "linked-list" "sparse-array"; do
   make -j2
   make install
 
-  sh -c 'cd ../../../.. && rake clean && rake'
-
-  make uninstall
+  sh -c '\
+    cd ../../../.. && \
+    bundle install && \
+    rake clean && \
+    rake \
+  '
 done

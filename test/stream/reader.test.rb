@@ -64,11 +64,12 @@ module LZWS
           TEXTS.each do |text|
             COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
               [true, false].map do |with_buffer|
+                prev_result = "".b
+
                 PORTION_LENGTHS.each do |portion_length|
                   write_archive text, compressor_options
 
                   decompressed_text = "".b
-                  result            = "".b
 
                   ::File.open ARCHIVE_PATH, "rb" do |file|
                     instance = target.new file, decompressor_options
@@ -79,13 +80,14 @@ module LZWS
                       loop do
                         result =
                           if with_buffer
-                            instance.read portion_length, result
+                            instance.read portion_length, prev_result
                           else
                             instance.read portion_length
                           end
 
                         break if result.nil?
 
+                        assert_equal result, prev_result if with_buffer
                         decompressed_text << result
                       end
 
@@ -109,12 +111,12 @@ module LZWS
                   instance = target.new file, decompressor_options
 
                   begin
-                    decompressed_text =
-                      if with_buffer
-                        instance.read nil, decompressed_text
-                      else
-                        instance.read
-                      end
+                    if with_buffer
+                      decompressed_text = instance.read nil, prev_result
+                      assert_equal decompressed_text, prev_result
+                    else
+                      decompressed_text = instance.read
+                    end
 
                     assert instance.pos, decompressed_text.bytesize
                   ensure
@@ -128,6 +130,11 @@ module LZWS
                 assert_equal text, decompressed_text
               end
             end
+          end
+        end
+
+        def test_encoding
+          TEXTS.each do |text|
           end
         end
 
