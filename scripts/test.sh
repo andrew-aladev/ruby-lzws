@@ -3,6 +3,12 @@ set -e
 
 cd "$(dirname $0)"
 
+# Fix path environment params.
+export PATH="$PATH:/usr/local/bin"
+export C_INCLUDE_PATH="$C_INCLUDE_PATH:/usr/local/include"
+export LIBRARY_PATH="$C_INCLUDE_PATH:/usr/local/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+
 LZWS_BRANCH="v1.1.0"
 
 tmp="../tmp"
@@ -27,8 +33,7 @@ for dictionary in "linked-list" "sparse-array"; do
     -DLZWS_EXAMPLES=OFF \
     -DLZWS_MAN=OFF \
     -DCMAKE_BUILD_TYPE="RELEASE" \
-    -DCMAKE_C_FLAGS_RELEASE="-O2 -march=native" \
-    -DCMAKE_INSTALL_PREFIX="/usr"
+    -DCMAKE_C_FLAGS_RELEASE="-O2 -march=native"
   make clean
   make -j2
   sudo make install
