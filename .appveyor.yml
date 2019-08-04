@@ -5,7 +5,7 @@ environment:
     - RUBY_VERSION: 26
 
 init:
-  - sh: sudo apt-get install -y libgmp-dev
+  - sh: sudo apt-get install -y libgmp-dev ncompress
 
 test_script:
   - sh: scripts/test.sh

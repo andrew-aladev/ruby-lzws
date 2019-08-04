@@ -13,9 +13,11 @@ addons:
   apt:
     packages:
       - libgmp-dev
+      - ncompress
   homebrew:
     packages:
       - gmp
+      - ncompress
 
 script:
   - scripts/test.sh
