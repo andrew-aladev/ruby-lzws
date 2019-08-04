@@ -37,6 +37,8 @@ for dictionary in "linked-list" "sparse-array"; do
     gem install bundler &&
     bundle install && \
     bundle exec rake clean && \
+    bundle exec rake compile && \
+    ls -la lib && \
     bundle exec rake \
   '
 done
