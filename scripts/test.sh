@@ -39,8 +39,8 @@ for dictionary in "linked-list" "sparse-array"; do
   sudo make install
 
   sh -c '\
+    source ~/.rvm/scripts/rvm && \
     cd ../../../.. && \
-    rvm use $(rvm-prompt) && \
     gem install bundler &&
     bundle install && \
     bundle exec rake clean && \
