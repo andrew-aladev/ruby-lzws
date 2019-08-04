@@ -3,6 +3,11 @@ set -e
 
 cd "$(dirname $0)"
 
+pwd
+ls -la
+rvm list
+ruby -v
+
 # Fix path environment params.
 export PATH="$PATH:/usr/local/bin"
 export C_INCLUDE_PATH="$C_INCLUDE_PATH:/usr/local/include"
@@ -37,6 +42,11 @@ for dictionary in "linked-list" "sparse-array"; do
   make clean
   make -j2
   sudo make install
+
+  pwd
+  ls -la
+  rvm list
+  ruby -v
 
   sh -c '\
     cd ../../../.. && \
