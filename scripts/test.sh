@@ -38,7 +38,7 @@ for dictionary in "linked-list" "sparse-array"; do
     bundle install && \
     bundle exec rake clean && \
     bundle exec rake compile && \
-    ls -la lib && \
+    ldd -v lib/lzws_ext.so && \
     bundle exec rake \
   '
 done
