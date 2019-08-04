@@ -40,6 +40,8 @@ for dictionary in "linked-list" "sparse-array"; do
 
   sh -c '\
     cd ../../../.. && \
+    pwd && \
+    ls -la && \
     rvm list && \
     ruby -v && \
     gem install bundler &&
