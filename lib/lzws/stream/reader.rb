@@ -12,7 +12,7 @@ module LZWS
     class Reader < Abstract
       include ReaderHelpers
 
-      DEFAULT_IO_PORTION_BYTESIZE = 1 << 12
+      DEFAULT_IO_PORTION_BYTESIZE = 1 << 15 # 32 KB
 
       def initialize(source_io, options = {}, *args)
         @options = options

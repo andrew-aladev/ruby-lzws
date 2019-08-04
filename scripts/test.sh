@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 cd "$(dirname $0)"
@@ -38,8 +38,10 @@ for dictionary in "linked-list" "sparse-array"; do
   make -j2
   sudo make install
 
-  bash -c '\
+  sh -c '\
     cd ../../../.. && \
+    rvm list && \
+    ruby -v && \
     gem install bundler &&
     bundle install && \
     bundle exec rake clean && \

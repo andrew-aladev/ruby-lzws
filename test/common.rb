@@ -35,9 +35,8 @@ module LZWS
 
       TEXTS = [
         "",
-        "hello world",
         "tobeornottobeortobeornot",
-        ::SecureRandom.random_bytes(1 << 13) # 8 KB
+        ::SecureRandom.random_bytes(1 << 12) # 4 KB
       ]
       .flat_map do |text|
         ENCODINGS.map do |encoding|
