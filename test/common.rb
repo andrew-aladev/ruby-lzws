@@ -52,7 +52,6 @@ module LZWS
 
       PORTION_LENGTHS = [
         1,
-        2,
         512
       ]
       .freeze

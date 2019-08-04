@@ -108,7 +108,7 @@ module LZWS
       protected def transcode(result)
         # Transcoding from external to internal encoding.
         result.force_encoding @external_encoding unless @external_encoding.nil?
-        result = @buffer.encode @internal_encoding, @transcode_options unless @internal_encoding.nil?
+        result = result.encode @internal_encoding, @transcode_options unless @internal_encoding.nil?
         result
       end
 

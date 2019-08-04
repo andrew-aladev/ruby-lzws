@@ -66,29 +66,32 @@ module LZWS
 
         def test_encoding
           TEXTS.each do |text|
-            ENCODINGS.each do |external_encoding|
-              target_text = text.encode(
-                external_encoding,
+            # We don't need to transcode between same encodings.
+            (ENCODINGS - [text.encoding]).each do |external_encoding|
+              transcode_options = {
                 :invalid => :replace,
                 :undef   => :replace,
                 :replace => "?"
-              )
+              }
+              target_text = text.encode external_encoding, transcode_options
 
               COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
-                  instance = target.new file, compressor_options, :external_encoding => text.encoding
-                  assert instance.external_encoding, text.encoding
-
-                  instance.set_encoding(
-                    external_encoding,
-                    nil,
-                    :invalid => :replace,
-                    :undef   => :replace,
-                    :replace => "?"
+                  instance = target.new(
+                    file,
+                    compressor_options,
+                    :external_encoding => external_encoding
                   )
                   assert instance.external_encoding, external_encoding
 
                   begin
+                    instance.set_encoding(
+                      external_encoding,
+                      nil,
+                      transcode_options
+                    )
+                    assert instance.external_encoding, external_encoding
+
                     instance.write text
                   ensure
                     instance.close

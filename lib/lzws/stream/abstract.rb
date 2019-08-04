@@ -49,6 +49,9 @@ module LZWS
       protected def reset_io_advise
         # Both compressor and decompressor need sequential io access.
         @io.advise :sequential
+      rescue ::Errno::ESPIPE
+        # We can ignore this error.
+        nil
       end
 
       def advise
