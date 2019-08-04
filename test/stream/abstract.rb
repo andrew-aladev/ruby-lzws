@@ -13,8 +13,6 @@ module LZWS
       class Abstract < Minitest::Unit::TestCase
         SOURCE_PATH = Common::SOURCE_PATH
 
-        FIONREAD = 0x541B
-
         def test_invalid_initialize
           Validation::INVALID_IOS.each do |invalid_io|
             assert_raises ValidateError do
@@ -116,13 +114,6 @@ module LZWS
 
             fd = instance.fileno
             refute fd.nil?
-
-            buffer = ""
-            ioctl_result = instance.ioctl FIONREAD, buffer
-            assert_equal ioctl_result, 0
-
-            size = buffer.unpack1 "i!"
-            assert_equal ::File.size(SOURCE_PATH), size
 
             refute instance.isatty
             assert instance.pid.nil?

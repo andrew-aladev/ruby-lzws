@@ -19,7 +19,7 @@ module LZWS
         String = LZWS::String
 
         ARCHIVE_PATH     = Common::ARCHIVE_PATH
-        UNIX_SOCKET_PATH = Common::UNIX_SOCKET_PATH
+        PORT             = Common::PORT
         ENCODINGS        = Common::ENCODINGS
         TEXTS            = Common::TEXTS
         PORTION_LENGTHS  = Common::PORTION_LENGTHS

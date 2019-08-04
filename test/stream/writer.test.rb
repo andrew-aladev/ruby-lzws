@@ -18,7 +18,7 @@ module LZWS
         String = LZWS::String
 
         ARCHIVE_PATH     = Common::ARCHIVE_PATH
-        UNIX_SOCKET_PATH = Common::UNIX_SOCKET_PATH
+        PORT             = Common::PORT
         ENCODINGS        = Common::ENCODINGS
         TEXTS            = Common::TEXTS
         PORTION_LENGTHS  = Common::PORTION_LENGTHS
@@ -137,6 +137,9 @@ module LZWS
         # -- asynchronous --
 
         def test_write_nonblock
+          # Real server will be better for testing nonblock methods.
+          server = ::TCPServer.new PORT
+
           TEXTS.each do |text|
             PORTION_LENGTHS.each do |portion_length|
               sources = get_sources text, portion_length
@@ -144,10 +147,6 @@ module LZWS
               COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                 compressed_text = "".b
 
-                ::File.delete UNIX_SOCKET_PATH if ::File.exist? UNIX_SOCKET_PATH
-                server = ::UNIXServer.new UNIX_SOCKET_PATH
-
-                # Real unix server will be better for testing nonblock methods.
                 server_thread = ::Thread.new do
                   socket = server.accept
 
@@ -165,7 +164,7 @@ module LZWS
                   end
                 end
 
-                socket   = ::UNIXSocket.new UNIX_SOCKET_PATH
+                socket   = ::TCPSocket.new "localhost", PORT
                 instance = target.new socket, compressor_options
 
                 begin

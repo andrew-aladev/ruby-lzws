@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 cd "$(dirname $0)"
@@ -38,7 +38,7 @@ for dictionary in "linked-list" "sparse-array"; do
   make -j2
   sudo make install
 
-  sh -c '\
+  bash -c '\
     cd ../../../.. && \
     gem install bundler &&
     bundle install && \

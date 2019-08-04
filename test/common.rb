@@ -15,7 +15,15 @@ module LZWS
       NATIVE_SOURCE_PATH  = ::File.join(TEMP_PATH, "native_source").freeze
       NATIVE_ARCHIVE_PATH = ::File.join(TEMP_PATH, "native_archive").freeze
 
-      UNIX_SOCKET_PATH = ::File.join(TEMP_PATH, "server.sock").freeze
+      [
+        SOURCE_PATH,
+        ARCHIVE_PATH,
+        NATIVE_SOURCE_PATH,
+        NATIVE_ARCHIVE_PATH
+      ]
+      .each { |path| FileUtils.touch path }
+
+      PORT = 54_001
 
       ENCODINGS = %w[
         binary
