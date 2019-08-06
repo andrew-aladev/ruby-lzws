@@ -22,6 +22,7 @@ module LZWS
       attr_reader :external_encoding
       attr_reader :internal_encoding
       attr_reader :pos
+      alias tell pos
 
       def initialize(io, external_encoding: nil, internal_encoding: nil, transcode_options: {})
         @raw_stream = create_raw_stream
@@ -49,9 +50,8 @@ module LZWS
       protected def reset_io_advise
         # Both compressor and decompressor need sequential io access.
         @io.advise :sequential
-      rescue ::Errno::ESPIPE
-        # We can ignore this error.
-        nil
+      rescue ::Errno::ESPIPE # rubocop:disable Lint/HandleExceptions
+        # ok
       end
 
       def advise

@@ -4,7 +4,6 @@
 require_relative "abstract"
 require_relative "reader_helpers"
 require_relative "raw/decompressor"
-require_relative "../error"
 require_relative "../validation"
 
 module LZWS
@@ -47,21 +46,12 @@ module LZWS
         unless bytes_to_read.nil?
           return nil if eof?
 
-          read_more_buffer until @buffer.bytesize >= bytes_to_read || @io.eof?
+          read_more_from_buffer until @buffer.bytesize >= bytes_to_read || @io.eof?
 
-          bytes_read = [@buffer.bytesize, bytes_to_read].min
-
-          # Result uses buffer binary encoding.
-          result   = @buffer.byteslice 0, bytes_read
-          @buffer  = @buffer.byteslice bytes_read, @buffer.bytesize - bytes_read
-          @pos    += bytes_read
-
-          result = out_buffer.replace result unless out_buffer.nil?
-
-          return result
+          return read_bytes_from_buffer bytes_to_read, out_buffer
         end
 
-        read_more_buffer until @io.eof?
+        read_more_from_buffer until @io.eof?
 
         result = @buffer
         reset_buffer
@@ -73,14 +63,22 @@ module LZWS
         result
       end
 
-      protected def read_more_buffer
-        io_portion    = @io_remainder + @io.read(@io_portion_bytesize)
-        bytes_read    = raw_wrapper :read, io_portion
-        @io_remainder = io_portion.byteslice bytes_read, io_portion.bytesize - bytes_read
+      protected def read_more_from_buffer
+        io_data = @io.read @io_portion_bytesize
+        append_io_data_to_buffer io_data
+      end
 
-        # We should just ignore case when "io.eof?" appears but "io_remainder" is not empty.
-        # Ancient compress implementations can write bytes from not initialized buffer parts to output.
-        raw_wrapper :flush if @io.eof?
+      def readpartial(bytes_to_read = nil, out_buffer = nil)
+        raise ::EOFError if eof?
+
+        readpartial_from_buffer until @buffer.bytesize >= bytes_to_read || @io.eof?
+
+        read_bytes_from_buffer bytes_to_read, out_buffer
+      end
+
+      protected def readpartial_from_buffer
+        io_data = @io.readpartial @io_portion_bytesize
+        append_io_data_to_buffer io_data
       end
 
       def rewind
@@ -99,10 +97,45 @@ module LZWS
 
       # -- asynchronous --
 
+      def read_nonblock(bytes_to_read, out_buffer = nil, *options)
+        raise ::EOFError if eof?
+
+        read_more_from_buffer_nonblock(*options) until @buffer.bytesize >= bytes_to_read || @io.eof?
+
+        read_bytes_from_buffer bytes_to_read, out_buffer
+      end
+
+      protected def read_more_from_buffer_nonblock(*options)
+        io_data = @io.read_nonblock @io_portion_bytesize, *options
+        append_io_data_to_buffer io_data
+      end
+
       # -- common --
 
       def eof?
         @io.eof? && @buffer.bytesize == 0
+      end
+
+      protected def read_bytes_from_buffer(bytes_to_read, out_buffer)
+        bytes_read = [@buffer.bytesize, bytes_to_read].min
+
+        # Result uses buffer binary encoding.
+        result   = @buffer.byteslice 0, bytes_read
+        @buffer  = @buffer.byteslice bytes_read, @buffer.bytesize - bytes_read
+        @pos    += bytes_read
+
+        result = out_buffer.replace result unless out_buffer.nil?
+        result
+      end
+
+      protected def append_io_data_to_buffer(io_data)
+        io_portion    = @io_remainder + io_data
+        bytes_read    = raw_wrapper :read, io_portion
+        @io_remainder = io_portion.byteslice bytes_read, io_portion.bytesize - bytes_read
+
+        # We should just ignore case when "io.eof?" appears but "io_remainder" is not empty.
+        # Ancient compress implementations can write bytes from not initialized buffer parts to output.
+        raw_wrapper :flush if @io.eof?
       end
 
       protected def transcode(result)

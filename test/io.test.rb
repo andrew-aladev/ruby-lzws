@@ -80,11 +80,7 @@ module LZWS
       end
 
       def test_native_compress
-        # Default options should be compatible with native util.
-
         TEXTS.each do |text|
-          # Native util is compressing.
-
           ::File.write NATIVE_SOURCE_PATH, text
           Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
 
@@ -96,11 +92,8 @@ module LZWS
 
             decompressed_text = decompressed_read_io.read
             decompressed_text.force_encoding text.encoding
-
             assert_equal text, decompressed_text
           end
-
-          # Native util is decompressing.
 
           ::IO.pipe("#{text.encoding}:#{::Encoding::BINARY}") do |source_read_io, source_write_io|
             source_write_io << text
@@ -115,7 +108,6 @@ module LZWS
 
               decompressed_text = ::File.read NATIVE_SOURCE_PATH
               decompressed_text.force_encoding text.encoding
-
               assert_equal text, decompressed_text
             end
           end

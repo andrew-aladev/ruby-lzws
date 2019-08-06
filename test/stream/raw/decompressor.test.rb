@@ -97,9 +97,7 @@ module LZWS
             end
           end
 
-          def test_native_decompress
-            # Default options should be compatible with native util.
-
+          def test_native_compress
             TEXTS.each do |text|
               ::File.write NATIVE_SOURCE_PATH, text
               Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
@@ -126,7 +124,6 @@ module LZWS
 
               decompressed_text = decompressed_buffer.string
               decompressed_text.force_encoding text.encoding
-
               assert_equal text, decompressed_text
             end
           end

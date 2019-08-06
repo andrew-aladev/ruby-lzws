@@ -92,7 +92,8 @@ module LZWS
                         decompressed_text << result
                       end
 
-                      assert instance.pos, decompressed_text.bytesize
+                      assert_equal instance.pos, decompressed_text.bytesize
+                      assert_equal instance.pos, instance.tell
                     ensure
                       refute instance.closed?
                       instance.close
@@ -119,7 +120,8 @@ module LZWS
                       decompressed_text = instance.read
                     end
 
-                    assert instance.pos, decompressed_text.bytesize
+                    assert_equal instance.pos, decompressed_text.bytesize
+                    assert_equal instance.pos, instance.tell
                   ensure
                     refute instance.closed?
                     instance.close
@@ -187,8 +189,8 @@ module LZWS
                     :external_encoding => external_encoding,
                     :internal_encoding => internal_encoding
                   )
-                  assert instance.external_encoding, external_encoding
-                  assert instance.internal_encoding, internal_encoding
+                  assert_equal instance.external_encoding, external_encoding
+                  assert_equal instance.internal_encoding, internal_encoding
 
                   begin
                     instance.set_encoding(
@@ -196,8 +198,8 @@ module LZWS
                       internal_encoding,
                       transcode_options
                     )
-                    assert instance.external_encoding, external_encoding
-                    assert instance.internal_encoding, internal_encoding
+                    assert_equal instance.external_encoding, external_encoding
+                    assert_equal instance.internal_encoding, internal_encoding
 
                     decompressed_text = instance.read
                     assert_equal decompressed_text.encoding, internal_encoding
@@ -207,12 +209,153 @@ module LZWS
                 end
 
                 assert_equal target_text, decompressed_text
+                assert target_text.valid_encoding?
+              end
+            end
+          end
+        end
+
+        def test_rewind
+          TEXTS.each do |text|
+            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              write_archive text, compressor_options
+
+              decompressed_text = nil
+
+              ::File.open ARCHIVE_PATH, "rb" do |file|
+                instance = target.new file, decompressor_options
+
+                begin
+                  result_1 = instance.read
+
+                  assert_equal instance.rewind, 0
+                  assert_equal instance.pos, 0
+                  assert_equal instance.pos, instance.tell
+
+                  result_2 = instance.read
+                  assert_equal result_1, result_2
+
+                  decompressed_text = result_1
+                ensure
+                  instance.close
+                end
+              end
+
+              decompressed_text.force_encoding text.encoding
+              assert_equal text, decompressed_text
+            end
+          end
+        end
+
+        def test_readpartial
+          ::TCPServer.open PORT do |server|
+            TEXTS.each do |text|
+              PORTION_LENGTHS.each do |portion_length|
+                COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                  [true, false].map do |with_buffer|
+                    compressed_text = String.compress text, compressor_options
+
+                    server_thread = ::Thread.new do
+                      socket = server.accept
+
+                      begin
+                        socket.write compressed_text
+                      ensure
+                        socket.close
+                      end
+                    end
+
+                    prev_result       = "".b
+                    decompressed_text = "".b
+
+                    ::TCPSocket.open "localhost", PORT do |socket|
+                      instance = target.new socket, decompressor_options
+
+                      begin
+                        loop do
+                          if with_buffer
+                            result = instance.readpartial portion_length, prev_result
+                            assert_equal result, prev_result
+                          else
+                            result = instance.readpartial portion_length
+                          end
+
+                          decompressed_text << result
+                        rescue ::EOFError
+                          break
+                        end
+                      ensure
+                        instance.close
+                      end
+                    end
+
+                    server_thread.join
+
+                    decompressed_text.force_encoding text.encoding
+                    assert_equal text, decompressed_text
+                  end
+                end
               end
             end
           end
         end
 
         # -- asynchronous --
+
+        def test_read_nonblock
+          ::TCPServer.open PORT do |server|
+            TEXTS.each do |text|
+              PORTION_LENGTHS.each do |portion_length|
+                COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                  compressed_text = String.compress text, compressor_options
+
+                  server_thread = ::Thread.new do
+                    socket = server.accept
+
+                    begin
+                      loop do
+                        begin
+                          bytes_written = socket.write_nonblock compressed_text
+                        rescue ::IO::WaitWritable
+                          ::IO.select nil, [socket]
+                          retry
+                        end
+
+                        compressed_text = compressed_text.byteslice bytes_written, compressed_text.bytesize - bytes_written
+                        break if compressed_text.bytesize == 0
+                      end
+                    ensure
+                      socket.close
+                    end
+                  end
+
+                  decompressed_text = "".b
+
+                  ::TCPSocket.open "localhost", PORT do |socket|
+                    instance = target.new socket, decompressor_options
+
+                    begin
+                      loop do
+                        decompressed_text << instance.read_nonblock(portion_length)
+                      rescue ::IO::WaitReadable
+                        ::IO.select [socket]
+                      rescue ::EOFError
+                        break
+                      end
+                    ensure
+                      instance.close
+                    end
+                  end
+
+                  decompressed_text.force_encoding text.encoding
+                  assert_equal text, decompressed_text
+
+                  server_thread.join
+                end
+              end
+            end
+          end
+        end
 
         # -----
 

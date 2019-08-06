@@ -49,7 +49,9 @@ module LZWS
                   begin
                     instance.write(*sources)
                     instance.flush
-                    assert instance.pos, text.bytesize
+
+                    assert_equal instance.pos, text.bytesize
+                    assert_equal instance.pos, instance.tell
                   ensure
                     refute instance.closed?
                     instance.close
@@ -82,7 +84,7 @@ module LZWS
                     compressor_options,
                     :external_encoding => external_encoding
                   )
-                  assert instance.external_encoding, external_encoding
+                  assert_equal instance.external_encoding, external_encoding
 
                   begin
                     instance.set_encoding(
@@ -90,7 +92,7 @@ module LZWS
                       nil,
                       transcode_options
                     )
-                    assert instance.external_encoding, external_encoding
+                    assert_equal instance.external_encoding, external_encoding
 
                     instance.write text
                   ensure
@@ -100,6 +102,7 @@ module LZWS
 
                 compressed_text = ::File.read ARCHIVE_PATH
                 check_text target_text, compressed_text, decompressor_options
+                assert target_text.valid_encoding?
               end
             end
           end
@@ -116,12 +119,15 @@ module LZWS
                 TEXTS.each do |text|
                   instance.write text
                   instance.flush
-                  assert instance.pos, text.bytesize
+
+                  assert_equal instance.pos, text.bytesize
+                  assert_equal instance.pos, instance.tell
 
                   compressed_texts << ::File.read(ARCHIVE_PATH)
 
                   assert_equal instance.rewind, 0
-                  assert instance.pos, 0
+                  assert_equal instance.pos, 0
+                  assert_equal instance.pos, instance.tell
 
                   file.truncate 0
                 end
@@ -140,84 +146,84 @@ module LZWS
         # -- asynchronous --
 
         def test_write_nonblock
-          # Real server will be better for testing nonblock methods.
-          server = ::TCPServer.new PORT
+          ::TCPServer.open PORT do |server|
+            TEXTS.each do |text|
+              PORTION_LENGTHS.each do |portion_length|
+                sources = get_sources text, portion_length
 
-          TEXTS.each do |text|
-            PORTION_LENGTHS.each do |portion_length|
-              sources = get_sources text, portion_length
+                COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                  compressed_text = "".b
 
-              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                compressed_text = "".b
+                  server_thread = ::Thread.new do
+                    socket = server.accept
 
-                server_thread = ::Thread.new do
-                  socket = server.accept
-
-                  # Read nonblock limited by portion length will provide a great amount of wait writable errors on client.
-                  begin
-                    loop do
-                      compressed_text += socket.read_nonblock portion_length
-                    rescue ::IO::WaitReadable
-                      ::IO.select [socket]
-                    rescue ::EOFError
-                      break
+                    begin
+                      loop do
+                        compressed_text << socket.read_nonblock(portion_length)
+                      rescue ::IO::WaitReadable
+                        ::IO.select [socket]
+                      rescue ::EOFError
+                        break
+                      end
+                    ensure
+                      socket.close
                     end
-                  ensure
-                    socket.close
                   end
-                end
 
-                socket   = ::TCPSocket.new "localhost", PORT
-                instance = target.new socket, compressor_options
+                  TCPSocket.open "localhost", PORT do |socket|
+                    instance = target.new socket, compressor_options
 
-                begin
-                  sources.each do |source|
-                    loop do
-                      begin
-                        bytes_written = instance.write_nonblock source
-                      rescue ::IO::WaitWritable
-                        ::IO.select nil, [socket]
-                        retry
+                    begin
+                      sources.each do |source|
+                        loop do
+                          begin
+                            bytes_written = instance.write_nonblock source
+                          rescue ::IO::WaitWritable
+                            ::IO.select nil, [socket]
+                            retry
+                          end
+
+                          source = source.byteslice bytes_written, source.bytesize - bytes_written
+                          break if source.bytesize == 0
+                        end
                       end
 
-                      source = source.byteslice bytes_written, source.bytesize - bytes_written
-                      break if source.bytesize == 0
+                      loop do
+                        begin
+                          is_flushed = instance.flush_nonblock
+                        rescue ::IO::WaitWritable
+                          ::IO.select nil, [socket]
+                          retry
+                        end
+
+                        break if is_flushed
+                      end
+
+                      assert_equal instance.pos, text.bytesize
+                      assert_equal instance.pos, instance.tell
+
+                    ensure
+                      refute instance.closed?
+
+                      loop do
+                        begin
+                          is_closed = instance.close_nonblock
+                        rescue ::IO::WaitWritable
+                          ::IO.select nil, [socket]
+                          retry
+                        end
+
+                        break if is_closed
+                      end
+
+                      assert instance.closed?
                     end
                   end
 
-                  loop do
-                    begin
-                      is_flushed = instance.flush_nonblock
-                    rescue ::IO::WaitWritable
-                      ::IO.select nil, [socket]
-                      retry
-                    end
+                  server_thread.join
 
-                    break if is_flushed
-                  end
-
-                  assert instance.pos, text.bytesize
-
-                ensure
-                  refute instance.closed?
-
-                  loop do
-                    begin
-                      is_closed = instance.close_nonblock
-                    rescue ::IO::WaitWritable
-                      ::IO.select nil, [socket]
-                      retry
-                    end
-
-                    break if is_closed
-                  end
-
-                  assert instance.closed?
+                  check_text text, compressed_text, decompressor_options
                 end
-
-                server_thread.join
-
-                check_text text, compressed_text, decompressor_options
               end
             end
           end
@@ -234,7 +240,9 @@ module LZWS
                 TEXTS.each do |text|
                   instance.write text
                   instance.flush
-                  assert instance.pos, text.bytesize
+
+                  assert_equal instance.pos, text.bytesize
+                  assert_equal instance.pos, instance.tell
 
                   compressed_texts << ::File.read(ARCHIVE_PATH)
 
@@ -249,7 +257,8 @@ module LZWS
                     break if is_rewinded
                   end
 
-                  assert instance.pos, 0
+                  assert_equal instance.pos, 0
+                  assert_equal instance.pos, instance.tell
 
                   file.truncate 0
                 end
