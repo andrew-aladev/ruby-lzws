@@ -10,10 +10,14 @@ module LZWS
     class Writer < Abstract
       include WriterHelpers
 
+      attr_reader :lineno
+
       def initialize(destination_io, options = {}, *args)
         @options = options
 
         super destination_io, *args
+
+        @lineno = 0
       end
 
       def create_raw_stream

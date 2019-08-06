@@ -21,6 +21,8 @@ module LZWS
 
           yield byte
         end
+
+        nil
       end
 
       def readbyte
@@ -30,9 +32,12 @@ module LZWS
         byte
       end
 
-      def ungetbyte(string)
-        Validation.validate_string string
-        @buffer.prepend string
+      def ungetbyte(byte)
+        Validation.validate_string byte
+
+        @buffer.prepend byte
+
+        nil
       end
 
       # -- char --
@@ -47,8 +52,8 @@ module LZWS
 
           bytes << byte
 
-          result = ::String.new bytes, :encoding => @external_encoding
-          return result if result.valid_encoding?
+          char = ::String.new bytes, :encoding => external_encoding_value
+          return char if char.valid_encoding?
         end
       end
 
@@ -61,6 +66,8 @@ module LZWS
 
           yield char
         end
+
+        nil
       end
 
       def readchar
@@ -70,12 +77,40 @@ module LZWS
         char
       end
 
-      def ungetc(string)
-        Validation.validate_string string
-        @buffer.prepend string
+      def ungetc(char)
+        Validation.validate_string char
+
+        bytes = ::String.new char, :encoding => ::Encoding::BINARY
+        @buffer.prepend bytes
+
+        nil
       end
 
       # -- lines --
+
+      def gets(separator = $OUTPUT_RECORD_SEPARATOR, limit = nil)
+        # Limit can be a first argument.
+        if separator.is_a? ::Numeric
+          limit     = separator
+          separator = $OUTPUT_RECORD_SEPARATOR
+        end
+
+        chars = ::String.new bytes, :encoding => external_encoding_value
+
+        loop do
+          char = getc
+        end
+      end
+
+      # -- common --
+
+      protected def external_encoding_value
+        if @external_encoding.nil?
+          ::Encoding::BINARY
+        else
+          @external_encoding
+        end
+      end
 
       # -- etc --
 

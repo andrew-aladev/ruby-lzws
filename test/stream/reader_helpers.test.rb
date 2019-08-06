@@ -79,6 +79,8 @@ module LZWS
               write_archive text, compressor_options
 
               Target.open ARCHIVE_PATH, decompressor_options do |instance|
+                instance.set_encoding text.encoding
+
                 char = instance.getc
                 instance.ungetc char unless char.nil?
 
@@ -89,10 +91,9 @@ module LZWS
                   # ok
                 end
 
-                decompressed_text = "".b
+                decompressed_text = ::String.new :encoding => text.encoding
                 instance.each_char { |current_char| decompressed_text << current_char }
 
-                decompressed_text.force_encoding text.encoding
                 assert_equal text, decompressed_text
               end
             end

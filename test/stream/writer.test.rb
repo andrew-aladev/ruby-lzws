@@ -17,11 +17,12 @@ module LZWS
         Target = LZWS::Stream::Writer
         String = LZWS::String
 
-        ARCHIVE_PATH     = Common::ARCHIVE_PATH
-        PORT             = Common::PORT
-        ENCODINGS        = Common::ENCODINGS
-        TEXTS            = Common::TEXTS
-        PORTION_LENGTHS  = Common::PORTION_LENGTHS
+        ARCHIVE_PATH      = Common::ARCHIVE_PATH
+        PORT              = Common::PORT
+        ENCODINGS         = Common::ENCODINGS
+        TRANSCODE_OPTIONS = Common::TRANSCODE_OPTIONS
+        TEXTS             = Common::TEXTS
+        PORTION_LENGTHS   = Common::PORTION_LENGTHS
 
         COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
 
@@ -70,12 +71,7 @@ module LZWS
           TEXTS.each do |text|
             # We don't need to transcode between same encodings.
             (ENCODINGS - [text.encoding]).each do |external_encoding|
-              transcode_options = {
-                :invalid => :replace,
-                :undef   => :replace,
-                :replace => "?"
-              }
-              target_text = text.encode external_encoding, transcode_options
+              target_text = text.encode external_encoding, TRANSCODE_OPTIONS
 
               COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
@@ -87,11 +83,7 @@ module LZWS
                   assert_equal instance.external_encoding, external_encoding
 
                   begin
-                    instance.set_encoding(
-                      external_encoding,
-                      nil,
-                      transcode_options
-                    )
+                    instance.set_encoding external_encoding, nil, TRANSCODE_OPTIONS
                     assert_equal instance.external_encoding, external_encoding
 
                     instance.write text

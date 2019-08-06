@@ -33,6 +33,13 @@ module LZWS
       .map { |encoding_name| ::Encoding.find encoding_name }
       .freeze
 
+      TRANSCODE_OPTIONS = {
+        :invalid => :replace,
+        :undef   => :replace,
+        :replace => "?"
+      }
+      .freeze
+
       TEXTS = [
         "",
         "tobeornottobeortobeornot",
@@ -40,12 +47,7 @@ module LZWS
       ]
       .flat_map do |text|
         ENCODINGS.map do |encoding|
-          text.encode(
-            encoding,
-            :invalid => :replace,
-            :undef   => :replace,
-            :replace => "?"
-          )
+          text.encode encoding, TRANSCODE_OPTIONS
         end
       end
       .freeze
