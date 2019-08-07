@@ -43,6 +43,13 @@ module LZWS
       # -- char --
 
       def getc
+        if @external_encoding.nil?
+          byte = getbyte
+          return nil if byte.nil?
+
+          return transcode_from_external_to_internal byte
+        end
+
         bytes = ::String.new :encoding => ::Encoding::BINARY
 
         # Read one byte until valid string will appear.
@@ -77,6 +84,9 @@ module LZWS
         char
       end
 
+      # Char is returning back to buffer.
+      # "getc" method will return same char again.
+      # WARNING - "getbyte" can return different bytes because of transcoding.
       def ungetc(char)
         Validation.validate_string char
 

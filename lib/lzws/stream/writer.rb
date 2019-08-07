@@ -140,9 +140,9 @@ module LZWS
 
       # -- common --
 
-      protected def transcode(source)
-        source = source.encode @external_encoding, @transcode_options unless @external_encoding.nil?
-        source
+      protected def transcode(data)
+        data = data.encode @external_encoding, @transcode_options unless @external_encoding.nil?
+        data
       end
     end
   end

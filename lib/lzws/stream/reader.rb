@@ -57,7 +57,7 @@ module LZWS
         reset_buffer
         @pos += result.bytesize
 
-        result = transcode result
+        result = transcode_from_external_to_internal result
         result = out_buffer.replace result unless out_buffer.nil?
 
         result
@@ -138,11 +138,18 @@ module LZWS
         raw_wrapper :flush if @io.eof?
       end
 
-      protected def transcode(result)
-        # Transcoding from external to internal encoding.
-        result.force_encoding @external_encoding unless @external_encoding.nil?
-        result = result.encode @internal_encoding, @transcode_options unless @internal_encoding.nil?
-        result
+      protected def transcode_from_external_to_internal(data)
+        data.force_encoding @external_encoding unless @external_encoding.nil?
+        data = data.encode @internal_encoding, @transcode_options unless @internal_encoding.nil?
+        data
+      end
+
+      # We should be able to return data back to buffer.
+      # We won't use transcode options because transcoded data should be backward compatible.
+      protected def transcode_from_internal_to_external(data)
+        data.force_encoding @internal_encoding unless @internal_encoding.nil?
+        data = data.encode @external_encoding unless @external_encoding.nil?
+        data
       end
 
       protected def raw_wrapper(method_name, *args)
