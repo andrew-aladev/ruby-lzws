@@ -156,7 +156,7 @@ module LZWS
       protected def ungetstring(string)
         Validation.validate_string string
 
-        string.force_encoding @internal_encoding unless @internal_encoding.nil?
+        string = ::String.new string, :encoding => @internal_encoding
         string = transcode_to_external string unless @external_encoding.nil?
 
         string.force_encoding ::Encoding::BINARY
