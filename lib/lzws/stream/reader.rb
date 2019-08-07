@@ -2,8 +2,8 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require_relative "abstract"
-require_relative "reader_helpers"
 require_relative "raw/decompressor"
+require_relative "reader_helpers"
 require_relative "../validation"
 
 module LZWS
@@ -12,6 +12,8 @@ module LZWS
       include ReaderHelpers
 
       DEFAULT_IO_PORTION_BYTESIZE = 1 << 15 # 32 KB
+
+      attr_accessor :lineno
 
       def initialize(source_io, options = {}, *args)
         @options = options
@@ -25,6 +27,8 @@ module LZWS
         @io_portion_bytesize = io_portion_bytesize || DEFAULT_IO_PORTION_BYTESIZE
 
         reset_io_remainder
+
+        @lineno = 0
       end
 
       def create_raw_stream
@@ -57,7 +61,8 @@ module LZWS
         reset_buffer
         @pos += result.bytesize
 
-        result = transcode_from_external_to_internal result
+        result.force_encoding @external_encoding unless @external_encoding.nil?
+        result = transcode_to_internal result
         result = out_buffer.replace result unless out_buffer.nil?
 
         result
@@ -138,16 +143,14 @@ module LZWS
         raw_wrapper :flush if @io.eof?
       end
 
-      protected def transcode_from_external_to_internal(data)
-        data.force_encoding @external_encoding unless @external_encoding.nil?
+      protected def transcode_to_internal(data)
         data = data.encode @internal_encoding, @transcode_options unless @internal_encoding.nil?
         data
       end
 
       # We should be able to return data back to buffer.
-      # We won't use transcode options because transcoded data should be backward compatible.
-      protected def transcode_from_internal_to_external(data)
-        data.force_encoding @internal_encoding unless @internal_encoding.nil?
+      # We won't use any transcode options because transcoded data should be backward compatible.
+      protected def transcode_to_external(data)
         data = data.encode @external_encoding unless @external_encoding.nil?
         data
       end

@@ -8,8 +8,6 @@ def require_header(name)
 end
 
 require_header "lzws/buffer.h"
-require_header "lzws/string.h"
-require_header "lzws/file.h"
 require_header "lzws/compressor/common.h"
 require_header "lzws/compressor/header.h"
 require_header "lzws/compressor/main.h"
@@ -18,6 +16,8 @@ require_header "lzws/decompressor/common.h"
 require_header "lzws/decompressor/header.h"
 require_header "lzws/decompressor/main.h"
 require_header "lzws/decompressor/state.h"
+require_header "lzws/file.h"
+require_header "lzws/string.h"
 
 def require_library(name, functions)
   functions.each do |function|

@@ -1,14 +1,14 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require "lzws/stream/raw/decompressor"
+require "lzws/string"
+
 require_relative "abstract"
 require_relative "../../common"
 require_relative "../../minitest"
 require_relative "../../option"
 require_relative "../../validation"
-
-require "lzws/stream/raw/decompressor"
-require "lzws/string"
 
 module LZWS
   module Test
@@ -21,6 +21,7 @@ module LZWS
           NATIVE_SOURCE_PATH  = Common::NATIVE_SOURCE_PATH
           NATIVE_ARCHIVE_PATH = Common::NATIVE_ARCHIVE_PATH
           TEXTS               = Common::TEXTS
+          LARGE_TEXTS         = Common::LARGE_TEXTS
           PORTION_LENGTHS     = Common::PORTION_LENGTHS
 
           COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
@@ -98,7 +99,7 @@ module LZWS
           end
 
           def test_native_compress
-            TEXTS.each do |text|
+            LARGE_TEXTS.each do |text|
               ::File.write NATIVE_SOURCE_PATH, text
               Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
 

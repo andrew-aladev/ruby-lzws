@@ -113,6 +113,14 @@ module LZWS
         instance_variable_set name, value
       end
 
+      protected def target_encoding
+        return @internal_encoding unless @internal_encoding.nil?
+
+        return @external_encoding unless @external_encoding.nil?
+
+        ::Encoding::BINARY
+      end
+
       # -- etc --
 
       def rewind

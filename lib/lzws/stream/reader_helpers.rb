@@ -6,30 +6,16 @@ require_relative "../validation"
 module LZWS
   module Stream
     module ReaderHelpers
-      # -- byte --
-
       def getbyte
         read 1
       end
 
       def each_byte(&block)
-        return enum_for __method__ unless block.is_a? ::Proc
-
-        loop do
-          byte = getbyte
-          break if byte.nil?
-
-          yield byte
-        end
-
-        nil
+        each_string method(:getbyte), &block
       end
 
       def readbyte
-        byte = getbyte
-        raise ::EOFError if byte.nil?
-
-        byte
+        readstring method(:getbyte)
       end
 
       def ungetbyte(byte)
@@ -47,79 +33,123 @@ module LZWS
           byte = getbyte
           return nil if byte.nil?
 
-          return transcode_from_external_to_internal byte
+          return transcode_to_internal byte
         end
 
-        bytes = ::String.new :encoding => ::Encoding::BINARY
+        char = ::String.new :encoding => ::Encoding::BINARY
 
         # Read one byte until valid string will appear.
         loop do
           byte = getbyte
           return nil if byte.nil?
 
-          bytes << byte
+          char << byte
 
-          char = ::String.new bytes, :encoding => external_encoding_value
-          return char if char.valid_encoding?
+          char.force_encoding @external_encoding
+          return transcode_to_internal char if char.valid_encoding?
+
+          char.force_encoding ::Encoding::BINARY
         end
-      end
-
-      def each_char(&block)
-        return enum_for __method__ unless block.is_a? ::Proc
-
-        loop do
-          char = getc
-          break if char.nil?
-
-          yield char
-        end
-
-        nil
       end
 
       def readchar
-        char = getc
-        raise ::EOFError if char.nil?
-
-        char
+        readstring method(:getc)
       end
 
-      # Char is returning back to buffer.
-      # "getc" method will return same char again.
-      # WARNING - "getbyte" can return different bytes because of transcoding.
+      def each_char(&block)
+        each_string method(:getc), &block
+      end
+
       def ungetc(char)
-        Validation.validate_string char
-
-        bytes = ::String.new char, :encoding => ::Encoding::BINARY
-        @buffer.prepend bytes
-
-        nil
+        ungetstring char
       end
 
       # -- lines --
 
       def gets(separator = $OUTPUT_RECORD_SEPARATOR, limit = nil)
+        return nil if eof?
+
         # Limit can be a first argument.
         if separator.is_a? ::Numeric
           limit     = separator
           separator = $OUTPUT_RECORD_SEPARATOR
         end
 
-        chars = ::String.new bytes, :encoding => external_encoding_value
+        Validation.validate_string separator unless separator.nil?
+        Validation.validate_positive_integer limit unless limit.nil?
+
+        line = ::String.new :encoding => target_encoding
 
         loop do
           char = getc
+          break if char.nil?
+
+          line << char
+          break if char == separator || (!limit.nil? && line.length >= limit)
         end
+
+        @lineno += 1
+
+        line
+      end
+
+      def readline
+        readstring method(:gets)
+      end
+
+      def readlines
+        lines = []
+        each_line { |line| lines << line }
+
+        lines
+      end
+
+      def each_line(&block)
+        each_string method(:gets), &block
+      end
+
+      alias each each_line
+
+      def ungetline(line)
+        ungetstring line
+
+        @lineno -= 1
+
+        nil
       end
 
       # -- common --
 
-      protected def external_encoding_value
-        if @external_encoding.nil?
-          ::Encoding::BINARY
-        else
-          @external_encoding
+      protected def readstring(each_proc)
+        string = each_proc.call
+        raise ::EOFError if string.nil?
+
+        string
+      end
+
+      protected def each_string(each_proc, &block)
+        return enum_for __method__ unless block.is_a? ::Proc
+
+        loop do
+          string = each_proc.call
+          break if string.nil?
+
+          yield string
         end
+
+        nil
+      end
+
+      protected def ungetstring(string)
+        Validation.validate_string string
+
+        string.force_encoding @internal_encoding unless @internal_encoding.nil?
+        string = transcode_to_external string unless @external_encoding.nil?
+
+        string.force_encoding ::Encoding::BINARY
+        @buffer.prepend string
+
+        nil
       end
 
       # -- etc --

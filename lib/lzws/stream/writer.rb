@@ -2,22 +2,18 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require_relative "abstract"
-require_relative "writer_helpers"
 require_relative "raw/compressor"
+require_relative "writer_helpers"
 
 module LZWS
   module Stream
     class Writer < Abstract
       include WriterHelpers
 
-      attr_reader :lineno
-
       def initialize(destination_io, options = {}, *args)
         @options = options
 
         super destination_io, *args
-
-        @lineno = 0
       end
 
       def create_raw_stream

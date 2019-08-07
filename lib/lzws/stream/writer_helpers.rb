@@ -66,6 +66,8 @@ module LZWS
         nil
       end
 
+      # -- etc --
+
       module ClassMethods
         def open(file_path, *args, &block)
           Validation.validate_string file_path

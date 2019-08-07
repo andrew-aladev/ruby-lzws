@@ -7,11 +7,12 @@
 #include <lzws/compressor/main.h>
 #include <lzws/compressor/state.h>
 
+#include "ruby.h"
+
 #include "lzws_ext/error.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
 #include "lzws_ext/stream/compressor.h"
-#include "ruby.h"
 
 static void free_compressor(lzws_ext_compressor_t* compressor_ptr)
 {

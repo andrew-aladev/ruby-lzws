@@ -1,14 +1,15 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require "socket"
+
+require "lzws/stream/writer"
+require "lzws/string"
+
 require_relative "abstract"
 require_relative "../common"
 require_relative "../minitest"
 require_relative "../option"
-
-require "lzws/stream/writer"
-require "lzws/string"
-require "socket"
 
 module LZWS
   module Test

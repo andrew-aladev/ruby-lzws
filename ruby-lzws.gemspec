@@ -1,9 +1,9 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
-require_relative "lib/lzws/version"
-
 require "date"
+
+require_relative "lib/lzws/version"
 
 Gem::Specification.new do |gem|
   gem.name     = "ruby-lzws"

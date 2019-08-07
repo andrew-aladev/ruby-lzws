@@ -1,12 +1,13 @@
 // Ruby bindings for lzws library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
+#include "ruby.h"
+
 #include "lzws_ext/common.h"
 #include "lzws_ext/io.h"
 #include "lzws_ext/stream/compressor.h"
 #include "lzws_ext/stream/decompressor.h"
 #include "lzws_ext/string.h"
-#include "ruby.h"
 
 void Init_lzws_ext()
 {
