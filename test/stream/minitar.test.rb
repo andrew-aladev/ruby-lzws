@@ -20,14 +20,14 @@ module LZWS
 
         def test_tar
           LARGE_TEXTS.each do |text|
-            Writer.open ARCHIVE_PATH do |io_writer|
-              Minitar::Writer.open io_writer do |tar|
+            Writer.open ARCHIVE_PATH do |writer|
+              Minitar::Writer.open writer do |tar|
                 tar.add_file_simple "file", :data => text
               end
             end
 
-            Reader.open ARCHIVE_PATH do |io_reader|
-              Minitar::Reader.open io_reader do |tar|
+            Reader.open ARCHIVE_PATH do |reader|
+              Minitar::Reader.open reader do |tar|
                 tar.each_entry do |entry|
                   assert_equal entry.name, "file"
 

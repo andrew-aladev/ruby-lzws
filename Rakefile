@@ -1,5 +1,8 @@
 require "rake/extensiontask"
 require "rake/testtask"
+require "rubygems/package_task"
+
+load "ruby-lzws.gemspec"
 
 Rake::ExtensionTask.new do |ext|
   ext.name           = "lzws_ext"
@@ -17,3 +20,5 @@ Rake::TestTask.new do |task|
 end
 
 task :default => %i[compile test]
+
+Gem::PackageTask.new(GEMSPEC).define

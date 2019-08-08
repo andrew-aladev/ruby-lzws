@@ -5,7 +5,7 @@ require "date"
 
 require_relative "lib/lzws/version"
 
-Gem::Specification.new do |gem|
+GEMSPEC = Gem::Specification.new do |gem|
   gem.name     = "ruby-lzws"
   gem.summary  = "Ruby bindings for lzws library."
   gem.homepage = "https://github.com/andrew-aladev/ruby-lzws"

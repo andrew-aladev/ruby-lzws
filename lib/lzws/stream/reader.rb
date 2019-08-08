@@ -31,7 +31,7 @@ module LZWS
         @lineno = 0
       end
 
-      def create_raw_stream
+      protected def create_raw_stream
         Raw::Decompressor.new @options
       end
 

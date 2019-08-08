@@ -16,7 +16,7 @@ module LZWS
         super destination_io, *args
       end
 
-      def create_raw_stream
+      protected def create_raw_stream
         Raw::Compressor.new @options
       end
 
