@@ -61,7 +61,9 @@ end
 ```
 
 Each API supports additional options, please read lzws docs for more info.
+
 Compressor supports `:max_code_bit_length`, `:block_mode`, `buffer_length`, `:without_magic_header`, `:msb`, `:unaligned_bit_groups`, `:quiet`.
+
 Decompressor supports `:buffer_length`, `:without_magic_header`, `:msb`, `:unaligned_bit_groups`, `:quiet`.
 
 ```ruby
@@ -160,8 +162,8 @@ end
 #ungetline(line)
 ```
 
-`LZWS::Stream::Writer` and `LZWS::Stream::Reader` behaviour is the same as builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipReader.html), [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipWriter.html) and [IO](https://ruby-doc.org/core-2.6.3/IO.html).
-Please read these method descriptions in builtin ruby doc.
+`LZWS::Stream::Writer` and `LZWS::Stream::Reader` behaviour is the same as builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipReader.html), [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipWriter.html) and [`IO`](https://ruby-doc.org/core-2.6.3/IO.html).
+Please read these method descriptions in ruby doc.
 
 ## License
 
