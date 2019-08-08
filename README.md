@@ -62,9 +62,27 @@ end
 
 Each API supports additional options, please read lzws docs for more info.
 
-Compressor supports `:max_code_bit_length`, `:block_mode`, `buffer_length`, `:without_magic_header`, `:msb`, `:unaligned_bit_groups`, `:quiet`.
+Compressor:
 
-Decompressor supports `:buffer_length`, `:without_magic_header`, `:msb`, `:unaligned_bit_groups`, `:quiet`.
+```
+:max_code_bit_length
+:block_mode
+:buffer_length
+:without_magic_header
+:msb
+:unaligned_bit_groups
+:quiet
+```
+
+Decompressor:
+
+```
+:buffer_length
+:without_magic_header
+:msb
+:unaligned_bit_groups
+:quiet
+```
 
 ```ruby
 require "lzws"
@@ -104,7 +122,7 @@ end
 `LZWS::Stream::Writer` and `LZWS::Stream::Reader`:
 
 ```
-::open(file_path, *args, &block)
+::open(file_path, options = {}, :external_encoding => nil, :internal_encoding => nil, &block)
 #io
 #stat
 #external_encoding
@@ -112,7 +130,7 @@ end
 #pos
 #tell
 #advise
-#set_encoding(*args)
+#set_encoding(external_encoding, internal_encoding, transcode_options)
 #rewind
 #close
 #closed?
@@ -122,7 +140,7 @@ end
 `Stream::Writer`:
 
 ```
-::new(destination_io, options = {}, *args)
+::new(destination_io, options = {}, :external_encoding => nil)
 #write(*objects)
 #flush
 #write_nonblock(object, *options)
@@ -139,7 +157,7 @@ end
 `Stream::Reader`:
 
 ```
-::new(source_io, options = {}, *args)
+::new(source_io, options = {}, :external_encoding => nil, :internal_encoding => nil)
 #lineno
 #lineno=
 #read(bytes_to_read = nil, out_buffer = nil)
