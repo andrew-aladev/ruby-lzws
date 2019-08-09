@@ -62,7 +62,7 @@ end
 
 Each API supports additional options, please read lzws docs for more info.
 
-###### Compressor
+Compressor:
 
 ```
 :max_code_bit_length
@@ -108,7 +108,7 @@ Values: true/false, default value: false.
 
 Values: true/false, default value: false.
 
-###### Decompressor
+Decompressor:
 
 ```
 :buffer_length
@@ -129,7 +129,7 @@ data = LZWS::String.compress "TOBEORNOTTOBEORTOBEORNOT", :msb => true
 puts LZWS::String.decompress(data, :msb => true)
 ```
 
-###### Content-Encoding: compress
+Content-Encoding: compress:
 
 ```ruby
 require "lzws"
@@ -143,7 +143,7 @@ end
 
 ## Docs
 
-###### String
+`String`:
 
 ```
 ::compress(source, options = {})
@@ -157,7 +157,7 @@ Compress source string (with options).
 
 Decompress source string (with options).
 
-###### File
+`File`:
 
 ```
 ::compress(source, destination, options = {})
@@ -171,7 +171,7 @@ Compress source file path to destination file path (with options).
 
 Decompress source file path to destination file path (with options).
 
-###### Stream::Writer
+`Stream::Writer`:
 
 Its behaviour is similar to builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipWriter.html).
 
@@ -239,7 +239,7 @@ Behaviour is the same as `IO#write_nonblock` method.
 
 Typical helpers, see [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
 
-###### Stream::Reader
+`Stream::Reader`:
 
 Its behaviour is similar to builtin [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipReader.html).
 
@@ -277,8 +277,6 @@ Set another encodings.
 See [`IO`](https://ruby-doc.org/core-2.6.3/IO.html) docs.
 
 ```
-#lineno
-#lineno=
 #read(bytes_to_read = nil, out_buffer = nil)
 #eof?
 #rewind
@@ -306,6 +304,8 @@ See [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib
 #each_char(&block)
 #ungetc(char)
 
+#lineno
+#lineno=
 #gets(separator = $OUTPUT_RECORD_SEPARATOR, limit = nil)
 #readline
 #readlines
