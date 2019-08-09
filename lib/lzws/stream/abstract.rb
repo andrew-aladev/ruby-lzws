@@ -21,6 +21,7 @@ module LZWS
       attr_reader :stat
       attr_reader :external_encoding
       attr_reader :internal_encoding
+      attr_reader :transcode_options
       attr_reader :pos
       alias tell pos
 

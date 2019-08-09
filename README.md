@@ -62,11 +62,55 @@ end
 
 Each API supports additional options, please read lzws docs for more info.
 
-Compressor:
+###### Compressor
 
 ```
 :max_code_bit_length
+```
+
+Values: 9 - 16, default value: 16.
+
+```
 :block_mode
+```
+
+Values: true/false, default value: true.
+
+```
+:buffer_length
+```
+
+Values: 0, 2 - infinity, default value: 0.
+0 means automatic buffer length selection.
+1 byte is not enough, 2 bytes is minimal buffer length.
+
+```
+:without_magic_header
+```
+
+Values: true/false, default value: false.
+
+```
+:msb
+```
+
+Values: true/false, default value: false.
+
+```
+:unaligned_bit_groups
+```
+
+Values: true/false, default value: false.
+
+```
+:quiet
+```
+
+Values: true/false, default value: false.
+
+###### Decompressor
+
+```
 :buffer_length
 :without_magic_header
 :msb
@@ -74,15 +118,9 @@ Compressor:
 :quiet
 ```
 
-Decompressor:
+Values are the same.
 
-```
-:buffer_length
-:without_magic_header
-:msb
-:unaligned_bit_groups
-:quiet
-```
+Example:
 
 ```ruby
 require "lzws"
@@ -91,7 +129,7 @@ data = LZWS::String.compress "TOBEORNOTTOBEORTOBEORNOT", :msb => true
 puts LZWS::String.decompress(data, :msb => true)
 ```
 
-You can use `Content-Encoding: compress`.
+###### Content-Encoding: compress
 
 ```ruby
 require "lzws"
@@ -105,48 +143,93 @@ end
 
 ## Docs
 
-`LZWS::String`:
+###### String
 
 ```
 ::compress(source, options = {})
+```
+
+Compress source string (with options).
+
+```
 ::decompress(source, options = {})
 ```
 
-`LZWS::File`:
+Decompress source string (with options).
+
+###### File
 
 ```
 ::compress(source, destination, options = {})
+```
+
+Compress source file path to destination file path (with options).
+
+```
 ::decompress(source, destination, options = {})
 ```
 
-`LZWS::Stream::Writer` and `LZWS::Stream::Reader`:
+Decompress source file path to destination file path (with options).
+
+###### Stream::Writer
+
+Its behaviour is similar to builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipWriter.html).
 
 ```
-::open(file_path, options = {}, :external_encoding => nil, :internal_encoding => nil, &block)
+::open(file_path, options = {}, :external_encoding => nil, :transcode_options => {}, &block)
+```
+
+Open file path and create stream writer (with options) associated with opened file.
+Data will be transcoded to `:external_encoding` using `:transcode_options` before writing.
+
+```
+::new(destination_io, options = {}, :external_encoding => nil, :transcode_options => {})
+```
+
+Create stream writer (with options) associated with destination io.
+Data will be transcoded to `:external_encoding` using `:transcode_options` before writing.
+
+```
+#set_encoding(external_encoding, nil, transcode_options)
+```
+
+Set another encodings, `nil` is just for compatibility with `IO`.
+
+```
 #io
+#to_io
 #stat
 #external_encoding
-#internal_encoding
+#transcode_options
 #pos
 #tell
-#advise
-#set_encoding(external_encoding, internal_encoding, transcode_options)
+```
+
+See [`IO`](https://ruby-doc.org/core-2.6.3/IO.html) docs.
+
+```
+#write(*objects)
+#flush
 #rewind
 #close
 #closed?
-#to_io
 ```
 
-`Stream::Writer`:
+See [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
 
 ```
-::new(destination_io, options = {}, :external_encoding => nil)
-#write(*objects)
-#flush
 #write_nonblock(object, *options)
 #flush_nonblock(*options)
 #rewind_nonblock(*options)
 #close_nonblock(*options)
+```
+
+Special asynchronous methods that are missing in `Zlib::GzipWriter`.
+`rewind` wants to do `close`, `close` wants to do `flush`, `flush` want to `write` something.
+So it is possible to have asynchronous variants for all synchronous methods.
+Behaviour is the same as `IO#write_nonblock` method.
+
+```
 #<<(object)
 #print(*objects)
 #printf(*args)
@@ -154,24 +237,75 @@ end
 #puts(*objects)
 ```
 
-`Stream::Reader`:
+Typical helpers, see [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
+
+###### Stream::Reader
+
+Its behaviour is similar to builtin [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipReader.html).
 
 ```
-::new(source_io, options = {}, :external_encoding => nil, :internal_encoding => nil)
+::open(file_path, options = {}, :external_encoding => nil, :internal_encoding => nil, :transcode_options => {}, &block)
+```
+
+Open file path and create stream reader (with options) associated with opened file.
+Data will be forced encoded to `:external_encoding` and transcoded to `:external_encoding` using `:transcode_options` after reading.
+
+```
+::new(source_io, options = {}, :external_encoding => nil, :internal_encoding => nil, :transcode_options => {})
+```
+
+Create stream reader (with options) associated with source io.
+Data will be forced encoded to `:external_encoding` and transcoded to `:external_encoding` using `:transcode_options` after reading.
+
+```
+#set_encoding(external_encoding, internal_encoding, transcode_options)
+```
+
+Set another encodings.
+
+```
+#io
+#to_io
+#stat
+#external_encoding
+#internal_encoding
+#transcode_options
+#pos
+#tell
+```
+
+See [`IO`](https://ruby-doc.org/core-2.6.3/IO.html) docs.
+
+```
 #lineno
 #lineno=
 #read(bytes_to_read = nil, out_buffer = nil)
+#eof?
+#rewind
+#close
+#closed?
+```
+
+See [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
+
+```
 #readpartial(bytes_to_read = nil, out_buffer = nil)
 #read_nonblock(bytes_to_read, out_buffer = nil, *options)
-#eof?
+```
+
+See [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
+
+```
 #getbyte
 #each_byte(&block)
 #readbyte
 #ungetbyte(byte)
+
 #getc
 #readchar
 #each_char(&block)
 #ungetc(char)
+
 #gets(separator = $OUTPUT_RECORD_SEPARATOR, limit = nil)
 #readline
 #readlines
@@ -180,8 +314,7 @@ end
 #ungetline(line)
 ```
 
-`LZWS::Stream::Writer` and `LZWS::Stream::Reader` behaviour is the same as builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipReader.html), [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipWriter.html) and [`IO`](https://ruby-doc.org/core-2.6.3/IO.html).
-Please read these method descriptions in ruby doc.
+Typical helpers, see [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
 
 ## License
 

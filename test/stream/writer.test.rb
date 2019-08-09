@@ -79,13 +79,16 @@ module LZWS
                   instance = target.new(
                     file,
                     compressor_options,
-                    :external_encoding => external_encoding
+                    :external_encoding => external_encoding,
+                    :transcode_options => TRANSCODE_OPTIONS
                   )
                   assert_equal instance.external_encoding, external_encoding
+                  assert_equal instance.transcode_options, TRANSCODE_OPTIONS
 
                   begin
                     instance.set_encoding external_encoding, nil, TRANSCODE_OPTIONS
                     assert_equal instance.external_encoding, external_encoding
+                    assert_equal instance.transcode_options, TRANSCODE_OPTIONS
 
                     instance.write text
                   ensure

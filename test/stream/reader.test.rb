@@ -184,15 +184,18 @@ module LZWS
                     file,
                     decompressor_options,
                     :external_encoding => external_encoding,
-                    :internal_encoding => internal_encoding
+                    :internal_encoding => internal_encoding,
+                    :transcode_options => TRANSCODE_OPTIONS
                   )
                   assert_equal instance.external_encoding, external_encoding
                   assert_equal instance.internal_encoding, internal_encoding
+                  assert_equal instance.transcode_options, TRANSCODE_OPTIONS
 
                   begin
                     instance.set_encoding external_encoding, internal_encoding, TRANSCODE_OPTIONS
                     assert_equal instance.external_encoding, external_encoding
                     assert_equal instance.internal_encoding, internal_encoding
+                    assert_equal instance.transcode_options, TRANSCODE_OPTIONS
 
                     decompressed_text = instance.read
                     assert_equal decompressed_text.encoding, internal_encoding
