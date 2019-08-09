@@ -80,6 +80,8 @@ Values: true/false, default value: true.
 :buffer_length
 ```
 
+This is internal buffer length for compressed data.
+
 Values: 0, 2 - infinity, default value: 0.
 0 means automatic buffer length selection.
 1 byte is not enough, 2 bytes is minimal buffer length.
