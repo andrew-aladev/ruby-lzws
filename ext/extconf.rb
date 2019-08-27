@@ -60,7 +60,6 @@ sources = %w[
   error
   io
   main
-  option
   string
 ]
 .freeze

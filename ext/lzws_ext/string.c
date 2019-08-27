@@ -5,7 +5,6 @@
 
 #include "ruby.h"
 
-#include "lzws_ext/error.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
 #include "lzws_ext/string.h"
