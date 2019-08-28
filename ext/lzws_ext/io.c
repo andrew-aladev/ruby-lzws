@@ -6,6 +6,7 @@
 #include "ruby.h"
 #include "ruby/io.h"
 
+#include "lzws_ext/error.h"
 #include "lzws_ext/io.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
