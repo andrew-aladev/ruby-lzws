@@ -68,6 +68,7 @@ module LZWS
 
                     source      = "".b
                     text_offset = 0
+                    index       = 0
 
                     loop do
                       portion = text.byteslice text_offset, portion_length
@@ -78,9 +79,11 @@ module LZWS
 
                       bytes_written = compressor.write source, &writer
                       source        = source.byteslice bytes_written, source.bytesize - bytes_written
+
+                      compressor.flush(&writer) if index.even?
+                      index += 1
                     end
 
-                    compressor.flush(&writer)
                   ensure
                     refute compressor.closed?
                     compressor.close(&writer)

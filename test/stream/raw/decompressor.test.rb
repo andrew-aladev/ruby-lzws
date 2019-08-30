@@ -70,6 +70,7 @@ module LZWS
 
                     source                 = "".b
                     compressed_text_offset = 0
+                    index                  = 0
 
                     loop do
                       portion = compressed_text.byteslice compressed_text_offset, portion_length
@@ -80,9 +81,11 @@ module LZWS
 
                       bytes_read = decompressor.read source, &writer
                       source     = source.byteslice bytes_read, source.bytesize - bytes_read
+
+                      decompressor.flush(&writer) if index.even?
+                      index += 1
                     end
 
-                    decompressor.flush(&writer)
                   ensure
                     refute decompressor.closed?
                     decompressor.close(&writer)

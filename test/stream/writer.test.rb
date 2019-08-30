@@ -49,8 +49,10 @@ module LZWS
                   instance = target.new file, compressor_options
 
                   begin
-                    instance.write(*sources)
-                    instance.flush
+                    sources.each_slice(2) do |current_sources|
+                      instance.write(*current_sources)
+                      instance.flush
+                    end
 
                     assert_equal instance.pos, text.bytesize
                     assert_equal instance.pos, instance.tell
