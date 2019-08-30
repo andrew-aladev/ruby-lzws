@@ -21,6 +21,8 @@ module LZWS
           @need_to_read_magic_header = !options[:without_magic_header]
         end
 
+        # -- read --
+
         def read(source, &writer)
           do_not_use_after_close
 
@@ -59,18 +61,14 @@ module LZWS
           total_bytes_read
         end
 
-        def flush(&writer)
-          do_not_use_after_close
+        # -- close --
 
-          Validation.validate_proc writer
+        def close(&writer)
+          return nil if closed?
 
-          write_result(&writer)
+          super
 
           nil
-        end
-
-        protected def do_not_use_after_close
-          raise UsedAfterCloseError, "decompressor used after close" if @is_closed
         end
       end
     end

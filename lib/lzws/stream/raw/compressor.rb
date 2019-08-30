@@ -21,6 +21,8 @@ module LZWS
           @need_to_write_magic_header = !options[:without_magic_header]
         end
 
+        # -- write --
+
         def write(source, &writer)
           do_not_use_after_close
 
@@ -70,13 +72,13 @@ module LZWS
           nil
         end
 
-        def flush(&writer)
-          do_not_use_after_close
+        # -- close --
 
-          Validation.validate_proc writer
+        def close(&writer)
+          return nil if closed?
 
           loop do
-            need_more_destination = @native_stream.flush
+            need_more_destination = @native_stream.finish
 
             if need_more_destination
               flush_destination_buffer(&writer)
@@ -86,13 +88,9 @@ module LZWS
             break
           end
 
-          write_result(&writer)
+          super
 
           nil
-        end
-
-        protected def do_not_use_after_close
-          raise UsedAfterCloseError, "compressor used after close" if @is_closed
         end
       end
     end

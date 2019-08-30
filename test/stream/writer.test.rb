@@ -121,9 +121,10 @@ module LZWS
                   assert_equal instance.pos, text.bytesize
                   assert_equal instance.pos, instance.tell
 
+                  assert_equal instance.rewind, 0
+
                   compressed_texts << ::File.read(ARCHIVE_PATH)
 
-                  assert_equal instance.rewind, 0
                   assert_equal instance.pos, 0
                   assert_equal instance.pos, instance.tell
 
@@ -242,8 +243,6 @@ module LZWS
                   assert_equal instance.pos, text.bytesize
                   assert_equal instance.pos, instance.tell
 
-                  compressed_texts << ::File.read(ARCHIVE_PATH)
-
                   loop do
                     begin
                       is_rewinded = instance.rewind_nonblock
@@ -254,6 +253,8 @@ module LZWS
 
                     break if is_rewinded
                   end
+
+                  compressed_texts << ::File.read(ARCHIVE_PATH)
 
                   assert_equal instance.pos, 0
                   assert_equal instance.pos, instance.tell

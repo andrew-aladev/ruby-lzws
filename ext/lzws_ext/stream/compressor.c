@@ -153,12 +153,12 @@ VALUE lzws_ext_compress(VALUE self, VALUE source)
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
 }
 
-VALUE lzws_ext_flush_compressor(VALUE self)
+VALUE lzws_ext_finish_compressor(VALUE self)
 {
   GET_COMPRESSOR();
   DO_NOT_USE_AFTER_CLOSE();
 
-  lzws_result_t result = lzws_flush_compressor(
+  lzws_result_t result = lzws_finish_compressor(
     compressor_ptr->state_ptr,
     &compressor_ptr->remaining_destination_buffer,
     &compressor_ptr->remaining_destination_buffer_length);

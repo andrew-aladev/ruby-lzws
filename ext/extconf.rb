@@ -39,7 +39,7 @@ functions = %w[
   lzws_compressor_write_magic_header
   lzws_compressor_get_initial_state
   lzws_compress
-  lzws_flush_compressor
+  lzws_finish_compressor
   lzws_compressor_free_state
 
   lzws_decompressor_read_magic_header

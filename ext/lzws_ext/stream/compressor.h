@@ -20,7 +20,7 @@ VALUE lzws_ext_allocate_compressor(VALUE klass);
 VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options);
 VALUE lzws_ext_compressor_write_magic_header(VALUE self);
 VALUE lzws_ext_compress(VALUE self, VALUE source);
-VALUE lzws_ext_flush_compressor(VALUE self);
+VALUE lzws_ext_finish_compressor(VALUE self);
 VALUE lzws_ext_compressor_read_result(VALUE self);
 VALUE lzws_ext_compressor_close(VALUE self);
 

@@ -227,7 +227,7 @@ See [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.3/libdoc/zlib/rdoc/Zlib
 ```
 
 Special asynchronous methods that are missing in `Zlib::GzipWriter`.
-`rewind` wants to do `close`, `close` wants to do `flush`, `flush` want to `write` something.
+`rewind` wants to do `close`, `close` wants to do `write` something and `flush`, `flush` want to `write` something.
 So it is possible to have asynchronous variants for all synchronous methods.
 Behaviour is the same as `IO#write_nonblock` method.
 

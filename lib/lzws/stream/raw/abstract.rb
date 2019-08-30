@@ -4,6 +4,7 @@
 require "lzws_ext"
 
 require_relative "../../error"
+require_relative "../../validation"
 
 module LZWS
   module Stream
@@ -14,19 +15,16 @@ module LZWS
           @is_closed     = false
         end
 
-        def close(&writer)
-          return nil if @is_closed
+        # -- write --
 
-          flush(&writer)
+        def flush(&writer)
+          do_not_use_after_close
 
-          @native_stream.close
-          @is_closed = true
+          Validation.validate_proc writer
+
+          write_result(&writer)
 
           nil
-        end
-
-        def closed?
-          @is_closed
         end
 
         protected def flush_destination_buffer(&writer)
@@ -39,6 +37,23 @@ module LZWS
           yield result
 
           result.bytesize
+        end
+
+        # -- close --
+
+        protected def do_not_use_after_close
+          raise UsedAfterCloseError, "used after close" if closed?
+        end
+
+        def close(&writer)
+          flush(&writer)
+
+          @native_stream.close
+          @is_closed = true
+        end
+
+        def closed?
+          @is_closed
         end
       end
     end

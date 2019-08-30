@@ -9,7 +9,7 @@ export C_INCLUDE_PATH="$C_INCLUDE_PATH:/usr/local/include"
 export LIBRARY_PATH="$C_INCLUDE_PATH:/usr/local/lib"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 
-LZWS_BRANCH="v1.1.0"
+LZWS_BRANCH="v1.2.0"
 
 tmp="../tmp"
 build="$tmp/lzws-build"
