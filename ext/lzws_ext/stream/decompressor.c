@@ -207,3 +207,16 @@ VALUE lzws_ext_decompressor_close(VALUE self)
 
   return Qnil;
 }
+
+void lzws_ext_decompressor_exports(VALUE root_module)
+{
+  VALUE stream = rb_define_module_under(root_module, "Stream");
+
+  VALUE decompressor = rb_define_class_under(stream, "NativeDecompressor", rb_cObject);
+  rb_define_alloc_func(decompressor, lzws_ext_allocate_decompressor);
+  rb_define_method(decompressor, "initialize", lzws_ext_initialize_decompressor, 1);
+  rb_define_method(decompressor, "read_magic_header", lzws_ext_decompressor_read_magic_header, 1);
+  rb_define_method(decompressor, "read", lzws_ext_decompress, 1);
+  rb_define_method(decompressor, "read_result", lzws_ext_decompressor_read_result, 0);
+  rb_define_method(decompressor, "close", lzws_ext_decompressor_close, 0);
+}

@@ -90,3 +90,9 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
 
   return Qnil;
 }
+
+void lzws_ext_io_exports(VALUE root_module)
+{
+  rb_define_module_function(root_module, "_native_compress_io", RUBY_METHOD_FUNC(lzws_ext_compress_io), 3);
+  rb_define_module_function(root_module, "_native_decompress_io", RUBY_METHOD_FUNC(lzws_ext_decompress_io), 3);
+}

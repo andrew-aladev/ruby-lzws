@@ -9,4 +9,6 @@
 VALUE lzws_ext_compress_string(VALUE self, VALUE source, VALUE options);
 VALUE lzws_ext_decompress_string(VALUE self, VALUE source, VALUE options);
 
+void lzws_ext_string_exports(VALUE root_module);
+
 #endif // LZWS_EXT_STRING_H

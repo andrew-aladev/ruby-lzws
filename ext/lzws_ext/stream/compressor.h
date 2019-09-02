@@ -24,4 +24,6 @@ VALUE lzws_ext_finish_compressor(VALUE self);
 VALUE lzws_ext_compressor_read_result(VALUE self);
 VALUE lzws_ext_compressor_close(VALUE self);
 
+void lzws_ext_compressor_exports(VALUE root_module);
+
 #endif // LZWS_EXT_STREAM_COMPRESSOR_H
