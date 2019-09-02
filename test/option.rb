@@ -45,15 +45,19 @@ module LZWS
 
       # "0" means default buffer length.
       # "2" bytes is the minimal buffer length for compressor and decompressor.
-      # "3" bytes should be enough for reading/writing magic and regular header.
       BUFFER_LENGTHS = [
         0,
         2,
-        3,
         512
       ]
       .freeze
-      BOOLS = [true, false].freeze
+
+      BOOLS = [
+        true,
+        false
+      ]
+      .freeze
+
       MAX_CODE_BIT_LENGTHS = Range.new(
         LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH,
         LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH

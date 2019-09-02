@@ -21,8 +21,6 @@ module LZWS
           @need_to_write_magic_header = !options[:without_magic_header]
         end
 
-        # -- write --
-
         def write(source, &writer)
           do_not_use_after_close
 
@@ -72,10 +70,10 @@ module LZWS
           nil
         end
 
-        # -- close --
-
         def close(&writer)
           return nil if closed?
+
+          Validation.validate_proc writer
 
           loop do
             need_more_destination = @native_stream.finish

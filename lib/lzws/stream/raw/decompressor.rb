@@ -4,7 +4,6 @@
 require "lzws_ext"
 
 require_relative "abstract"
-require_relative "../../error"
 require_relative "../../option"
 require_relative "../../validation"
 
@@ -20,8 +19,6 @@ module LZWS
 
           @need_to_read_magic_header = !options[:without_magic_header]
         end
-
-        # -- read --
 
         def read(source, &writer)
           do_not_use_after_close
@@ -61,10 +58,10 @@ module LZWS
           total_bytes_read
         end
 
-        # -- close --
-
         def close(&writer)
           return nil if closed?
+
+          Validation.validate_proc writer
 
           super
 
