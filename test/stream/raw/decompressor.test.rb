@@ -60,14 +60,14 @@ module LZWS
                 COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
                   compressed_text = String.compress text, compressor_options
 
+                  decompressed_buffer = ::StringIO.new
+                  decompressed_buffer.set_encoding ::Encoding::BINARY
+
+                  writer = proc { |portion| decompressed_buffer << portion }
+
                   decompressor = Target.new decompressor_options
 
                   begin
-                    decompressed_buffer = ::StringIO.new
-                    decompressed_buffer.set_encoding ::Encoding::BINARY
-
-                    writer = proc { |portion| decompressed_buffer << portion }
-
                     source                 = "".b
                     compressed_text_offset = 0
                     index                  = 0
@@ -106,14 +106,14 @@ module LZWS
               ::File.write NATIVE_SOURCE_PATH, text
               Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
 
+              decompressed_buffer = ::StringIO.new
+              decompressed_buffer.set_encoding ::Encoding::BINARY
+
+              writer = proc { |portion| decompressed_buffer << portion }
+
               decompressor = Target.new
 
               begin
-                decompressed_buffer = ::StringIO.new
-                decompressed_buffer.set_encoding ::Encoding::BINARY
-
-                writer = proc { |portion| decompressed_buffer << portion }
-
                 source = ::File.read NATIVE_ARCHIVE_PATH
 
                 loop do
