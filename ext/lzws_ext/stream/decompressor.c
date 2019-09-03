@@ -54,10 +54,10 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
   LZWS_EXT_UNUSED_VARIABLE(without_magic_header);
 
-  lzws_decompressor_state_t* decompressor_state_ptr;
+  lzws_decompressor_state_t* state_ptr;
 
   lzws_result_t result = lzws_decompressor_get_initial_state(
-    &decompressor_state_ptr,
+    &state_ptr,
     msb, unaligned_bit_groups, quiet);
 
   if (result == LZWS_DECOMPRESSOR_ALLOCATE_FAILED) {
@@ -67,22 +67,19 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
 
-  decompressor_ptr->state_ptr = decompressor_state_ptr;
+  uint8_t* buffer;
 
-  // -----
-
-  uint8_t* destination_buffer;
-  size_t   destination_buffer_length = buffer_length;
-
-  result = lzws_create_buffer_for_decompressor(&destination_buffer, &destination_buffer_length, quiet);
+  result = lzws_create_buffer_for_decompressor(&buffer, &buffer_length, quiet);
   if (result != 0) {
+    lzws_decompressor_free_state(state_ptr);
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
 
-  decompressor_ptr->destination_buffer                  = destination_buffer;
-  decompressor_ptr->destination_buffer_length           = destination_buffer_length;
-  decompressor_ptr->remaining_destination_buffer        = destination_buffer;
-  decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+  decompressor_ptr->state_ptr                           = state_ptr;
+  decompressor_ptr->destination_buffer                  = buffer;
+  decompressor_ptr->destination_buffer_length           = buffer_length;
+  decompressor_ptr->remaining_destination_buffer        = buffer;
+  decompressor_ptr->remaining_destination_buffer_length = buffer_length;
 
   return Qnil;
 }
