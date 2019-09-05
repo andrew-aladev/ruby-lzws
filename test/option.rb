@@ -64,9 +64,15 @@ module LZWS
       )
       .freeze
 
-      DECOMPRESSOR_OPTION_DATA = [
+      COMPRESSOR_OPTION_DATA = [
         BUFFER_LENGTHS.map do |buffer_length|
           { :buffer_length => buffer_length }
+        end,
+        MAX_CODE_BIT_LENGTHS.map do |max_code_bit_length|
+          { :max_code_bit_length => max_code_bit_length }
+        end,
+        BOOLS.map do |block_mode|
+          { :block_mode => block_mode }
         end,
         BOOLS.map do |without_magic_header|
           { :without_magic_header => without_magic_header }
@@ -78,20 +84,6 @@ module LZWS
           { :unaligned_bit_groups => unaligned_bit_groups }
         end
       ]
-      .freeze
-
-      COMPRESSOR_OPTION_DATA = [
-        DECOMPRESSOR_OPTION_DATA,
-        [
-          MAX_CODE_BIT_LENGTHS.map do |max_code_bit_length|
-            { :max_code_bit_length => max_code_bit_length }
-          end,
-          BOOLS.map do |block_mode|
-            { :block_mode => block_mode }
-          end
-        ]
-      ]
-      .flatten(1)
       .freeze
 
       private_class_method def self.get_option_combinations(data)
@@ -109,21 +101,16 @@ module LZWS
         end
       end
 
-      DECOMPRESSOR_OPTION_COMBINATIONS = get_option_combinations(DECOMPRESSOR_OPTION_DATA).freeze
-      COMPRESSOR_OPTION_COMBINATIONS   = get_option_combinations(COMPRESSOR_OPTION_DATA).freeze
+      COMPRESSOR_OPTION_COMBINATIONS = get_option_combinations(COMPRESSOR_OPTION_DATA).freeze
 
-      COMPATIBLE_OPTION_COMBINATIONS = (
-        COMPRESSOR_OPTION_COMBINATIONS.map do |compressor_options|
-          decompressor_options = {
-            :buffer_length        => compressor_options[:buffer_length],
-            :without_magic_header => compressor_options[:without_magic_header],
-            :msb                  => compressor_options[:msb],
-            :unaligned_bit_groups => compressor_options[:unaligned_bit_groups]
-          }
-          [compressor_options, decompressor_options]
-        end
-      )
-      .freeze
+      def self.get_compatible_decompressor_options(compressor_options, &_block)
+        yield(
+          :buffer_length        => compressor_options[:buffer_length],
+          :without_magic_header => compressor_options[:without_magic_header],
+          :msb                  => compressor_options[:msb],
+          :unaligned_bit_groups => compressor_options[:unaligned_bit_groups]
+        )
+      end
     end
   end
 end

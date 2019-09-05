@@ -20,8 +20,6 @@ module LZWS
       TEXTS               = Common::TEXTS
       LARGE_TEXTS         = Common::LARGE_TEXTS
 
-      COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
-
       def test_invalid_arguments
         Validation::INVALID_STRINGS.each do |invalid_path|
           assert_raises ValidateError do
@@ -58,14 +56,17 @@ module LZWS
         TEXTS.each do |text|
           ::File.write SOURCE_PATH, text
 
-          COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+          Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
             Target.compress SOURCE_PATH, ARCHIVE_PATH, compressor_options
-            Target.decompress ARCHIVE_PATH, SOURCE_PATH, decompressor_options
 
-            decompressed_text = ::File.read SOURCE_PATH
-            decompressed_text.force_encoding text.encoding
+            Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+              Target.decompress ARCHIVE_PATH, SOURCE_PATH, decompressor_options
 
-            assert_equal text, decompressed_text
+              decompressed_text = ::File.read SOURCE_PATH
+              decompressed_text.force_encoding text.encoding
+
+              assert_equal text, decompressed_text
+            end
           end
         end
       end

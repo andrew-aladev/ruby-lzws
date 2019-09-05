@@ -22,11 +22,9 @@ module LZWS
         LARGE_TEXTS        = Common::LARGE_TEXTS
         PORTION_LENGTHS    = Common::PORTION_LENGTHS
 
-        COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
-
         def test_print
           TEXTS.each do |text|
-            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               Target.open ARCHIVE_PATH, compressor_options do |instance|
                 $LAST_READ_LINE = text
 
@@ -38,7 +36,10 @@ module LZWS
               end
 
               compressed_text = ::File.read ARCHIVE_PATH
-              check_text text, compressed_text, decompressor_options
+
+              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                check_text text, compressed_text, decompressor_options
+              end
             end
 
             # This part of test is for not empty texts only.
@@ -54,7 +55,7 @@ module LZWS
               sources.each { |source| target_text << source + field_separator }
               target_text << record_separator
 
-              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 Target.open ARCHIVE_PATH, compressor_options do |instance|
                   $OUTPUT_FIELD_SEPARATOR  = field_separator
                   $OUTPUT_RECORD_SEPARATOR = record_separator
@@ -68,7 +69,10 @@ module LZWS
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
-                check_text target_text, compressed_text, decompressor_options
+
+                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  check_text target_text, compressed_text, decompressor_options
+                end
               end
             end
           end
@@ -79,13 +83,16 @@ module LZWS
             PORTION_LENGTHS.each do |portion_length|
               sources = get_sources text, portion_length
 
-              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 Target.open ARCHIVE_PATH, compressor_options do |instance|
                   sources.each { |source| instance.printf "%s", source }
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
-                check_text text, compressed_text, decompressor_options
+
+                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  check_text text, compressed_text, decompressor_options
+                end
               end
             end
           end
@@ -103,7 +110,7 @@ module LZWS
 
         def test_putc
           TEXTS.each do |text|
-            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               Target.open ARCHIVE_PATH, compressor_options do |instance|
                 # Putc should process numbers and strings.
                 text.chars.map.with_index do |char, index|
@@ -116,7 +123,10 @@ module LZWS
               end
 
               compressed_text = ::File.read ARCHIVE_PATH
-              check_text text, compressed_text, decompressor_options
+
+              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                check_text text, compressed_text, decompressor_options
+              end
             end
           end
         end
@@ -135,7 +145,7 @@ module LZWS
               target_text = "".encode text.encoding
               sources.each { |source| target_text << source + newline }
 
-              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 Target.open ARCHIVE_PATH, compressor_options do |instance|
                   # Puts should ignore additional newlines and process arrays.
                   args = sources.map.with_index do |source, index|
@@ -150,7 +160,10 @@ module LZWS
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
-                check_text target_text, compressed_text, decompressor_options
+
+                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  check_text target_text, compressed_text, decompressor_options
+                end
               end
             end
           end
@@ -171,11 +184,14 @@ module LZWS
 
         def test_open
           TEXTS.each do |text|
-            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               Target.open(ARCHIVE_PATH, compressor_options) { |instance| instance.write text }
 
               compressed_text = ::File.read ARCHIVE_PATH
-              check_text text, compressed_text, decompressor_options
+
+              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                check_text text, compressed_text, decompressor_options
+              end
             end
           end
         end

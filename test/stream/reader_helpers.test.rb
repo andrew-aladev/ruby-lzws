@@ -25,8 +25,6 @@ module LZWS
         LARGE_TEXTS         = Common::LARGE_TEXTS
         PORTION_LENGTHS     = Common::PORTION_LENGTHS
 
-        COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
-
         LIMITS = [nil, 1].freeze
 
         def test_invalid_ungetbyte
@@ -41,31 +39,33 @@ module LZWS
 
         def test_byte
           TEXTS.each do |text|
-            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               write_archive text, compressor_options
 
-              Target.open ARCHIVE_PATH, decompressor_options do |instance|
-                # getbyte
+              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                Target.open ARCHIVE_PATH, decompressor_options do |instance|
+                  # getbyte
 
-                byte = instance.getbyte
-                instance.ungetbyte byte unless byte.nil?
+                  byte = instance.getbyte
+                  instance.ungetbyte byte unless byte.nil?
 
-                # readbyte
+                  # readbyte
 
-                begin
-                  byte = instance.readbyte
-                  instance.ungetc byte
-                rescue ::EOFError # rubocop:disable Lint/HandleExceptions
-                  # ok
+                  begin
+                    byte = instance.readbyte
+                    instance.ungetc byte
+                  rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                    # ok
+                  end
+
+                  # each_byte
+
+                  decompressed_text = "".b
+                  instance.each_byte { |current_byte| decompressed_text << current_byte }
+
+                  decompressed_text.force_encoding text.encoding
+                  assert_equal text, decompressed_text
                 end
-
-                # each_byte
-
-                decompressed_text = "".b
-                instance.each_byte { |current_byte| decompressed_text << current_byte }
-
-                decompressed_text.force_encoding text.encoding
-                assert_equal text, decompressed_text
               end
             end
           end
@@ -85,31 +85,33 @@ module LZWS
 
         def test_char
           TEXTS.each do |text|
-            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               write_archive text, compressor_options
 
-              Target.open ARCHIVE_PATH, decompressor_options do |instance|
-                # getc
+              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                Target.open ARCHIVE_PATH, decompressor_options do |instance|
+                  # getc
 
-                char = instance.getc
-                instance.ungetc char unless char.nil?
+                  char = instance.getc
+                  instance.ungetc char unless char.nil?
 
-                # readchar
+                  # readchar
 
-                begin
-                  char = instance.readchar
-                  instance.ungetc char
-                rescue ::EOFError # rubocop:disable Lint/HandleExceptions
-                  # ok
+                  begin
+                    char = instance.readchar
+                    instance.ungetc char
+                  rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                    # ok
+                  end
+
+                  # each_char
+
+                  decompressed_text = "".b
+                  instance.each_char { |current_char| decompressed_text << current_char }
+
+                  decompressed_text.force_encoding text.encoding
+                  assert_equal text, decompressed_text
                 end
-
-                # each_char
-
-                decompressed_text = "".b
-                instance.each_char { |current_char| decompressed_text << current_char }
-
-                decompressed_text.force_encoding text.encoding
-                assert_equal text, decompressed_text
               end
             end
           end
@@ -122,42 +124,44 @@ module LZWS
             (ENCODINGS - [external_encoding]).each do |internal_encoding|
               target_text = text.encode internal_encoding, TRANSCODE_OPTIONS
 
-              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 write_archive text, compressor_options
 
-                Target.open ARCHIVE_PATH, decompressor_options do |instance|
-                  instance.set_encoding external_encoding, internal_encoding, TRANSCODE_OPTIONS
+                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  Target.open ARCHIVE_PATH, decompressor_options do |instance|
+                    instance.set_encoding external_encoding, internal_encoding, TRANSCODE_OPTIONS
 
-                  # getc
+                    # getc
 
-                  char = instance.getc
+                    char = instance.getc
 
-                  unless char.nil?
-                    assert_equal char.encoding, internal_encoding
-                    instance.ungetc char
+                    unless char.nil?
+                      assert_equal char.encoding, internal_encoding
+                      instance.ungetc char
+                    end
+
+                    # readchar
+
+                    begin
+                      char = instance.readchar
+                      assert_equal char.encoding, internal_encoding
+
+                      instance.ungetc char
+                    rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                      # ok
+                    end
+
+                    # each_char
+
+                    decompressed_text = ::String.new :encoding => internal_encoding
+
+                    instance.each_char do |current_char|
+                      assert_equal current_char.encoding, internal_encoding
+                      decompressed_text << current_char
+                    end
+
+                    assert_equal target_text, decompressed_text
                   end
-
-                  # readchar
-
-                  begin
-                    char = instance.readchar
-                    assert_equal char.encoding, internal_encoding
-
-                    instance.ungetc char
-                  rescue ::EOFError # rubocop:disable Lint/HandleExceptions
-                    # ok
-                  end
-
-                  # each_char
-
-                  decompressed_text = ::String.new :encoding => internal_encoding
-
-                  instance.each_char do |current_char|
-                    assert_equal current_char.encoding, internal_encoding
-                    decompressed_text << current_char
-                  end
-
-                  assert_equal target_text, decompressed_text
                 end
               end
             end
@@ -201,27 +205,41 @@ module LZWS
                 text[0]
               end
 
-            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               write_archive text, compressor_options
 
-              Target.open ARCHIVE_PATH, decompressor_options do |instance|
-                # lineno
+              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                Target.open ARCHIVE_PATH, decompressor_options do |instance|
+                  # lineno
 
-                assert_equal instance.lineno, 0
+                  assert_equal instance.lineno, 0
 
-                instance.lineno = 1
-                assert_equal instance.lineno, 1
+                  instance.lineno = 1
+                  assert_equal instance.lineno, 1
 
-                instance.lineno = 0
-                assert_equal instance.lineno, 0
+                  instance.lineno = 0
+                  assert_equal instance.lineno, 0
 
-                # gets
+                  # gets
 
-                $OUTPUT_RECORD_SEPARATOR = separator
+                  $OUTPUT_RECORD_SEPARATOR = separator
 
-                begin
+                  begin
+                    LIMITS.each do |limit|
+                      line = instance.gets limit
+                      next if line.nil?
+
+                      assert_equal instance.lineno, 1
+
+                      instance.ungetline line
+                      assert_equal instance.lineno, 0
+                    end
+                  ensure
+                    $OUTPUT_RECORD_SEPARATOR = nil
+                  end
+
                   LIMITS.each do |limit|
-                    line = instance.gets limit
+                    line = instance.gets separator, limit
                     next if line.nil?
 
                     assert_equal instance.lineno, 1
@@ -229,48 +247,36 @@ module LZWS
                     instance.ungetline line
                     assert_equal instance.lineno, 0
                   end
-                ensure
-                  $OUTPUT_RECORD_SEPARATOR = nil
+
+                  # readline
+
+                  begin
+                    line = instance.readline
+                    assert_equal instance.lineno, 1
+
+                    instance.ungetline line
+                    assert_equal instance.lineno, 0
+                  rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                    # ok
+                  end
+
+                  # readlines
+
+                  lines = instance.readlines
+                  lines.each { |current_line| instance.ungetline current_line }
+
+                  decompressed_text = lines.join ""
+                  decompressed_text.force_encoding text.encoding
+                  assert_equal text, decompressed_text
+
+                  # each_line
+
+                  decompressed_text = "".b
+                  instance.each_line { |current_line| decompressed_text << current_line }
+
+                  decompressed_text.force_encoding text.encoding
+                  assert_equal text, decompressed_text
                 end
-
-                LIMITS.each do |limit|
-                  line = instance.gets separator, limit
-                  next if line.nil?
-
-                  assert_equal instance.lineno, 1
-
-                  instance.ungetline line
-                  assert_equal instance.lineno, 0
-                end
-
-                # readline
-
-                begin
-                  line = instance.readline
-                  assert_equal instance.lineno, 1
-
-                  instance.ungetline line
-                  assert_equal instance.lineno, 0
-                rescue ::EOFError # rubocop:disable Lint/HandleExceptions
-                  # ok
-                end
-
-                # readlines
-
-                lines = instance.readlines
-                lines.each { |current_line| instance.ungetline current_line }
-
-                decompressed_text = lines.join ""
-                decompressed_text.force_encoding text.encoding
-                assert_equal text, decompressed_text
-
-                # each_line
-
-                decompressed_text = "".b
-                instance.each_line { |current_line| decompressed_text << current_line }
-
-                decompressed_text.force_encoding text.encoding
-                assert_equal text, decompressed_text
               end
             end
           end
@@ -290,48 +296,50 @@ module LZWS
             (ENCODINGS - [external_encoding]).each do |internal_encoding|
               target_text = text.encode internal_encoding, TRANSCODE_OPTIONS
 
-              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 write_archive text, compressor_options
 
-                Target.open ARCHIVE_PATH, decompressor_options do |instance|
-                  instance.set_encoding external_encoding, internal_encoding, TRANSCODE_OPTIONS
+                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  Target.open ARCHIVE_PATH, decompressor_options do |instance|
+                    instance.set_encoding external_encoding, internal_encoding, TRANSCODE_OPTIONS
 
-                  # gets
+                    # gets
 
-                  $OUTPUT_RECORD_SEPARATOR = separator
+                    $OUTPUT_RECORD_SEPARATOR = separator
 
-                  begin
-                    line = instance.gets
+                    begin
+                      line = instance.gets
 
-                    unless line.nil?
-                      assert_equal line.encoding, internal_encoding
-                      instance.ungetline line
+                      unless line.nil?
+                        assert_equal line.encoding, internal_encoding
+                        instance.ungetline line
+                      end
+                    ensure
+                      $OUTPUT_RECORD_SEPARATOR = nil
                     end
-                  ensure
-                    $OUTPUT_RECORD_SEPARATOR = nil
+
+                    # readline
+
+                    begin
+                      line = instance.readline
+                      assert_equal line.encoding, internal_encoding
+
+                      instance.ungetline line
+                    rescue ::EOFError # rubocop:disable Lint/HandleExceptions
+                      # ok
+                    end
+
+                    # each_line
+
+                    decompressed_text = ::String.new :encoding => internal_encoding
+
+                    instance.each_line do |current_line|
+                      assert_equal current_line.encoding, internal_encoding
+                      decompressed_text << current_line
+                    end
+
+                    assert_equal target_text, decompressed_text
                   end
-
-                  # readline
-
-                  begin
-                    line = instance.readline
-                    assert_equal line.encoding, internal_encoding
-
-                    instance.ungetline line
-                  rescue ::EOFError # rubocop:disable Lint/HandleExceptions
-                    # ok
-                  end
-
-                  # each_line
-
-                  decompressed_text = ::String.new :encoding => internal_encoding
-
-                  instance.each_line do |current_line|
-                    assert_equal current_line.encoding, internal_encoding
-                    decompressed_text << current_line
-                  end
-
-                  assert_equal target_text, decompressed_text
                 end
               end
             end
@@ -355,12 +363,14 @@ module LZWS
 
         def test_open
           TEXTS.each do |text|
-            COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+            Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
               write_archive text, compressor_options
 
-              decompressed_text = Target.open ARCHIVE_PATH, decompressor_options, &:read
-              decompressed_text.force_encoding text.encoding
-              assert_equal text, decompressed_text
+              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                decompressed_text = Target.open ARCHIVE_PATH, decompressor_options, &:read
+                decompressed_text.force_encoding text.encoding
+                assert_equal text, decompressed_text
+              end
             end
           end
         end

@@ -25,8 +25,6 @@ module LZWS
         TEXTS             = Common::TEXTS
         PORTION_LENGTHS   = Common::PORTION_LENGTHS
 
-        COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
-
         def test_invalid_initialize
           Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
             assert_raises ValidateError do
@@ -44,7 +42,7 @@ module LZWS
             PORTION_LENGTHS.each do |portion_length|
               sources = get_sources text, portion_length
 
-              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
                   instance = target.new file, compressor_options
 
@@ -64,7 +62,10 @@ module LZWS
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
-                check_text text, compressed_text, decompressor_options
+
+                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  check_text text, compressed_text, decompressor_options
+                end
               end
             end
           end
@@ -76,7 +77,7 @@ module LZWS
             (ENCODINGS - [text.encoding]).each do |external_encoding|
               target_text = text.encode external_encoding, TRANSCODE_OPTIONS
 
-              COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+              Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
                   instance = target.new(
                     file,
@@ -99,15 +100,18 @@ module LZWS
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
-                check_text target_text, compressed_text, decompressor_options
-                assert target_text.valid_encoding?
+
+                Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  check_text target_text, compressed_text, decompressor_options
+                  assert target_text.valid_encoding?
+                end
               end
             end
           end
         end
 
         def test_rewind
-          COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+          Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
             compressed_texts = []
 
             ::File.open ARCHIVE_PATH, "wb" do |file|
@@ -137,7 +141,10 @@ module LZWS
 
             TEXTS.each.with_index do |text, index|
               compressed_text = compressed_texts[index]
-              check_text text, compressed_text, decompressor_options
+
+              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                check_text text, compressed_text, decompressor_options
+              end
             end
           end
         end
@@ -150,78 +157,80 @@ module LZWS
               PORTION_LENGTHS.each do |portion_length|
                 sources = get_sources text, portion_length
 
-                COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
-                  compressed_text = "".b
+                Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+                  Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                    compressed_text = "".b
 
-                  server_thread = ::Thread.new do
-                    socket = server.accept
+                    server_thread = ::Thread.new do
+                      socket = server.accept
 
-                    begin
-                      loop do
-                        compressed_text << socket.read_nonblock(portion_length)
-                      rescue ::IO::WaitReadable
-                        ::IO.select [socket]
-                      rescue ::EOFError
-                        break
+                      begin
+                        loop do
+                          compressed_text << socket.read_nonblock(portion_length)
+                        rescue ::IO::WaitReadable
+                          ::IO.select [socket]
+                        rescue ::EOFError
+                          break
+                        end
+                      ensure
+                        socket.close
                       end
-                    ensure
-                      socket.close
                     end
-                  end
 
-                  TCPSocket.open "localhost", PORT do |socket|
-                    instance = target.new socket, compressor_options
+                    TCPSocket.open "localhost", PORT do |socket|
+                      instance = target.new socket, compressor_options
 
-                    begin
-                      sources.each do |source|
+                      begin
+                        sources.each do |source|
+                          loop do
+                            begin
+                              bytes_written = instance.write_nonblock source
+                            rescue ::IO::WaitWritable
+                              ::IO.select nil, [socket]
+                              retry
+                            end
+
+                            source = source.byteslice bytes_written, source.bytesize - bytes_written
+                            break if source.bytesize == 0
+                          end
+                        end
+
                         loop do
                           begin
-                            bytes_written = instance.write_nonblock source
+                            is_flushed = instance.flush_nonblock
                           rescue ::IO::WaitWritable
                             ::IO.select nil, [socket]
                             retry
                           end
 
-                          source = source.byteslice bytes_written, source.bytesize - bytes_written
-                          break if source.bytesize == 0
-                        end
-                      end
-
-                      loop do
-                        begin
-                          is_flushed = instance.flush_nonblock
-                        rescue ::IO::WaitWritable
-                          ::IO.select nil, [socket]
-                          retry
+                          break if is_flushed
                         end
 
-                        break if is_flushed
-                      end
+                        assert_equal instance.pos, text.bytesize
+                        assert_equal instance.pos, instance.tell
 
-                      assert_equal instance.pos, text.bytesize
-                      assert_equal instance.pos, instance.tell
+                      ensure
+                        refute instance.closed?
 
-                    ensure
-                      refute instance.closed?
+                        loop do
+                          begin
+                            is_closed = instance.close_nonblock
+                          rescue ::IO::WaitWritable
+                            ::IO.select nil, [socket]
+                            retry
+                          end
 
-                      loop do
-                        begin
-                          is_closed = instance.close_nonblock
-                        rescue ::IO::WaitWritable
-                          ::IO.select nil, [socket]
-                          retry
+                          break if is_closed
                         end
 
-                        break if is_closed
+                        assert instance.closed?
                       end
-
-                      assert instance.closed?
                     end
+
+                    server_thread.join
+
+                    check_text text, compressed_text, decompressor_options
                   end
-
-                  server_thread.join
-
-                  check_text text, compressed_text, decompressor_options
                 end
               end
             end
@@ -229,7 +238,7 @@ module LZWS
         end
 
         def test_rewind_nonblock
-          COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+          Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
             compressed_texts = []
 
             ::File.open ARCHIVE_PATH, "wb" do |file|
@@ -268,7 +277,10 @@ module LZWS
 
             TEXTS.each.with_index do |text, index|
               compressed_text = compressed_texts[index]
-              check_text text, compressed_text, decompressor_options
+
+              Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                check_text text, compressed_text, decompressor_options
+              end
             end
           end
         end

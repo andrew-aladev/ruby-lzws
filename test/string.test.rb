@@ -18,8 +18,6 @@ module LZWS
       TEXTS               = Common::TEXTS
       LARGE_TEXTS         = Common::LARGE_TEXTS
 
-      COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
-
       def test_invalid_arguments
         Validation::INVALID_STRINGS.each do |invalid_string|
           assert_raises ValidateError do
@@ -46,13 +44,15 @@ module LZWS
 
       def test_texts
         TEXTS.each do |text|
-          COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+          Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
             compressed_text = Target.compress text, compressor_options
 
-            decompressed_text = Target.decompress compressed_text, decompressor_options
-            decompressed_text.force_encoding text.encoding
+            Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+              decompressed_text = Target.decompress compressed_text, decompressor_options
+              decompressed_text.force_encoding text.encoding
 
-            assert_equal text, decompressed_text
+              assert_equal text, decompressed_text
+            end
           end
         end
       end

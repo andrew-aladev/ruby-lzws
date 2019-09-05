@@ -24,8 +24,6 @@ module LZWS
           LARGE_TEXTS         = Common::LARGE_TEXTS
           PORTION_LENGTHS     = Common::PORTION_LENGTHS
 
-          COMPATIBLE_OPTION_COMBINATIONS = Option::COMPATIBLE_OPTION_COMBINATIONS
-
           def test_invalid_initialize
             Option::INVALID_DECOMPRESSOR_OPTIONS.each do |invalid_options|
               assert_raises ValidateError do
@@ -57,45 +55,47 @@ module LZWS
           def test_texts
             TEXTS.each do |text|
               PORTION_LENGTHS.each do |portion_length|
-                COMPATIBLE_OPTION_COMBINATIONS.each do |compressor_options, decompressor_options|
+                Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                   compressed_text = String.compress text, compressor_options
 
-                  decompressed_buffer = ::StringIO.new
-                  decompressed_buffer.set_encoding ::Encoding::BINARY
+                  Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                    decompressed_buffer = ::StringIO.new
+                    decompressed_buffer.set_encoding ::Encoding::BINARY
 
-                  writer = proc { |portion| decompressed_buffer << portion }
+                    writer = proc { |portion| decompressed_buffer << portion }
 
-                  decompressor = Target.new decompressor_options
+                    decompressor = Target.new decompressor_options
 
-                  begin
-                    source                 = "".b
-                    compressed_text_offset = 0
-                    index                  = 0
+                    begin
+                      source                 = "".b
+                      compressed_text_offset = 0
+                      index                  = 0
 
-                    loop do
-                      portion = compressed_text.byteslice compressed_text_offset, portion_length
-                      break if portion.nil?
+                      loop do
+                        portion = compressed_text.byteslice compressed_text_offset, portion_length
+                        break if portion.nil?
 
-                      compressed_text_offset += portion_length
-                      source << portion
+                        compressed_text_offset += portion_length
+                        source << portion
 
-                      bytes_read = decompressor.read source, &writer
-                      source     = source.byteslice bytes_read, source.bytesize - bytes_read
+                        bytes_read = decompressor.read source, &writer
+                        source     = source.byteslice bytes_read, source.bytesize - bytes_read
 
-                      decompressor.flush(&writer) if index.even?
-                      index += 1
+                        decompressor.flush(&writer) if index.even?
+                        index += 1
+                      end
+
+                    ensure
+                      refute decompressor.closed?
+                      decompressor.close(&writer)
+                      assert decompressor.closed?
                     end
 
-                  ensure
-                    refute decompressor.closed?
-                    decompressor.close(&writer)
-                    assert decompressor.closed?
+                    decompressed_text = decompressed_buffer.string
+                    decompressed_text.force_encoding text.encoding
+
+                    assert_equal text, decompressed_text
                   end
-
-                  decompressed_text = decompressed_buffer.string
-                  decompressed_text.force_encoding text.encoding
-
-                  assert_equal text, decompressed_text
                 end
               end
             end

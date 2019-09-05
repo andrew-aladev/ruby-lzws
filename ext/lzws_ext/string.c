@@ -10,7 +10,7 @@
 #include "lzws_ext/option.h"
 #include "lzws_ext/string.h"
 
-#define GET_STRING(source)                         \
+#define GET_SOURCE_DATA(source)                    \
   Check_Type(source, T_STRING);                    \
                                                    \
   const char* source_data   = RSTRING_PTR(source); \
@@ -18,7 +18,7 @@
 
 VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE options)
 {
-  GET_STRING(source);
+  GET_SOURCE_DATA(source);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   char*  destination;
@@ -47,7 +47,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
 
 VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE options)
 {
-  GET_STRING(source);
+  GET_SOURCE_DATA(source);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   char*  destination;
