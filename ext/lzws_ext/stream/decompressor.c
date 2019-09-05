@@ -44,13 +44,13 @@ VALUE lzws_ext_allocate_decompressor(VALUE klass)
   return self;
 }
 
-#define GET_DECOMPRESSOR()                   \
+#define GET_DECOMPRESSOR(self)               \
   lzws_ext_decompressor_t* decompressor_ptr; \
   Data_Get_Struct(self, lzws_ext_decompressor_t, decompressor_ptr);
 
 VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
 {
-  GET_DECOMPRESSOR();
+  GET_DECOMPRESSOR(self);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
   LZWS_EXT_UNUSED_VARIABLE(without_magic_header);
 
@@ -84,29 +84,28 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   return Qnil;
 }
 
-#define GET_SOURCE_STRING()                        \
-  Check_Type(source, T_STRING);                    \
-                                                   \
-  const char* source_data   = RSTRING_PTR(source); \
-  size_t      source_length = RSTRING_LEN(source);
+#define GET_SOURCE_DATA(source_value)                              \
+  Check_Type(source_value, T_STRING);                              \
+                                                                   \
+  const char* source                  = RSTRING_PTR(source_value); \
+  size_t      source_length           = RSTRING_LEN(source_value); \
+  uint8_t*    remaining_source        = (uint8_t*)source;          \
+  size_t      remaining_source_length = source_length;
 
-#define DO_NOT_USE_AFTER_CLOSE()                                                             \
+#define DO_NOT_USE_AFTER_CLOSE(decompressor_ptr)                                             \
   if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
     lzws_ext_raise_error("UsedAfterCloseError", "decompressor used after close");            \
   }
 
-VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
+VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source_value)
 {
-  GET_DECOMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
-  GET_SOURCE_STRING();
-
-  uint8_t* remaining_source_data   = (uint8_t*)source_data;
-  size_t   remaining_source_length = source_length;
+  GET_DECOMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
+  GET_SOURCE_DATA(source_value);
 
   lzws_result_t result = lzws_decompressor_read_magic_header(
     decompressor_ptr->state_ptr,
-    &remaining_source_data,
+    &remaining_source,
     &remaining_source_length);
 
   VALUE bytes_read = INT2NUM(source_length - remaining_source_length);
@@ -122,18 +121,15 @@ VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source)
   }
 }
 
-VALUE lzws_ext_decompress(VALUE self, VALUE source)
+VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
 {
-  GET_DECOMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
-  GET_SOURCE_STRING();
-
-  uint8_t* remaining_source_data   = (uint8_t*)source_data;
-  size_t   remaining_source_length = source_length;
+  GET_DECOMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
+  GET_SOURCE_DATA(source_value);
 
   lzws_result_t result = lzws_decompress(
     decompressor_ptr->state_ptr,
-    &remaining_source_data,
+    &remaining_source,
     &remaining_source_length,
     &decompressor_ptr->remaining_destination_buffer,
     &decompressor_ptr->remaining_destination_buffer_length);
@@ -162,28 +158,28 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source)
 
 VALUE lzws_ext_decompressor_read_result(VALUE self)
 {
-  GET_DECOMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
+  GET_DECOMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
 
   uint8_t* destination_buffer                  = decompressor_ptr->destination_buffer;
   size_t   destination_buffer_length           = decompressor_ptr->destination_buffer_length;
   size_t   remaining_destination_buffer_length = decompressor_ptr->remaining_destination_buffer_length;
 
-  const char* result_data   = (const char*)destination_buffer;
+  const char* result        = (const char*)destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
 
-  VALUE result = rb_str_new(result_data, result_length);
+  VALUE result_value = rb_str_new(result, result_length);
 
   decompressor_ptr->remaining_destination_buffer        = destination_buffer;
   decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
 
-  return result;
+  return result_value;
 }
 
 VALUE lzws_ext_decompressor_close(VALUE self)
 {
-  GET_DECOMPRESSOR();
-  DO_NOT_USE_AFTER_CLOSE();
+  GET_DECOMPRESSOR(self);
+  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
 
   lzws_decompressor_state_t* state_ptr = decompressor_ptr->state_ptr;
   if (state_ptr != NULL) {

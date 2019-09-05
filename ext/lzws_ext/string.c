@@ -10,22 +10,22 @@
 #include "lzws_ext/option.h"
 #include "lzws_ext/string.h"
 
-#define GET_SOURCE_DATA(source)                    \
-  Check_Type(source, T_STRING);                    \
-                                                   \
-  const char* source_data   = RSTRING_PTR(source); \
-  size_t      source_length = RSTRING_LEN(source);
+#define GET_SOURCE_DATA(source_value)                    \
+  Check_Type(source_value, T_STRING);                    \
+                                                         \
+  const char* source        = RSTRING_PTR(source_value); \
+  size_t      source_length = RSTRING_LEN(source_value);
 
-VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE options)
+VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
-  GET_SOURCE_DATA(source);
+  GET_SOURCE_DATA(source_value);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   char*  destination;
   size_t destination_length;
 
   lzws_result_t result = lzws_compress_string(
-    (uint8_t*)source_data, source_length,
+    (uint8_t*)source, source_length,
     (uint8_t**)&destination, &destination_length, buffer_length,
     without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
@@ -45,16 +45,16 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE 
   return result_string;
 }
 
-VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE options)
+VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
-  GET_SOURCE_DATA(source);
+  GET_SOURCE_DATA(source_value);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   char*  destination;
   size_t destination_length;
 
   lzws_result_t result = lzws_decompress_string(
-    (uint8_t*)source_data, source_length,
+    (uint8_t*)source, source_length,
     (uint8_t**)&destination, &destination_length, buffer_length,
     without_magic_header, msb, unaligned_bit_groups, quiet);
 
