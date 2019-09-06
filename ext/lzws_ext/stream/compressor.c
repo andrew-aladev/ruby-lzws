@@ -133,7 +133,7 @@ VALUE lzws_ext_compress(VALUE self, VALUE source_value)
     &compressor_ptr->remaining_destination_buffer,
     &compressor_ptr->remaining_destination_buffer_length);
 
-  VALUE bytes_written = INT2NUM(source_length - remaining_source_length);
+  VALUE bytes_written = UINT2NUM(source_length - remaining_source_length);
 
   VALUE needs_more_destination;
   if (result == LZWS_COMPRESSOR_NEEDS_MORE_SOURCE) {

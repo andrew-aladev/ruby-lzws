@@ -19,7 +19,7 @@ unsigned long lzws_ext_get_fixnum_option(VALUE options, const char *name)
 
   Check_Type(value, T_FIXNUM);
 
-  return rb_num2uint(value);
+  return NUM2UINT(value);
 }
 
 bool lzws_ext_get_bool_option(VALUE options, const char *name)

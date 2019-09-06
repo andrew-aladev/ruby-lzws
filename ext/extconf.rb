@@ -17,7 +17,6 @@ require_header "lzws/decompressor/header.h"
 require_header "lzws/decompressor/main.h"
 require_header "lzws/decompressor/state.h"
 require_header "lzws/file.h"
-require_header "lzws/string.h"
 
 def require_library(name, functions)
   functions.each do |function|

@@ -108,7 +108,7 @@ VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source_value)
     &remaining_source,
     &remaining_source_length);
 
-  VALUE bytes_read = INT2NUM(source_length - remaining_source_length);
+  VALUE bytes_read = UINT2NUM(source_length - remaining_source_length);
 
   if (result == 0 || result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE) {
     return bytes_read;
@@ -134,7 +134,7 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
     &decompressor_ptr->remaining_destination_buffer,
     &decompressor_ptr->remaining_destination_buffer_length);
 
-  VALUE bytes_read = INT2NUM(source_length - remaining_source_length);
+  VALUE bytes_read = UINT2NUM(source_length - remaining_source_length);
 
   VALUE needs_more_destination;
   if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE) {
