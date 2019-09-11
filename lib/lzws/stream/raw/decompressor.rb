@@ -16,8 +16,6 @@ module LZWS
           native_stream = NativeDecompressor.new options
 
           super native_stream
-
-          @need_to_read_magic_header = !options[:without_magic_header]
         end
 
         def read(source, &writer)
@@ -27,19 +25,6 @@ module LZWS
           Validation.validate_proc writer
 
           total_bytes_read = 0
-
-          if @need_to_read_magic_header
-            bytes_read = @native_stream.read_magic_header source
-            if bytes_read == 0
-              # Decompressor is not able to read full magic header.
-              return 0
-            end
-
-            total_bytes_read += bytes_read
-            source            = source.byteslice bytes_read, source.bytesize - bytes_read
-
-            @need_to_read_magic_header = false
-          end
 
           loop do
             bytes_read, need_more_destination  = @native_stream.read source

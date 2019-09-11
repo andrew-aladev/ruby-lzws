@@ -18,7 +18,6 @@ typedef struct {
 
 VALUE lzws_ext_allocate_decompressor(VALUE klass);
 VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options);
-VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source);
 VALUE lzws_ext_decompress(VALUE self, VALUE source);
 VALUE lzws_ext_decompressor_read_result(VALUE self);
 VALUE lzws_ext_decompressor_close(VALUE self);

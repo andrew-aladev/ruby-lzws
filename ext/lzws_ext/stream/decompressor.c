@@ -3,14 +3,12 @@
 
 #include <lzws/buffer.h>
 #include <lzws/decompressor/common.h>
-#include <lzws/decompressor/header.h>
 #include <lzws/decompressor/main.h>
 #include <lzws/decompressor/state.h>
 
 #include "ruby.h"
 
 #include "lzws_ext/error.h"
-#include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
 #include "lzws_ext/stream/decompressor.h"
 
@@ -52,13 +50,12 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
 {
   GET_DECOMPRESSOR(self);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
-  LZWS_EXT_UNUSED_VARIABLE(without_magic_header);
 
   lzws_decompressor_state_t* state_ptr;
 
   lzws_result_t result = lzws_decompressor_get_initial_state(
     &state_ptr,
-    msb, unaligned_bit_groups, quiet);
+    without_magic_header, msb, unaligned_bit_groups, quiet);
 
   if (result == LZWS_DECOMPRESSOR_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");
@@ -84,6 +81,11 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   return Qnil;
 }
 
+#define DO_NOT_USE_AFTER_CLOSE(decompressor_ptr)                                             \
+  if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
+    lzws_ext_raise_error("UsedAfterCloseError", "decompressor used after close");            \
+  }
+
 #define GET_SOURCE_DATA(source_value)                              \
   Check_Type(source_value, T_STRING);                              \
                                                                    \
@@ -91,35 +93,6 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   size_t      source_length           = RSTRING_LEN(source_value); \
   uint8_t*    remaining_source        = (uint8_t*)source;          \
   size_t      remaining_source_length = source_length;
-
-#define DO_NOT_USE_AFTER_CLOSE(decompressor_ptr)                                             \
-  if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
-    lzws_ext_raise_error("UsedAfterCloseError", "decompressor used after close");            \
-  }
-
-VALUE lzws_ext_decompressor_read_magic_header(VALUE self, VALUE source_value)
-{
-  GET_DECOMPRESSOR(self);
-  DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
-  GET_SOURCE_DATA(source_value);
-
-  lzws_result_t result = lzws_decompressor_read_magic_header(
-    decompressor_ptr->state_ptr,
-    &remaining_source,
-    &remaining_source_length);
-
-  VALUE bytes_read = UINT2NUM(source_length - remaining_source_length);
-
-  if (result == 0 || result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE) {
-    return bytes_read;
-  }
-  else if (result == LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER) {
-    lzws_ext_raise_error("ValidateError", "validate error");
-  }
-  else {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
-  }
-}
 
 VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
 {
@@ -208,7 +181,6 @@ void lzws_ext_decompressor_exports(VALUE root_module)
   VALUE decompressor = rb_define_class_under(stream, "NativeDecompressor", rb_cObject);
   rb_define_alloc_func(decompressor, lzws_ext_allocate_decompressor);
   rb_define_method(decompressor, "initialize", lzws_ext_initialize_decompressor, 1);
-  rb_define_method(decompressor, "read_magic_header", lzws_ext_decompressor_read_magic_header, 1);
   rb_define_method(decompressor, "read", lzws_ext_decompress, 1);
   rb_define_method(decompressor, "read_result", lzws_ext_decompressor_read_result, 0);
   rb_define_method(decompressor, "close", lzws_ext_decompressor_close, 0);

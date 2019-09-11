@@ -10,6 +10,4 @@
 #define LZWS_EXT_UNUSED(x) x
 #endif
 
-#define LZWS_EXT_UNUSED_VARIABLE(x) (void)(x)
-
 #endif // LZWS_EXT_MACRO_H

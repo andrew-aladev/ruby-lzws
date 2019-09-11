@@ -17,8 +17,6 @@ module LZWS
           native_stream = NativeCompressor.new options
 
           super native_stream
-
-          @need_to_write_magic_header = !options[:without_magic_header]
         end
 
         def write(source, &writer)
@@ -26,11 +24,6 @@ module LZWS
 
           Validation.validate_string source
           Validation.validate_proc writer
-
-          if @need_to_write_magic_header
-            write_magic_header(&writer)
-            @need_to_write_magic_header = false
-          end
 
           total_bytes_written = 0
 
@@ -53,21 +46,6 @@ module LZWS
           end
 
           total_bytes_written
-        end
-
-        protected def write_magic_header(&writer)
-          loop do
-            need_more_destination = @native_stream.write_magic_header
-
-            if need_more_destination
-              flush_destination_buffer(&writer)
-              next
-            end
-
-            break
-          end
-
-          nil
         end
 
         def close(&writer)

@@ -3,14 +3,12 @@
 
 #include <lzws/buffer.h>
 #include <lzws/compressor/common.h>
-#include <lzws/compressor/header.h>
 #include <lzws/compressor/main.h>
 #include <lzws/compressor/state.h>
 
 #include "ruby.h"
 
 #include "lzws_ext/error.h"
-#include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
 #include "lzws_ext/stream/compressor.h"
 
@@ -52,13 +50,12 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
 {
   GET_COMPRESSOR(self);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
-  LZWS_EXT_UNUSED_VARIABLE(without_magic_header);
 
   lzws_compressor_state_t* state_ptr;
 
   lzws_result_t result = lzws_compressor_get_initial_state(
     &state_ptr,
-    max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
+    without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
   if (result == LZWS_COMPRESSOR_ALLOCATE_FAILED) {
     lzws_ext_raise_error("AllocateError", "allocate error");
@@ -91,26 +88,6 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
   if (compressor_ptr->state_ptr == NULL || compressor_ptr->destination_buffer == NULL) { \
     lzws_ext_raise_error("UsedAfterCloseError", "compressor used after closed");         \
   }
-
-VALUE lzws_ext_compressor_write_magic_header(VALUE self)
-{
-  GET_COMPRESSOR(self);
-  DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
-
-  lzws_result_t result = lzws_compressor_write_magic_header(
-    &compressor_ptr->remaining_destination_buffer,
-    &compressor_ptr->remaining_destination_buffer_length);
-
-  if (result == 0) {
-    return Qfalse;
-  }
-  else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    return Qtrue;
-  }
-  else {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
-  }
-}
 
 #define GET_SOURCE_DATA(source_value)                              \
   Check_Type(source_value, T_STRING);                              \
@@ -222,7 +199,6 @@ void lzws_ext_compressor_exports(VALUE root_module)
   VALUE compressor = rb_define_class_under(stream, "NativeCompressor", rb_cObject);
   rb_define_alloc_func(compressor, lzws_ext_allocate_compressor);
   rb_define_method(compressor, "initialize", lzws_ext_initialize_compressor, 1);
-  rb_define_method(compressor, "write_magic_header", lzws_ext_compressor_write_magic_header, 0);
   rb_define_method(compressor, "write", lzws_ext_compress, 1);
   rb_define_method(compressor, "finish", lzws_ext_finish_compressor, 0);
   rb_define_method(compressor, "read_result", lzws_ext_compressor_read_result, 0);

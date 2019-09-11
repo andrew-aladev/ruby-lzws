@@ -9,11 +9,9 @@ end
 
 require_header "lzws/buffer.h"
 require_header "lzws/compressor/common.h"
-require_header "lzws/compressor/header.h"
 require_header "lzws/compressor/main.h"
 require_header "lzws/compressor/state.h"
 require_header "lzws/decompressor/common.h"
-require_header "lzws/decompressor/header.h"
 require_header "lzws/decompressor/main.h"
 require_header "lzws/decompressor/state.h"
 require_header "lzws/file.h"
@@ -29,19 +27,14 @@ functions = %w[
   lzws_create_buffer_for_decompressor
   lzws_resize_buffer
 
-  lzws_compress_string
-  lzws_decompress_string
-
   lzws_compress_file
   lzws_decompress_file
 
-  lzws_compressor_write_magic_header
   lzws_compressor_get_initial_state
   lzws_compress
   lzws_finish_compressor
   lzws_compressor_free_state
 
-  lzws_decompressor_read_magic_header
   lzws_decompressor_get_initial_state
   lzws_decompress
   lzws_decompressor_free_state
