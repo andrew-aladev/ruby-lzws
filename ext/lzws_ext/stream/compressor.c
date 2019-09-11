@@ -113,7 +113,7 @@ VALUE lzws_ext_compress(VALUE self, VALUE source_value)
   VALUE bytes_written = UINT2NUM(source_length - remaining_source_length);
 
   VALUE needs_more_destination;
-  if (result == LZWS_COMPRESSOR_NEEDS_MORE_SOURCE) {
+  if (result == 0) {
     needs_more_destination = Qfalse;
   }
   else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
@@ -136,15 +136,18 @@ VALUE lzws_ext_finish_compressor(VALUE self)
     &compressor_ptr->remaining_destination_buffer,
     &compressor_ptr->remaining_destination_buffer_length);
 
+  VALUE needs_more_destination;
   if (result == 0) {
-    return Qfalse;
+    needs_more_destination = Qfalse;
   }
   else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    return Qtrue;
+    needs_more_destination = Qtrue;
   }
   else {
     lzws_ext_raise_error("UnexpectedError", "unexpected error");
   }
+
+  return needs_more_destination;
 }
 
 VALUE lzws_ext_compressor_read_result(VALUE self)

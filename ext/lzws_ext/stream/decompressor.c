@@ -110,13 +110,15 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
   VALUE bytes_read = UINT2NUM(source_length - remaining_source_length);
 
   VALUE needs_more_destination;
-  if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE) {
+  if (result == 0) {
     needs_more_destination = Qfalse;
   }
   else if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
     needs_more_destination = Qtrue;
   }
-  else if (result == LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
+  else if (
+    result == LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER ||
+    result == LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
     lzws_ext_raise_error("ValidateError", "validate error");
   }
   else if (result == LZWS_DECOMPRESSOR_CORRUPTED_SOURCE) {

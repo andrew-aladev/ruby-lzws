@@ -190,12 +190,12 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
       rb_str_free(destination_value);
       lzws_decompressor_free_state(state_ptr);
 
-      if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_SOURCE ||
-          result == LZWS_DECOMPRESSOR_CORRUPTED_SOURCE) {
-        lzws_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
-      }
-      else if (result == LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
+      if (result == LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER ||
+          result == LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
         lzws_ext_raise_error("ValidateError", "validate error");
+      }
+      else if (result == LZWS_DECOMPRESSOR_CORRUPTED_SOURCE) {
+        lzws_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
       }
       else {
         lzws_ext_raise_error("UnexpectedError", "unexpected error");
