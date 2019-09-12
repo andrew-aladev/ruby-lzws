@@ -9,7 +9,7 @@ require_relative "../validation"
 module LZWS
   module Stream
     class Abstract
-      # LZWS native stream is not seekable by design.
+      # Native stream is not seekable by design.
       # Related methods like "seek" and "pos=" can't be implemented.
 
       # It is not possible to maintain correspondance between bytes consumed from source and bytes written to destination by design.
@@ -116,7 +116,6 @@ module LZWS
 
       protected def target_encoding
         return @internal_encoding unless @internal_encoding.nil?
-
         return @external_encoding unless @external_encoding.nil?
 
         ::Encoding::BINARY

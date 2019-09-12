@@ -58,6 +58,17 @@ module LZWS
               instance.read nil, invalid_string
             end
           end
+
+          corrupted_compressed_text = String.compress("") + "1111"
+          ::File.write ARCHIVE_PATH, corrupted_compressed_text
+
+          ::File.open ARCHIVE_PATH, "rb" do |file|
+            instance = target.new file
+
+            assert_raises DecompressorCorruptedSourceError do
+              instance.read
+            end
+          end
         end
 
         def test_read

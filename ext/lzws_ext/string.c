@@ -72,7 +72,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
   int exception;
 
   CREATE_BUFFER(destination_value, buffer_length, exception);
-  if (exception) {
+  if (exception != 0) {
     lzws_compressor_free_state(state_ptr);
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
@@ -113,7 +113,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
 
     if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
-      if (exception) {
+      if (exception != 0) {
         rb_str_free(destination_value);
         lzws_compressor_free_state(state_ptr);
         lzws_ext_raise_error("AllocateError", "allocate error");
@@ -132,7 +132,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
   lzws_compressor_free_state(state_ptr);
 
   RESIZE_BUFFER(destination_value, destination_length, exception);
-  if (exception) {
+  if (exception != 0) {
     rb_str_free(destination_value);
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
@@ -165,7 +165,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
   int exception;
 
   CREATE_BUFFER(destination_value, buffer_length, exception);
-  if (exception) {
+  if (exception != 0) {
     lzws_decompressor_free_state(state_ptr);
     lzws_ext_raise_error("AllocateError", "allocate error");
   }
@@ -206,7 +206,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
 
     if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
-      if (exception) {
+      if (exception != 0) {
         rb_str_free(destination_value);
         lzws_decompressor_free_state(state_ptr);
         lzws_ext_raise_error("AllocateError", "allocate error");
@@ -222,7 +222,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
   lzws_decompressor_free_state(state_ptr);
 
   RESIZE_BUFFER(destination_value, destination_length, exception);
-  if (exception) {
+  if (exception != 0) {
     rb_str_free(destination_value);
     lzws_ext_raise_error("AllocateError", "allocate error");
   }

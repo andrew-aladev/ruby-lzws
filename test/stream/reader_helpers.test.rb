@@ -23,7 +23,6 @@ module LZWS
         TRANSCODE_OPTIONS   = Common::TRANSCODE_OPTIONS
         TEXTS               = Common::TEXTS
         LARGE_TEXTS         = Common::LARGE_TEXTS
-        PORTION_LENGTHS     = Common::PORTION_LENGTHS
 
         LIMITS = [nil, 1].freeze
 

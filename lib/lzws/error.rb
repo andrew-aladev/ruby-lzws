@@ -13,7 +13,6 @@ module LZWS
 
   class DecompressorCorruptedSourceError < BaseError; end
 
-  class OpenFileError < BaseError; end
   class AccessIOError < BaseError; end
   class ReadIOError   < BaseError; end
   class WriteIOError  < BaseError; end

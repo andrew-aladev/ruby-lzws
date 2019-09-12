@@ -42,6 +42,14 @@ module LZWS
         end
       end
 
+      def test_invalid_text
+        corrupted_compressed_text = Target.compress("") + "1111"
+
+        assert_raises DecompressorCorruptedSourceError do
+          Target.decompress corrupted_compressed_text
+        end
+      end
+
       def test_texts
         TEXTS.each do |text|
           Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|

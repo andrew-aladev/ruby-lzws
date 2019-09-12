@@ -73,8 +73,8 @@ module LZWS
           Validation.validate_string file_path
           Validation.validate_proc block
 
-          ::File.open file_path, "wb" do |file|
-            writer = new file, *args
+          ::File.open file_path, "wb" do |io|
+            writer = new io, *args
 
             begin
               yield writer

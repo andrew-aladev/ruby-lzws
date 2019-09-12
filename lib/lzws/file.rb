@@ -32,24 +32,10 @@ module LZWS
     end
 
     private_class_method def self.open_files(source, destination, &_block)
-      open_file(source, "rb") do |source_io|
-        open_file(destination, "wb") do |destination_io|
+      ::File.open source, "rb" do |source_io|
+        ::File.open destination, "wb" do |destination_io|
           yield source_io, destination_io
         end
-      end
-    end
-
-    private_class_method def self.open_file(path, mode, &_block)
-      begin
-        io = ::File.open path, mode
-      rescue ::StandardError
-        raise OpenFileError, "open file failed"
-      end
-
-      begin
-        yield io
-      ensure
-        io.close
       end
     end
   end
