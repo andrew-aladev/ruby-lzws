@@ -43,7 +43,7 @@ module LZWS
       end
 
       def test_invalid_text
-        corrupted_compressed_text = Target.compress("") + "1111"
+        corrupted_compressed_text = Target.compress("11") + "11"
 
         assert_raises DecompressorCorruptedSourceError do
           Target.decompress corrupted_compressed_text

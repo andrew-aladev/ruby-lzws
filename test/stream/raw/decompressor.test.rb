@@ -45,7 +45,7 @@ module LZWS
               decompressor.read ""
             end
 
-            corrupted_compressed_text = String.compress("") + "1111"
+            corrupted_compressed_text = String.compress("11") + "11"
 
             assert_raises DecompressorCorruptedSourceError do
               decompressor.read corrupted_compressed_text, &NOOP_PROC

@@ -59,7 +59,7 @@ module LZWS
             end
           end
 
-          corrupted_compressed_text = String.compress("") + "1111"
+          corrupted_compressed_text = String.compress("11") + "11"
           ::File.write ARCHIVE_PATH, corrupted_compressed_text
 
           ::File.open ARCHIVE_PATH, "rb" do |file|
