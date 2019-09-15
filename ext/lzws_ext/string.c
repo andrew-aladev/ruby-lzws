@@ -55,14 +55,15 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
     &state_ptr,
     without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
-  if (result == LZWS_COMPRESSOR_ALLOCATE_FAILED) {
-    lzws_ext_raise_error("AllocateError", "allocate error");
-  }
-  else if (result == LZWS_COMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
-    lzws_ext_raise_error("ValidateError", "validate error");
-  }
-  else if (result != 0) {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
+  switch (result) {
+    case LZWS_COMPRESSOR_ALLOCATE_FAILED:
+      lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+    case LZWS_COMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
+      lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
+    default:
+      if (result != 0) {
+        lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
+      }
   }
 
   if (buffer_length == 0) {
@@ -74,7 +75,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
   CREATE_BUFFER(destination_value, buffer_length, exception);
   if (exception != 0) {
     lzws_compressor_free_state(state_ptr);
-    lzws_ext_raise_error("AllocateError", "allocate error");
+    lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   size_t destination_length                  = 0;
@@ -105,7 +106,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
       result != 0 &&
       result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
       lzws_compressor_free_state(state_ptr);
-      lzws_ext_raise_error("UnexpectedError", "unexpected error");
+      lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
     }
 
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
@@ -114,7 +115,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
       if (exception != 0) {
         lzws_compressor_free_state(state_ptr);
-        lzws_ext_raise_error("AllocateError", "allocate error");
+        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
       }
 
       remaining_destination_buffer_length = buffer_length;
@@ -131,7 +132,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
 
   RESIZE_BUFFER(destination_value, destination_length, exception);
   if (exception != 0) {
-    lzws_ext_raise_error("AllocateError", "allocate error");
+    lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   return destination_value;
@@ -148,11 +149,13 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
     &state_ptr,
     without_magic_header, msb, unaligned_bit_groups, quiet);
 
-  if (result == LZWS_DECOMPRESSOR_ALLOCATE_FAILED) {
-    lzws_ext_raise_error("AllocateError", "allocate error");
-  }
-  else if (result != 0) {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
+  switch (result) {
+    case LZWS_DECOMPRESSOR_ALLOCATE_FAILED:
+      lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+    default:
+      if (result != 0) {
+        lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
+      }
   }
 
   if (buffer_length == 0) {
@@ -164,7 +167,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
   CREATE_BUFFER(destination_value, buffer_length, exception);
   if (exception != 0) {
     lzws_decompressor_free_state(state_ptr);
-    lzws_ext_raise_error("AllocateError", "allocate error");
+    lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   size_t destination_length                  = 0;
@@ -186,15 +189,14 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
       result != LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
       lzws_decompressor_free_state(state_ptr);
 
-      if (result == LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER ||
-          result == LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
-        lzws_ext_raise_error("ValidateError", "validate error");
-      }
-      else if (result == LZWS_DECOMPRESSOR_CORRUPTED_SOURCE) {
-        lzws_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
-      }
-      else {
-        lzws_ext_raise_error("UnexpectedError", "unexpected error");
+      switch (result) {
+        case LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER:
+        case LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
+          lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
+        case LZWS_DECOMPRESSOR_CORRUPTED_SOURCE:
+          lzws_ext_raise_error(LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE);
+        default:
+          lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
       }
     }
 
@@ -204,7 +206,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
       if (exception != 0) {
         lzws_decompressor_free_state(state_ptr);
-        lzws_ext_raise_error("AllocateError", "allocate error");
+        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
       }
 
       remaining_destination_buffer_length = buffer_length;
@@ -218,7 +220,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
 
   RESIZE_BUFFER(destination_value, destination_length, exception);
   if (exception != 0) {
-    lzws_ext_raise_error("AllocateError", "allocate error");
+    lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   return destination_value;

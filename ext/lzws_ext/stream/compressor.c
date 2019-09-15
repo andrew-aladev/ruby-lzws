@@ -57,14 +57,15 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
     &state_ptr,
     without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
-  if (result == LZWS_COMPRESSOR_ALLOCATE_FAILED) {
-    lzws_ext_raise_error("AllocateError", "allocate error");
-  }
-  else if (result == LZWS_COMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
-    lzws_ext_raise_error("ValidateError", "validate error");
-  }
-  else if (result != 0) {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
+  switch (result) {
+    case LZWS_COMPRESSOR_ALLOCATE_FAILED:
+      lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+    case LZWS_COMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
+      lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
+    default:
+      if (result != 0) {
+        lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
+      }
   }
 
   uint8_t* buffer;
@@ -72,7 +73,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
   result = lzws_create_buffer_for_compressor(&buffer, &buffer_length, quiet);
   if (result != 0) {
     lzws_compressor_free_state(state_ptr);
-    lzws_ext_raise_error("AllocateError", "allocate error");
+    lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   compressor_ptr->state_ptr                           = state_ptr;
@@ -86,7 +87,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
 
 #define DO_NOT_USE_AFTER_CLOSE(compressor_ptr)                                           \
   if (compressor_ptr->state_ptr == NULL || compressor_ptr->destination_buffer == NULL) { \
-    lzws_ext_raise_error("UsedAfterCloseError", "compressor used after closed");         \
+    lzws_ext_raise_error(LZWS_EXT_ERROR_USED_AFTER_CLOSE);                               \
   }
 
 #define GET_SOURCE_DATA(source_value)                              \
@@ -120,7 +121,7 @@ VALUE lzws_ext_compress(VALUE self, VALUE source_value)
     needs_more_destination = Qtrue;
   }
   else {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
+    lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
   }
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
@@ -144,7 +145,7 @@ VALUE lzws_ext_finish_compressor(VALUE self)
     needs_more_destination = Qtrue;
   }
   else {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
+    lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
   }
 
   return needs_more_destination;

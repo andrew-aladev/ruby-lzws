@@ -6,6 +6,24 @@
 
 #include "ruby.h"
 
-NORETURN(void lzws_ext_raise_error(const char* name, const char* description));
+#include "lzws_ext/common.h"
+
+// Results for errors listed in "lib/lzws/error" used in c extension.
+
+enum {
+  LZWS_EXT_ERROR_ALLOCATE_FAILED = 1,
+  LZWS_EXT_ERROR_VALIDATE_FAILED,
+
+  LZWS_EXT_ERROR_USED_AFTER_CLOSE,
+  LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE,
+
+  LZWS_EXT_ERROR_ACCESS_IO,
+  LZWS_EXT_ERROR_READ_IO,
+  LZWS_EXT_ERROR_WRITE_IO,
+
+  LZWS_EXT_ERROR_UNEXPECTED
+};
+
+NORETURN(void lzws_ext_raise_error(lzws_ext_result_t result));
 
 #endif // LZWS_EXT_ERROR_H

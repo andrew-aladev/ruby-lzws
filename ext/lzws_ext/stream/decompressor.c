@@ -57,11 +57,13 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
     &state_ptr,
     without_magic_header, msb, unaligned_bit_groups, quiet);
 
-  if (result == LZWS_DECOMPRESSOR_ALLOCATE_FAILED) {
-    lzws_ext_raise_error("AllocateError", "allocate error");
-  }
-  else if (result != 0) {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
+  switch (result) {
+    case LZWS_DECOMPRESSOR_ALLOCATE_FAILED:
+      lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+    default:
+      if (result != 0) {
+        lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
+      }
   }
 
   uint8_t* buffer;
@@ -69,7 +71,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   result = lzws_create_buffer_for_decompressor(&buffer, &buffer_length, quiet);
   if (result != 0) {
     lzws_decompressor_free_state(state_ptr);
-    lzws_ext_raise_error("AllocateError", "allocate error");
+    lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   decompressor_ptr->state_ptr                           = state_ptr;
@@ -83,7 +85,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
 
 #define DO_NOT_USE_AFTER_CLOSE(decompressor_ptr)                                             \
   if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
-    lzws_ext_raise_error("UsedAfterCloseError", "decompressor used after close");            \
+    lzws_ext_raise_error(LZWS_EXT_ERROR_USED_AFTER_CLOSE);                                   \
   }
 
 #define GET_SOURCE_DATA(source_value)                              \
@@ -116,16 +118,16 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
   else if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
     needs_more_destination = Qtrue;
   }
-  else if (
-    result == LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER ||
-    result == LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH) {
-    lzws_ext_raise_error("ValidateError", "validate error");
-  }
-  else if (result == LZWS_DECOMPRESSOR_CORRUPTED_SOURCE) {
-    lzws_ext_raise_error("DecompressorCorruptedSourceError", "decompressor received corrupted source");
-  }
   else {
-    lzws_ext_raise_error("UnexpectedError", "unexpected error");
+    switch (result) {
+      case LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER:
+      case LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
+      case LZWS_DECOMPRESSOR_CORRUPTED_SOURCE:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE);
+      default:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
+    }
   }
 
   return rb_ary_new_from_args(2, bytes_read, needs_more_destination);

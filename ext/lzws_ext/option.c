@@ -28,7 +28,7 @@ bool lzws_ext_get_bool_option(VALUE options, const char *name)
 
   int type = TYPE(value);
   if (type != T_TRUE && type != T_FALSE) {
-    lzws_ext_raise_error("ValidateError", "invalid bool value");
+    lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
   }
 
   return type == T_TRUE;
