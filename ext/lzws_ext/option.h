@@ -8,8 +8,8 @@
 
 #include "ruby.h"
 
-unsigned long lzws_ext_get_fixnum_option(VALUE options, const char *name);
-bool          lzws_ext_get_bool_option(VALUE options, const char *name);
+unsigned long lzws_ext_get_fixnum_option(VALUE options, const char* name);
+bool          lzws_ext_get_bool_option(VALUE options, const char* name);
 
 #define LZWS_EXT_GET_FIXNUM_OPTION(type, name) \
   type name = lzws_ext_get_fixnum_option(options, #name);

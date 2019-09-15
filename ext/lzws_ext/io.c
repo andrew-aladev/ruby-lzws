@@ -14,10 +14,10 @@
 #define GET_FILE(target)                               \
   Check_Type(target, T_FILE);                          \
                                                        \
-  rb_io_t *target##_io;                                \
+  rb_io_t* target##_io;                                \
   GetOpenFile(target, target##_io);                    \
                                                        \
-  FILE *target##_file = rb_io_stdio_file(target##_io); \
+  FILE* target##_file = rb_io_stdio_file(target##_io); \
   if (target##_file == NULL) {                         \
     lzws_ext_raise_error(LZWS_EXT_ERROR_ACCESS_IO);    \
   }

@@ -8,12 +8,12 @@
 #include "lzws_ext/error.h"
 #include "lzws_ext/option.h"
 
-static inline VALUE get_option(VALUE options, const char *name)
+static inline VALUE get_option(VALUE options, const char* name)
 {
   return rb_funcall(options, rb_intern("[]"), 1, ID2SYM(rb_intern(name)));
 }
 
-unsigned long lzws_ext_get_fixnum_option(VALUE options, const char *name)
+unsigned long lzws_ext_get_fixnum_option(VALUE options, const char* name)
 {
   VALUE value = get_option(options, name);
 
@@ -22,7 +22,7 @@ unsigned long lzws_ext_get_fixnum_option(VALUE options, const char *name)
   return NUM2UINT(value);
 }
 
-bool lzws_ext_get_bool_option(VALUE options, const char *name)
+bool lzws_ext_get_bool_option(VALUE options, const char* name)
 {
   VALUE value = get_option(options, name);
 
