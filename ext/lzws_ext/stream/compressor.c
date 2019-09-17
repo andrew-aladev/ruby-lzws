@@ -57,15 +57,15 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
     &state_ptr,
     without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
-  switch (result) {
-    case LZWS_COMPRESSOR_ALLOCATE_FAILED:
-      lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
-    case LZWS_COMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
-      lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
-    default:
-      if (result != 0) {
+  if (result != 0) {
+    switch (result) {
+      case LZWS_COMPRESSOR_ALLOCATE_FAILED:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+      case LZWS_COMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
+      default:
         lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
-      }
+    }
   }
 
   uint8_t* buffer;
@@ -111,18 +111,14 @@ VALUE lzws_ext_compress(VALUE self, VALUE source_value)
     &compressor_ptr->remaining_destination_buffer,
     &compressor_ptr->remaining_destination_buffer_length);
 
-  VALUE bytes_written = UINT2NUM(source_length - remaining_source_length);
-
-  VALUE needs_more_destination;
-  if (result == 0) {
-    needs_more_destination = Qfalse;
-  }
-  else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    needs_more_destination = Qtrue;
-  }
-  else {
+  if (
+    result != 0 &&
+    result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
     lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
   }
+
+  VALUE bytes_written          = UINT2NUM(source_length - remaining_source_length);
+  VALUE needs_more_destination = result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
 }
@@ -137,16 +133,13 @@ VALUE lzws_ext_finish_compressor(VALUE self)
     &compressor_ptr->remaining_destination_buffer,
     &compressor_ptr->remaining_destination_buffer_length);
 
-  VALUE needs_more_destination;
-  if (result == 0) {
-    needs_more_destination = Qfalse;
-  }
-  else if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-    needs_more_destination = Qtrue;
-  }
-  else {
+  if (
+    result != 0 &&
+    result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
     lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
   }
+
+  VALUE needs_more_destination = result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION ? Qtrue : Qfalse;
 
   return needs_more_destination;
 }

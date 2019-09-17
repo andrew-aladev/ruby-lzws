@@ -57,13 +57,13 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
     &state_ptr,
     without_magic_header, msb, unaligned_bit_groups, quiet);
 
-  switch (result) {
-    case LZWS_DECOMPRESSOR_ALLOCATE_FAILED:
-      lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
-    default:
-      if (result != 0) {
+  if (result != 0) {
+    switch (result) {
+      case LZWS_DECOMPRESSOR_ALLOCATE_FAILED:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+      default:
         lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
-      }
+    }
   }
 
   uint8_t* buffer;
@@ -109,16 +109,9 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
     &decompressor_ptr->remaining_destination_buffer,
     &decompressor_ptr->remaining_destination_buffer_length);
 
-  VALUE bytes_read = UINT2NUM(source_length - remaining_source_length);
-
-  VALUE needs_more_destination;
-  if (result == 0) {
-    needs_more_destination = Qfalse;
-  }
-  else if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
-    needs_more_destination = Qtrue;
-  }
-  else {
+  if (
+    result != 0 &&
+    result != LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
     switch (result) {
       case LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER:
       case LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
@@ -129,6 +122,9 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
         lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
     }
   }
+
+  VALUE bytes_read             = UINT2NUM(source_length - remaining_source_length);
+  VALUE needs_more_destination = result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_read, needs_more_destination);
 }

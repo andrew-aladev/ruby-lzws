@@ -55,15 +55,15 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
     &state_ptr,
     without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
-  switch (result) {
-    case LZWS_COMPRESSOR_ALLOCATE_FAILED:
-      lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
-    case LZWS_COMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
-      lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
-    default:
-      if (result != 0) {
+  if (result != 0) {
+    switch (result) {
+      case LZWS_COMPRESSOR_ALLOCATE_FAILED:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+      case LZWS_COMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
+      default:
         lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
-      }
+    }
   }
 
   if (buffer_length == 0) {
@@ -119,13 +119,14 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
       }
 
       remaining_destination_buffer_length = buffer_length;
+      continue;
     }
-    else if (!is_finished) {
-      is_finished = true;
-    }
-    else {
+
+    if (is_finished) {
       break;
     }
+
+    is_finished = true;
   }
 
   lzws_compressor_free_state(state_ptr);
@@ -149,13 +150,13 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
     &state_ptr,
     without_magic_header, msb, unaligned_bit_groups, quiet);
 
-  switch (result) {
-    case LZWS_DECOMPRESSOR_ALLOCATE_FAILED:
-      lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
-    default:
-      if (result != 0) {
+  if (result != 0) {
+    switch (result) {
+      case LZWS_DECOMPRESSOR_ALLOCATE_FAILED:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+      default:
         lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
-      }
+    }
   }
 
   if (buffer_length == 0) {
@@ -210,10 +211,10 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
       }
 
       remaining_destination_buffer_length = buffer_length;
+      continue;
     }
-    else {
-      break;
-    }
+
+    break;
   }
 
   lzws_decompressor_free_state(state_ptr);
