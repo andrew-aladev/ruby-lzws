@@ -106,10 +106,8 @@ VALUE lzws_ext_compress(VALUE self, VALUE source_value)
 
   lzws_result_t result = lzws_compress(
     compressor_ptr->state_ptr,
-    &remaining_source,
-    &remaining_source_length,
-    &compressor_ptr->remaining_destination_buffer,
-    &compressor_ptr->remaining_destination_buffer_length);
+    &remaining_source, &remaining_source_length,
+    &compressor_ptr->remaining_destination_buffer, &compressor_ptr->remaining_destination_buffer_length);
 
   if (
     result != 0 &&
@@ -130,8 +128,7 @@ VALUE lzws_ext_finish_compressor(VALUE self)
 
   lzws_result_t result = lzws_finish_compressor(
     compressor_ptr->state_ptr,
-    &compressor_ptr->remaining_destination_buffer,
-    &compressor_ptr->remaining_destination_buffer_length);
+    &compressor_ptr->remaining_destination_buffer, &compressor_ptr->remaining_destination_buffer_length);
 
   if (
     result != 0 &&

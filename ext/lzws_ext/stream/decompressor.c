@@ -104,10 +104,8 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
 
   lzws_result_t result = lzws_decompress(
     decompressor_ptr->state_ptr,
-    &remaining_source,
-    &remaining_source_length,
-    &decompressor_ptr->remaining_destination_buffer,
-    &decompressor_ptr->remaining_destination_buffer_length);
+    &remaining_source, &remaining_source_length,
+    &decompressor_ptr->remaining_destination_buffer, &decompressor_ptr->remaining_destination_buffer_length);
 
   if (
     result != 0 &&

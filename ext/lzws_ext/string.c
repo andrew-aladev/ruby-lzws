@@ -90,16 +90,13 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
     if (is_finished) {
       result = lzws_finish_compressor(
         state_ptr,
-        &destination,
-        &remaining_destination_buffer_length);
+        &destination, &remaining_destination_buffer_length);
     }
     else {
       result = lzws_compress(
         state_ptr,
-        &remaining_source,
-        &remaining_source_length,
-        &destination,
-        &remaining_destination_buffer_length);
+        &remaining_source, &remaining_source_length,
+        &destination, &remaining_destination_buffer_length);
     }
 
     if (
@@ -180,10 +177,8 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
 
     result = lzws_decompress(
       state_ptr,
-      &remaining_source,
-      &remaining_source_length,
-      &destination,
-      &remaining_destination_buffer_length);
+      &remaining_source, &remaining_source_length,
+      &destination, &remaining_destination_buffer_length);
 
     if (
       result != 0 &&
