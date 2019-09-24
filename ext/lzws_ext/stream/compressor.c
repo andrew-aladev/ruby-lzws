@@ -1,16 +1,16 @@
 // Ruby bindings for lzws library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
+#include "lzws_ext/stream/compressor.h"
+
 #include <lzws/buffer.h>
 #include <lzws/compressor/common.h>
 #include <lzws/compressor/main.h>
 #include <lzws/compressor/state.h>
 
-#include "ruby.h"
-
 #include "lzws_ext/error.h"
 #include "lzws_ext/option.h"
-#include "lzws_ext/stream/compressor.h"
+#include "ruby.h"
 
 static void free_compressor(lzws_ext_compressor_t* compressor_ptr)
 {

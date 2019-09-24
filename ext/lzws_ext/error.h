@@ -4,9 +4,8 @@
 #if !defined(LZWS_EXT_ERROR_H)
 #define LZWS_EXT_ERROR_H
 
-#include "ruby.h"
-
 #include "lzws_ext/common.h"
+#include "ruby.h"
 
 // Results for errors listed in "lib/lzws/error" used in c extension.
 
@@ -15,6 +14,7 @@ enum {
   LZWS_EXT_ERROR_VALIDATE_FAILED,
 
   LZWS_EXT_ERROR_USED_AFTER_CLOSE,
+  LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER,
   LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE,
 
   LZWS_EXT_ERROR_ACCESS_IO,

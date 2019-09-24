@@ -1,15 +1,15 @@
 // Ruby bindings for lzws library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
-#include <lzws/file.h>
-
-#include "ruby.h"
 #include "ruby/io.h"
+
+#include <lzws/file.h>
 
 #include "lzws_ext/error.h"
 #include "lzws_ext/io.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
+#include "ruby.h"
 
 #define GET_FILE(target)                               \
   Check_Type(target, T_FILE);                          \
@@ -39,6 +39,8 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
         lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
       case LZWS_FILE_VALIDATE_FAILED:
         lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
+      case LZWS_FILE_NOT_ENOUGH_DESTINATION_BUFFER:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
       case LZWS_FILE_READ_FAILED:
         lzws_ext_raise_error(LZWS_EXT_ERROR_READ_IO);
       case LZWS_FILE_WRITE_FAILED:
@@ -71,6 +73,8 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
         lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
       case LZWS_FILE_VALIDATE_FAILED:
         lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
+      case LZWS_FILE_NOT_ENOUGH_DESTINATION_BUFFER:
+        lzws_ext_raise_error(LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
       case LZWS_FILE_DECOMPRESSOR_CORRUPTED_SOURCE:
         lzws_ext_raise_error(LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE);
       case LZWS_FILE_READ_FAILED:

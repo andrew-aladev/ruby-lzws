@@ -1,6 +1,8 @@
 // Ruby bindings for lzws library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
+#include "lzws_ext/string.h"
+
 #include <lzws/buffer.h>
 #include <lzws/compressor/common.h>
 #include <lzws/compressor/main.h>
@@ -9,12 +11,10 @@
 #include <lzws/decompressor/main.h>
 #include <lzws/decompressor/state.h>
 
-#include "ruby.h"
-
 #include "lzws_ext/error.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
-#include "lzws_ext/string.h"
+#include "ruby.h"
 
 #define GET_SOURCE_DATA(source_value)                              \
   Check_Type(source_value, T_STRING);                              \
@@ -84,19 +84,19 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
   bool is_finished = false;
 
   while (true) {
-    uint8_t* destination                              = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
+    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     if (is_finished) {
       result = lzws_finish_compressor(
         state_ptr,
-        &destination, &remaining_destination_buffer_length);
+        &remaining_destination_buffer, &remaining_destination_buffer_length);
     }
     else {
       result = lzws_compress(
         state_ptr,
         &remaining_source, &remaining_source_length,
-        &destination, &remaining_destination_buffer_length);
+        &remaining_destination_buffer, &remaining_destination_buffer_length);
     }
 
     if (
@@ -109,6 +109,12 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
     if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
+      if (remaining_destination_buffer_length == buffer_length) {
+        // We want to write more data at once, than buffer has.
+        lzws_compressor_free_state(state_ptr);
+        lzws_ext_raise_error(LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
+      }
+
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
       if (exception != 0) {
         lzws_compressor_free_state(state_ptr);
@@ -172,13 +178,13 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
   size_t remaining_destination_buffer_length = buffer_length;
 
   while (true) {
-    uint8_t* destination                              = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
+    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     result = lzws_decompress(
       state_ptr,
       &remaining_source, &remaining_source_length,
-      &destination, &remaining_destination_buffer_length);
+      &remaining_destination_buffer, &remaining_destination_buffer_length);
 
     if (
       result != 0 &&
@@ -199,6 +205,12 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
     if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
+      if (remaining_destination_buffer_length == buffer_length) {
+        // We want to write more data at once, than buffer has.
+        lzws_decompressor_free_state(state_ptr);
+        lzws_ext_raise_error(LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
+      }
+
       RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
       if (exception != 0) {
         lzws_decompressor_free_state(state_ptr);

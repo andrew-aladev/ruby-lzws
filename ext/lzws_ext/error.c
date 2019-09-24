@@ -1,10 +1,10 @@
 // Ruby bindings for lzws library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
-#include "ruby.h"
+#include "lzws_ext/error.h"
 
 #include "lzws_ext/common.h"
-#include "lzws_ext/error.h"
+#include "ruby.h"
 
 static inline NORETURN(void raise(const char* name, const char* description))
 {
@@ -23,6 +23,8 @@ void lzws_ext_raise_error(lzws_ext_result_t result)
 
     case LZWS_EXT_ERROR_USED_AFTER_CLOSE:
       raise("UsedAfterCloseError", "used after closed");
+    case LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER:
+      raise("NotEnoughDestinationBufferError", "not enough destination buffer");
     case LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE:
       raise("DecompressorCorruptedSourceError", "decompressor received corrupted source");
 

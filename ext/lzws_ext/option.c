@@ -1,12 +1,12 @@
 // Ruby bindings for lzws library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
+#include "lzws_ext/option.h"
+
 #include <stdbool.h>
 
-#include "ruby.h"
-
 #include "lzws_ext/error.h"
-#include "lzws_ext/option.h"
+#include "ruby.h"
 
 static inline VALUE get_option(VALUE options, const char* name)
 {
