@@ -24,6 +24,8 @@
   uint8_t*    remaining_source        = (uint8_t*)source;          \
   size_t      remaining_source_length = source_length;
 
+// -- buffer --
+
 static inline VALUE create_buffer(VALUE length)
 {
   return rb_str_new(NULL, NUM2UINT(length));
@@ -43,6 +45,95 @@ static inline VALUE resize_buffer(VALUE args)
   VALUE resize_buffer_args = rb_ary_new_from_args(2, buffer, UINT2NUM(length));         \
   buffer                   = rb_protect(resize_buffer, resize_buffer_args, &exception); \
   RB_GC_GUARD(resize_buffer_args);
+
+static inline lzws_ext_result_t increase_destination_buffer(
+  VALUE destination_value, size_t destination_length,
+  size_t* remaining_destination_buffer_length_ptr, size_t destination_buffer_length)
+{
+  if (*remaining_destination_buffer_length_ptr == destination_buffer_length) {
+    // We want to write more data at once, than buffer has.
+    return LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER;
+  }
+
+  int exception;
+
+  RESIZE_BUFFER(destination_value, destination_length + destination_buffer_length, exception);
+  if (exception != 0) {
+    return LZWS_EXT_ERROR_ALLOCATE_FAILED;
+  }
+
+  *remaining_destination_buffer_length_ptr = destination_buffer_length;
+
+  return 0;
+}
+
+// -- compress --
+
+static inline lzws_ext_result_t compress_data(
+  lzws_compressor_state_t* state_ptr,
+  uint8_t* remaining_source, size_t remaining_source_length,
+  VALUE destination_value, size_t destination_buffer_length)
+{
+  lzws_result_t     result;
+  lzws_ext_result_t ext_result;
+
+  size_t destination_length                  = 0;
+  size_t remaining_destination_buffer_length = destination_buffer_length;
+
+  bool is_finished = false;
+
+  while (true) {
+    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
+    size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
+
+    if (is_finished) {
+      result = lzws_finish_compressor(
+        state_ptr,
+        &remaining_destination_buffer, &remaining_destination_buffer_length);
+    }
+    else {
+      result = lzws_compress(
+        state_ptr,
+        &remaining_source, &remaining_source_length,
+        &remaining_destination_buffer, &remaining_destination_buffer_length);
+    }
+
+    if (
+      result != 0 &&
+      result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
+      return LZWS_EXT_ERROR_UNEXPECTED;
+    }
+
+    destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
+
+    if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
+      ext_result = increase_destination_buffer(
+        destination_value, destination_length,
+        &remaining_destination_buffer_length, destination_buffer_length);
+
+      if (ext_result != 0) {
+        return ext_result;
+      }
+
+      continue;
+    }
+
+    if (is_finished) {
+      break;
+    }
+
+    is_finished = true;
+  }
+
+  int exception;
+
+  RESIZE_BUFFER(destination_value, destination_length, exception);
+  if (exception != 0) {
+    return LZWS_EXT_ERROR_ALLOCATE_FAILED;
+  }
+
+  return 0;
+}
 
 VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
@@ -78,68 +169,81 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  size_t destination_length                  = 0;
-  size_t remaining_destination_buffer_length = buffer_length;
+  lzws_ext_result_t ext_result = compress_data(
+    state_ptr,
+    remaining_source, remaining_source_length,
+    destination_value, buffer_length);
 
-  bool is_finished = false;
+  lzws_compressor_free_state(state_ptr);
+
+  if (ext_result != 0) {
+    lzws_ext_raise_error(ext_result);
+  }
+
+  return destination_value;
+}
+
+// -- decompress --
+
+static inline lzws_ext_result_t decompress_data(
+  lzws_decompressor_state_t* state_ptr,
+  uint8_t* remaining_source, size_t remaining_source_length,
+  VALUE destination_value, size_t destination_buffer_length)
+{
+  lzws_result_t     result;
+  lzws_ext_result_t ext_result;
+
+  size_t destination_length                  = 0;
+  size_t remaining_destination_buffer_length = destination_buffer_length;
 
   while (true) {
     uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
-    if (is_finished) {
-      result = lzws_finish_compressor(
-        state_ptr,
-        &remaining_destination_buffer, &remaining_destination_buffer_length);
-    }
-    else {
-      result = lzws_compress(
-        state_ptr,
-        &remaining_source, &remaining_source_length,
-        &remaining_destination_buffer, &remaining_destination_buffer_length);
-    }
+    result = lzws_decompress(
+      state_ptr,
+      &remaining_source, &remaining_source_length,
+      &remaining_destination_buffer, &remaining_destination_buffer_length);
 
     if (
       result != 0 &&
-      result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-      lzws_compressor_free_state(state_ptr);
-      lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
+      result != LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
+      switch (result) {
+        case LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER:
+        case LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
+          return LZWS_EXT_ERROR_VALIDATE_FAILED;
+        case LZWS_DECOMPRESSOR_CORRUPTED_SOURCE:
+          return LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE;
+        default:
+          return LZWS_EXT_ERROR_UNEXPECTED;
+      }
     }
 
     destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
 
-    if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
-      if (remaining_destination_buffer_length == buffer_length) {
-        // We want to write more data at once, than buffer has.
-        lzws_compressor_free_state(state_ptr);
-        lzws_ext_raise_error(LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
+    if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
+      ext_result = increase_destination_buffer(
+        destination_value, destination_length,
+        &remaining_destination_buffer_length, destination_buffer_length);
+
+      if (ext_result != 0) {
+        return ext_result;
       }
 
-      RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
-      if (exception != 0) {
-        lzws_compressor_free_state(state_ptr);
-        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
-      }
-
-      remaining_destination_buffer_length = buffer_length;
       continue;
     }
 
-    if (is_finished) {
-      break;
-    }
-
-    is_finished = true;
+    break;
   }
 
-  lzws_compressor_free_state(state_ptr);
+  int exception;
 
   RESIZE_BUFFER(destination_value, destination_length, exception);
   if (exception != 0) {
-    lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+    return LZWS_EXT_ERROR_ALLOCATE_FAILED;
   }
 
-  return destination_value;
+  return 0;
 }
 
 VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, VALUE options)
@@ -174,61 +278,15 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  size_t destination_length                  = 0;
-  size_t remaining_destination_buffer_length = buffer_length;
-
-  while (true) {
-    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
-    size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
-
-    result = lzws_decompress(
-      state_ptr,
-      &remaining_source, &remaining_source_length,
-      &remaining_destination_buffer, &remaining_destination_buffer_length);
-
-    if (
-      result != 0 &&
-      result != LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
-      lzws_decompressor_free_state(state_ptr);
-
-      switch (result) {
-        case LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER:
-        case LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
-          lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
-        case LZWS_DECOMPRESSOR_CORRUPTED_SOURCE:
-          lzws_ext_raise_error(LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE);
-        default:
-          lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
-      }
-    }
-
-    destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;
-
-    if (result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
-      if (remaining_destination_buffer_length == buffer_length) {
-        // We want to write more data at once, than buffer has.
-        lzws_decompressor_free_state(state_ptr);
-        lzws_ext_raise_error(LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
-      }
-
-      RESIZE_BUFFER(destination_value, destination_length + buffer_length, exception);
-      if (exception != 0) {
-        lzws_decompressor_free_state(state_ptr);
-        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
-      }
-
-      remaining_destination_buffer_length = buffer_length;
-      continue;
-    }
-
-    break;
-  }
+  lzws_ext_result_t ext_result = decompress_data(
+    state_ptr,
+    remaining_source, remaining_source_length,
+    destination_value, buffer_length);
 
   lzws_decompressor_free_state(state_ptr);
 
-  RESIZE_BUFFER(destination_value, destination_length, exception);
-  if (exception != 0) {
-    lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
+  if (ext_result != 0) {
+    lzws_ext_raise_error(ext_result);
   }
 
   return destination_value;
