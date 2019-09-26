@@ -5,6 +5,7 @@
 
 #include <lzws/file.h>
 
+#include "lzws_ext/common.h"
 #include "lzws_ext/error.h"
 #include "lzws_ext/io.h"
 #include "lzws_ext/macro.h"
@@ -22,6 +23,28 @@
     lzws_ext_raise_error(LZWS_EXT_ERROR_ACCESS_IO);    \
   }
 
+static inline lzws_ext_result_t map_file_error(lzws_result_t result)
+{
+  switch (result) {
+    case LZWS_FILE_ALLOCATE_FAILED:
+      return LZWS_EXT_ERROR_ALLOCATE_FAILED;
+    case LZWS_FILE_VALIDATE_FAILED:
+      return LZWS_EXT_ERROR_VALIDATE_FAILED;
+    case LZWS_FILE_NOT_ENOUGH_SOURCE_BUFFER:
+      return LZWS_EXT_ERROR_NOT_ENOUGH_SOURCE_BUFFER;
+    case LZWS_FILE_NOT_ENOUGH_DESTINATION_BUFFER:
+      return LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER;
+    case LZWS_FILE_DECOMPRESSOR_CORRUPTED_SOURCE:
+      return LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE;
+    case LZWS_FILE_READ_FAILED:
+      return LZWS_EXT_ERROR_READ_IO;
+    case LZWS_FILE_WRITE_FAILED:
+      return LZWS_EXT_ERROR_WRITE_IO;
+    default:
+      return LZWS_EXT_ERROR_UNEXPECTED;
+  }
+}
+
 VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
 {
   GET_FILE(source);
@@ -34,20 +57,8 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
     without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
   if (result != 0) {
-    switch (result) {
-      case LZWS_FILE_ALLOCATE_FAILED:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
-      case LZWS_FILE_VALIDATE_FAILED:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
-      case LZWS_FILE_NOT_ENOUGH_DESTINATION_BUFFER:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
-      case LZWS_FILE_READ_FAILED:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_READ_IO);
-      case LZWS_FILE_WRITE_FAILED:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_WRITE_IO);
-      default:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
-    }
+    lzws_ext_result_t ext_result = map_file_error(result);
+    lzws_ext_raise_error(ext_result);
   }
 
   // Ruby itself won't flush stdio file before closing fd, flush is required.
@@ -68,22 +79,8 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
     without_magic_header, msb, unaligned_bit_groups, quiet);
 
   if (result != 0) {
-    switch (result) {
-      case LZWS_FILE_ALLOCATE_FAILED:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
-      case LZWS_FILE_VALIDATE_FAILED:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
-      case LZWS_FILE_NOT_ENOUGH_DESTINATION_BUFFER:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER);
-      case LZWS_FILE_DECOMPRESSOR_CORRUPTED_SOURCE:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE);
-      case LZWS_FILE_READ_FAILED:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_READ_IO);
-      case LZWS_FILE_WRITE_FAILED:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_WRITE_IO);
-      default:
-        lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
-    }
+    lzws_ext_result_t ext_result = map_file_error(result);
+    lzws_ext_raise_error(ext_result);
   }
 
   // Ruby itself won't flush stdio file before closing fd, flush is required.

@@ -23,6 +23,8 @@ void lzws_ext_raise_error(lzws_ext_result_t result)
 
     case LZWS_EXT_ERROR_USED_AFTER_CLOSE:
       raise("UsedAfterCloseError", "used after closed");
+    case LZWS_EXT_ERROR_NOT_ENOUGH_SOURCE_BUFFER:
+      raise("NotEnoughSourceBufferError", "not enough source buffer");
     case LZWS_EXT_ERROR_NOT_ENOUGH_DESTINATION_BUFFER:
       raise("NotEnoughDestinationBufferError", "not enough destination buffer");
     case LZWS_EXT_ERROR_DECOMPRESSOR_CORRUPTED_SOURCE:
@@ -34,6 +36,7 @@ void lzws_ext_raise_error(lzws_ext_result_t result)
       raise("ReadIOError", "failed to read IO");
     case LZWS_EXT_ERROR_WRITE_IO:
       raise("WriteIOError", "failed to write IO");
+
     default:
       // LZWS_EXT_ERROR_UNEXPECTED
       raise("UnexpectedError", "unexpected error");

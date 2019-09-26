@@ -31,13 +31,13 @@ functions = %w[
   lzws_decompress_file
 
   lzws_compressor_get_initial_state
-  lzws_compress
-  lzws_finish_compressor
   lzws_compressor_free_state
+  lzws_compress
+  lzws_compressor_finish
 
   lzws_decompressor_get_initial_state
-  lzws_decompress
   lzws_decompressor_free_state
+  lzws_decompress
 ]
 .freeze
 

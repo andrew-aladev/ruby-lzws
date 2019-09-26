@@ -121,12 +121,12 @@ VALUE lzws_ext_compress(VALUE self, VALUE source_value)
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);
 }
 
-VALUE lzws_ext_finish_compressor(VALUE self)
+VALUE lzws_ext_compressor_finish(VALUE self)
 {
   GET_COMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
-  lzws_result_t result = lzws_finish_compressor(
+  lzws_result_t result = lzws_compressor_finish(
     compressor_ptr->state_ptr,
     &compressor_ptr->remaining_destination_buffer, &compressor_ptr->remaining_destination_buffer_length);
 
@@ -194,7 +194,7 @@ void lzws_ext_compressor_exports(VALUE root_module)
   rb_define_alloc_func(compressor, lzws_ext_allocate_compressor);
   rb_define_method(compressor, "initialize", lzws_ext_initialize_compressor, 1);
   rb_define_method(compressor, "write", lzws_ext_compress, 1);
-  rb_define_method(compressor, "finish", lzws_ext_finish_compressor, 0);
+  rb_define_method(compressor, "finish", lzws_ext_compressor_finish, 0);
   rb_define_method(compressor, "read_result", lzws_ext_compressor_read_result, 0);
   rb_define_method(compressor, "close", lzws_ext_compressor_close, 0);
 }
