@@ -23,7 +23,7 @@
     lzws_ext_raise_error(LZWS_EXT_ERROR_ACCESS_IO);    \
   }
 
-static inline lzws_ext_result_t map_file_error(lzws_result_t result)
+static inline lzws_ext_result_t get_file_error(lzws_result_t result)
 {
   switch (result) {
     case LZWS_FILE_ALLOCATE_FAILED:
@@ -57,7 +57,7 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
     without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
   if (result != 0) {
-    lzws_ext_result_t ext_result = map_file_error(result);
+    lzws_ext_result_t ext_result = get_file_error(result);
     lzws_ext_raise_error(ext_result);
   }
 
@@ -79,7 +79,7 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
     without_magic_header, msb, unaligned_bit_groups, quiet);
 
   if (result != 0) {
-    lzws_ext_result_t ext_result = map_file_error(result);
+    lzws_ext_result_t ext_result = get_file_error(result);
     lzws_ext_raise_error(ext_result);
   }
 
