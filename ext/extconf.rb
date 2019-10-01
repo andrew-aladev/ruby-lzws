@@ -23,9 +23,10 @@ def require_library(name, functions)
 end
 
 functions = %w[
-  lzws_create_buffer_for_compressor
-  lzws_create_buffer_for_decompressor
-  lzws_resize_buffer
+  lzws_create_source_buffer_for_compressor
+  lzws_create_destination_buffer_for_compressor
+  lzws_create_source_buffer_for_decompressor
+  lzws_create_destination_buffer_for_decompressor
 
   lzws_compress_file
   lzws_decompress_file
