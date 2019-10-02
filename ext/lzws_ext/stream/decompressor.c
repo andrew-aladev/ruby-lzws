@@ -49,6 +49,8 @@ VALUE lzws_ext_allocate_decompressor(VALUE klass)
 VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
 {
   GET_DECOMPRESSOR(self);
+  Check_Type(options, T_HASH);
+  LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   lzws_decompressor_state_t* state_ptr;
@@ -66,19 +68,19 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
     }
   }
 
-  uint8_t* buffer;
+  uint8_t* destination_buffer;
 
-  result = lzws_create_buffer_for_decompressor(&buffer, &buffer_length, quiet);
+  result = lzws_create_destination_buffer_for_decompressor(&destination_buffer, &destination_buffer_length, quiet);
   if (result != 0) {
     lzws_decompressor_free_state(state_ptr);
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   decompressor_ptr->state_ptr                           = state_ptr;
-  decompressor_ptr->destination_buffer                  = buffer;
-  decompressor_ptr->destination_buffer_length           = buffer_length;
-  decompressor_ptr->remaining_destination_buffer        = buffer;
-  decompressor_ptr->remaining_destination_buffer_length = buffer_length;
+  decompressor_ptr->destination_buffer                  = destination_buffer;
+  decompressor_ptr->destination_buffer_length           = destination_buffer_length;
+  decompressor_ptr->remaining_destination_buffer        = destination_buffer;
+  decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
 
   return Qnil;
 }

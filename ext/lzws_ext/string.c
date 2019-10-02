@@ -126,6 +126,8 @@ static inline lzws_ext_result_t compress_data(
 VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
   GET_SOURCE_DATA(source_value);
+  Check_Type(options, T_HASH);
+  LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   lzws_compressor_state_t* state_ptr;
@@ -145,13 +147,13 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
     }
   }
 
-  if (buffer_length == 0) {
-    buffer_length = LZWS_COMPRESSOR_DEFAULT_BUFFER_LENGTH;
+  if (destination_buffer_length == 0) {
+    destination_buffer_length = LZWS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_COMPRESSOR;
   }
 
   int exception;
 
-  CREATE_BUFFER(destination_value, buffer_length, exception);
+  CREATE_BUFFER(destination_value, destination_buffer_length, exception);
   if (exception != 0) {
     lzws_compressor_free_state(state_ptr);
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
@@ -160,7 +162,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
   lzws_ext_result_t ext_result = compress_data(
     state_ptr,
     remaining_source, remaining_source_length,
-    destination_value, buffer_length);
+    destination_value, destination_buffer_length);
 
   lzws_compressor_free_state(state_ptr);
 
@@ -237,6 +239,8 @@ static inline lzws_ext_result_t decompress_data(
 VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, VALUE options)
 {
   GET_SOURCE_DATA(source_value);
+  Check_Type(options, T_HASH);
+  LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   lzws_decompressor_state_t* state_ptr;
@@ -254,13 +258,13 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
     }
   }
 
-  if (buffer_length == 0) {
-    buffer_length = LZWS_DECOMPRESSOR_DEFAULT_BUFFER_LENGTH;
+  if (destination_buffer_length == 0) {
+    destination_buffer_length = LZWS_DEFAULT_DESTINATION_BUFFER_LENGTH_FOR_DECOMPRESSOR;
   }
 
   int exception;
 
-  CREATE_BUFFER(destination_value, buffer_length, exception);
+  CREATE_BUFFER(destination_value, destination_buffer_length, exception);
   if (exception != 0) {
     lzws_decompressor_free_state(state_ptr);
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
@@ -269,7 +273,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
   lzws_ext_result_t ext_result = decompress_data(
     state_ptr,
     remaining_source, remaining_source_length,
-    destination_value, buffer_length);
+    destination_value, destination_buffer_length);
 
   lzws_decompressor_free_state(state_ptr);
 

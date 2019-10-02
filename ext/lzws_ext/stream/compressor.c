@@ -49,6 +49,8 @@ VALUE lzws_ext_allocate_compressor(VALUE klass)
 VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
 {
   GET_COMPRESSOR(self);
+  Check_Type(options, T_HASH);
+  LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   lzws_compressor_state_t* state_ptr;
@@ -68,19 +70,19 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
     }
   }
 
-  uint8_t* buffer;
+  uint8_t* destination_buffer;
 
-  result = lzws_create_buffer_for_compressor(&buffer, &buffer_length, quiet);
+  result = lzws_create_destination_buffer_for_compressor(&destination_buffer, &destination_buffer_length, quiet);
   if (result != 0) {
     lzws_compressor_free_state(state_ptr);
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
   compressor_ptr->state_ptr                           = state_ptr;
-  compressor_ptr->destination_buffer                  = buffer;
-  compressor_ptr->destination_buffer_length           = buffer_length;
-  compressor_ptr->remaining_destination_buffer        = buffer;
-  compressor_ptr->remaining_destination_buffer_length = buffer_length;
+  compressor_ptr->destination_buffer                  = destination_buffer;
+  compressor_ptr->destination_buffer_length           = destination_buffer_length;
+  compressor_ptr->remaining_destination_buffer        = destination_buffer;
+  compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
 
   return Qnil;
 }
