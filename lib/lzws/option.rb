@@ -8,11 +8,11 @@ module LZWS
   module Option
     # Default options will be compatible with UNIX compress.
 
+    DEFAULT_BUFFER_LENGTH       = 0
     LOWEST_MAX_CODE_BIT_LENGTH  = 9
     BIGGEST_MAX_CODE_BIT_LENGTH = 16
 
     DECOMPRESSOR_DEFAULTS = {
-      :buffer_length        => 0,
       :without_magic_header => false,
       :msb                  => false,
       :unaligned_bit_groups => false,
