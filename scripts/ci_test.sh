@@ -49,7 +49,9 @@ for dictionary in "linked-list" "sparse-array"; do
   sudo make install
 
   # "rvm" wants bash login mode.
+  # Sourcing "rvm" is required for some CI.
   bash -cl '\
+    source ~/.rvm/scripts/rvm &&
     cd ../../../.. && \
     gem install bundler &&
     bundle install && \
