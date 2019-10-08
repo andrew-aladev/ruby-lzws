@@ -8,6 +8,6 @@ init:
   - sh: sudo apt-get install -y libgmp-dev ncompress
 
 test_script:
-  - sh: scripts/test.sh
+  - sh: scripts/ci_test.sh
 
 build: off

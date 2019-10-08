@@ -20,4 +20,4 @@ addons:
       - ncompress
 
 script:
-  - scripts/test.sh
+  - scripts/ci_test.sh

@@ -3,7 +3,12 @@ set -e
 
 cd "$(dirname $0)"
 
-# Script looks overcomplicated, because it is optimized for CI machines.
+# This script is for CI machines only, it provides junk and removes some config files.
+# Please do not use it on your machine.
+
+# We can let CI use ruby version from its config.
+cd ".."
+mv ".ruby-version" ".ruby-version.bak"
 
 # Fix path environment params.
 export PATH="$PATH:/usr/local/bin"
@@ -14,9 +19,7 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 # Compiling library from source.
 LZWS_BRANCH="v1.3.0"
 
-tmp="../tmp"
-build="$tmp/lzws-build"
-
+build="tmp/lzws-build"
 mkdir -p "$build"
 cd "$build"
 
@@ -45,6 +48,7 @@ for dictionary in "linked-list" "sparse-array"; do
   # "sudo" may be required for "/usr/local".
   sudo make install
 
+  # "rvm" wants bash login mode.
   bash -cl '\
     cd ../../../.. && \
     gem install bundler &&
