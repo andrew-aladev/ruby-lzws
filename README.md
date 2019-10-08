@@ -38,7 +38,7 @@ puts LZWS::Stream::Reader.open("file.txt.Z") { |reader| reader.read }
 ```
 
 You can create and read `tar.Z` archives with `minitar` for example.
-LZWS is fully compatible with UNIX compress (with default options).
+LZWS is compatible with UNIX compress (with default options).
 
 ```ruby
 require "lzws"
@@ -60,6 +60,8 @@ LZWS::Stream::Reader.open "file.tar.Z" do |reader|
 end
 ```
 
+## Options
+
 Each API supports several options:
 
 ```
@@ -68,8 +70,8 @@ Each API supports several options:
 ```
 
 There is internal buffer for compressed and decompressed data.
-For example you want to use 1 KB as source buffer length for compressor => please use 256 B as destination buffer length.
-You want to use 256 B as source buffer length for decompressor => please use 1 KB as destination buffer length.
+For example you want to use 1 KB as source buffer length for compressor - please use 256 B as destination buffer length.
+You want to use 256 B as source buffer length for decompressor - please use 1 KB as destination buffer length.
 
 Values: 0, 2 - infinity, default value: 0.
 0 means automatic buffer length selection.
@@ -197,14 +199,14 @@ Writer maintains destination buffer only, so it accepts `destination_buffer_leng
 ```
 
 Open file path and create stream writer associated with opened file.
-Data will be transcoded to `:external_encoding` using `:transcode_options` before writing.
+Data will be transcoded to `:external_encoding` using `:transcode_options` before compressing.
 
 ```
 ::new(destination_io, options = {}, :external_encoding => nil, :transcode_options => {})
 ```
 
 Create stream writer associated with destination io.
-Data will be transcoded to `:external_encoding` using `:transcode_options` before writing.
+Data will be transcoded to `:external_encoding` using `:transcode_options` before compressing.
 
 ```
 #set_encoding(external_encoding, nil, transcode_options)
@@ -267,14 +269,14 @@ Reader maintains both source and destination buffers, it accepts both `source_bu
 ```
 
 Open file path and create stream reader associated with opened file.
-Data will be force encoded to `:external_encoding` and transcoded to `:internal_encoding` using `:transcode_options` after reading.
+Data will be force encoded to `:external_encoding` and transcoded to `:internal_encoding` using `:transcode_options` after decompressing.
 
 ```
 ::new(source_io, options = {}, :external_encoding => nil, :internal_encoding => nil, :transcode_options => {})
 ```
 
 Create stream reader associated with source io.
-Data will be force encoded to `:external_encoding` and transcoded to `:internal_encoding` using `:transcode_options` after reading.
+Data will be force encoded to `:external_encoding` and transcoded to `:internal_encoding` using `:transcode_options` after decompressing.
 
 ```
 #set_encoding(external_encoding, internal_encoding, transcode_options)
@@ -301,11 +303,7 @@ See [`IO`](https://ruby-doc.org/core-2.6.1/IO.html) docs.
 #rewind
 #close
 #closed?
-```
 
-See [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
-
-```
 #readpartial(bytes_to_read = nil, out_buffer = nil)
 #read_nonblock(bytes_to_read, out_buffer = nil, *options)
 ```
