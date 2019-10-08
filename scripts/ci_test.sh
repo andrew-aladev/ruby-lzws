@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 set -e
 
 cd "$(dirname $0)"
@@ -16,9 +16,7 @@ ruby_version=$(rvm list | grep -Po "$ruby_major_version\.\d+" | sort | tail -n 1
 mv ".ruby-version" ".ruby-version.bak"
 echo "$ruby_version" > ".ruby-version"
 
-rvm use "."
-gem install bundler
-bundle install
+bash -cl "gem install bundler && bundle install"
 
 # Fix path environment params.
 export PATH="$PATH:/usr/local/bin"
@@ -58,9 +56,5 @@ for dictionary in "linked-list" "sparse-array"; do
   # "sudo" may be required for "/usr/local".
   sudo make install
 
-  bash -cl "\
-    cd ../../../.. && \
-    bundle exec rake clean && \
-    bundle exec rake \
-  "
+  bash -cl "bundle exec rake clean && bundle exec rake"
 done
