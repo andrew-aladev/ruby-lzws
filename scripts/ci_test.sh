@@ -14,7 +14,11 @@ ruby_major_version=$(echo "${ruby_version%.*}" | sed "s/\./\\\./g") # escaping f
 ruby_version=$(rvm list | grep -o -e "$ruby_major_version\.[0-9]\+" | sort | tail -n 1)
 echo "$ruby_version" > ".ruby-version"
 
-bash -cl "rvm use '.' && gem install bundler && bundle install"
+bash -cl "\
+  rvm use '.' && \
+  gem install bundler && \
+  bundle install \
+"
 
 # Fix path environment params.
 export PATH="$PATH:/usr/local/bin"
@@ -54,5 +58,10 @@ for dictionary in "linked-list" "sparse-array"; do
   # "sudo" may be required for "/usr/local".
   sudo make install
 
-  bash -cl "bundle exec rake clean && bundle exec rake"
+  bash -cl "\
+    cd ../../../.. && \
+    rvm use '.' && \
+    bundle exec rake clean && \
+    bundle exec rake \
+  "
 done
