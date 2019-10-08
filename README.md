@@ -164,9 +164,7 @@ end
 
 Please read more about compatibility in lzws docs.
 
-## Docs
-
-###### String
+## String
 
 String maintains destination buffer only, so it accepts `destination_buffer_length` option only.
 
@@ -177,7 +175,7 @@ String maintains destination buffer only, so it accepts `destination_buffer_leng
 
 `source` is a source string.
 
-###### File
+## File
 
 File maintains both source and destination buffers, it accepts both `source_buffer_length` and `destination_buffer_length` options.
 
@@ -188,7 +186,7 @@ File maintains both source and destination buffers, it accepts both `source_buff
 
 `source` and `destination` are file pathes.
 
-###### Stream::Writer
+## Stream::Writer
 
 Its behaviour is similar to builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipWriter.html).
 
@@ -258,7 +256,7 @@ Behaviour is the same as `IO#write_nonblock` method.
 
 Typical helpers, see [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
 
-###### Stream::Reader
+## Stream::Reader
 
 Its behaviour is similar to builtin [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipReader.html).
 
