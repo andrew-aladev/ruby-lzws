@@ -50,7 +50,7 @@ module LZWS
 
       TEXTS = generate_texts(
         "",
-        ::SecureRandom.random_bytes(1 << 9) # 512 B
+        ::SecureRandom.random_bytes(1 << 8) # 256 B
       )
       .freeze
 
@@ -61,7 +61,7 @@ module LZWS
 
       PORTION_LENGTHS = [
         1,
-        256
+        128
       ]
       .freeze
 

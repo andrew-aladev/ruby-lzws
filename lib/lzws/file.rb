@@ -9,11 +9,13 @@ require_relative "validation"
 
 module LZWS
   module File
+    BUFFER_LENGTH_NAMES = %i[source_buffer_length destination_buffer_length].freeze
+
     def self.compress(source, destination, options = {})
       Validation.validate_string source
       Validation.validate_string destination
 
-      options = Option.get_compressor_options options
+      options = Option.get_compressor_options options, BUFFER_LENGTH_NAMES
 
       open_files(source, destination) do |source_io, destination_io|
         LZWS._native_compress_io source_io, destination_io, options
@@ -24,7 +26,7 @@ module LZWS
       Validation.validate_string source
       Validation.validate_string destination
 
-      options = Option.get_decompressor_options options
+      options = Option.get_decompressor_options options, BUFFER_LENGTH_NAMES
 
       open_files(source, destination) do |source_io, destination_io|
         LZWS._native_decompress_io source_io, destination_io, options

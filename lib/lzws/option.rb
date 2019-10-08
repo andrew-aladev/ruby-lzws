@@ -26,12 +26,13 @@ module LZWS
     )
     .freeze
 
-    def self.get_compressor_options(options)
+    def self.get_compressor_options(options, buffer_length_names)
       Validation.validate_hash options
 
-      options = COMPRESSOR_DEFAULTS.merge options
+      buffer_length_defaults = buffer_length_names.each_with_object({}) { |name, defaults| defaults[name] = DEFAULT_BUFFER_LENGTH }
+      options                = COMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
 
-      Validation.validate_not_negative_integer options[:buffer_length]
+      buffer_length_names.each { |name| Validation.validate_not_negative_integer options[name] }
 
       max_code_bit_length = options[:max_code_bit_length]
       Validation.validate_positive_integer max_code_bit_length
@@ -49,12 +50,14 @@ module LZWS
       options
     end
 
-    def self.get_decompressor_options(options)
+    def self.get_decompressor_options(options, buffer_length_names)
       Validation.validate_hash options
 
-      options = DECOMPRESSOR_DEFAULTS.merge options
+      buffer_length_defaults = buffer_length_names.each_with_object({}) { |name, defaults| defaults[name] = DEFAULT_BUFFER_LENGTH }
+      options                = DECOMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
 
-      Validation.validate_not_negative_integer options[:buffer_length]
+      buffer_length_names.each { |name| Validation.validate_not_negative_integer options[name] }
+
       Validation.validate_bool options[:without_magic_header]
       Validation.validate_bool options[:msb]
       Validation.validate_bool options[:unaligned_bit_groups]

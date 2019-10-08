@@ -24,8 +24,14 @@ module LZWS
           LARGE_TEXTS        = Common::LARGE_TEXTS
           PORTION_LENGTHS    = Common::PORTION_LENGTHS
 
+          BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
+          BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
+
+          INVALID_COMPRESSOR_OPTIONS     = Option.get_invalid_compressor_options(BUFFER_LENGTH_NAMES).freeze
+          COMPRESSOR_OPTION_COMBINATIONS = Option.get_compressor_option_combinations(BUFFER_LENGTH_NAMES).freeze
+
           def test_invalid_initialize
-            Option::INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
+            INVALID_COMPRESSOR_OPTIONS.each do |invalid_options|
               assert_raises ValidateError do
                 Target.new invalid_options
               end
@@ -55,7 +61,7 @@ module LZWS
           def test_texts
             TEXTS.each do |text|
               PORTION_LENGTHS.each do |portion_length|
-                Option::COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+                COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
                   compressed_buffer = ::StringIO.new
                   compressed_buffer.set_encoding ::Encoding::BINARY
 
@@ -90,7 +96,7 @@ module LZWS
 
                   compressed_text = compressed_buffer.string
 
-                  Option.get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                     decompressed_text = String.decompress compressed_text, decompressor_options
                     decompressed_text.force_encoding text.encoding
 
@@ -128,6 +134,12 @@ module LZWS
               decompressed_text.force_encoding text.encoding
               assert_equal text, decompressed_text
             end
+          end
+
+          # -----
+
+          def get_compatible_decompressor_options(compressor_options, &block)
+            Option.get_compatible_decompressor_options(compressor_options, BUFFER_LENGTH_MAPPING, &block)
           end
         end
 

@@ -28,9 +28,6 @@ functions = %w[
   lzws_create_source_buffer_for_decompressor
   lzws_create_destination_buffer_for_decompressor
 
-  lzws_compress_file
-  lzws_decompress_file
-
   lzws_compressor_get_initial_state
   lzws_compressor_free_state
   lzws_compress
@@ -39,6 +36,9 @@ functions = %w[
   lzws_decompressor_get_initial_state
   lzws_decompressor_free_state
   lzws_decompress
+
+  lzws_compress_file
+  lzws_decompress_file
 ]
 .freeze
 
