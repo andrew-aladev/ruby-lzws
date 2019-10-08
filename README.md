@@ -303,12 +303,16 @@ See [`IO`](https://ruby-doc.org/core-2.6.1/IO.html) docs.
 #rewind
 #close
 #closed?
+```
 
+See [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
+
+```
 #readpartial(bytes_to_read = nil, out_buffer = nil)
 #read_nonblock(bytes_to_read, out_buffer = nil, *options)
 ```
 
-See [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
+See [`IO`](https://ruby-doc.org/core-2.6.1/IO.html) docs.
 
 ```
 #getbyte
