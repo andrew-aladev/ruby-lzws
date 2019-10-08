@@ -3,27 +3,18 @@ set -e
 
 cd "$(dirname $0)"
 
-# This script is for CI machines only, it provides junk and removes some config files.
+# This script is for CI machines only, it provides junk and changes some config files.
 # Please do not use it on your machine.
 
 # CI may not want to provide target ruby version.
 # We can just use the latest available ruby based on target major version.
-
-# Some CI fails after first "rvm use" (may be automatic by bash login mode).
-# We need to remove ".ruby_version" immediately.
 cd ".."
-mv ".ruby-version" ".ruby-version.bak"
-
-ruby_version=$(< ".ruby-version.bak")
+ruby_version=$(< ".ruby-version")
 ruby_major_version=$(echo "${ruby_version%.*}" | sed "s/\./\\\./g") # escaping for regex
-
-# Some CI can't provide "rvm list" without bash login mode.
-rvm_list=$(bash -cl "rvm list")
-
-ruby_version=$(echo $rvm_list | grep -o -e "$ruby_major_version\.[0-9]\+" | sort | tail -n 1)
+ruby_version=$(rvm list | grep -o -e "$ruby_major_version\.[0-9]\+" | sort | tail -n 1)
 echo "$ruby_version" > ".ruby-version"
 
-bash -cl "gem install bundler && bundle install"
+bash -cl "rvm use '.' && gem install bundler && bundle install"
 
 # Fix path environment params.
 export PATH="$PATH:/usr/local/bin"
