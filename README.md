@@ -60,67 +60,84 @@ LZWS::Stream::Reader.open "file.tar.Z" do |reader|
 end
 ```
 
-Each API supports additional options, please read lzws docs for more info.
-
-Compressor:
+Each API supports several options:
 
 ```
-:max_code_bit_length
+:source_buffer_length
+:destination_buffer_length
 ```
 
-Values: 9 - 16, default value: 16.
-
-```
-:block_mode
-```
-
-Values: true/false, default value: true.
-
-```
-:buffer_length
-```
-
-This is internal buffer length for compressed data.
+There is internal buffer for compressed and decompressed data.
+For example you want to use 1 KB as source buffer length for compressor => please use 256 B as destination buffer length.
+You want to use 256 B as source buffer length for decompressor => please use 1 KB as destination buffer length.
 
 Values: 0, 2 - infinity, default value: 0.
 0 means automatic buffer length selection.
 1 byte is not enough, 2 bytes is minimal buffer length.
 
 ```
+:max_code_bit_length
+```
+
+Values: 9 - 16, default value: 16.
+Please read lzws docs for more info.
+
+```
+:block_mode
+```
+
+Values: true/false, default value: true.
+Please read lzws docs for more info.
+
+```
 :without_magic_header
 ```
 
 Values: true/false, default value: false.
+Please read lzws docs for more info.
 
 ```
 :msb
 ```
 
 Values: true/false, default value: false.
+Please read lzws docs for more info.
 
 ```
 :unaligned_bit_groups
 ```
 
 Values: true/false, default value: false.
+Please read lzws docs for more info.
 
 ```
 :quiet
 ```
 
 Values: true/false, default value: false.
+Disables lzws library logging.
 
-Decompressor:
-
+Possible compressor options:
 ```
-:buffer_length
+:source_buffer_length
+:destination_buffer_length
+:max_code_bit_length
+:block_mode
 :without_magic_header
 :msb
 :unaligned_bit_groups
 :quiet
 ```
 
-Values are the same.
+Possible decompressor options:
+```
+:source_buffer_length
+:destination_buffer_length
+:without_magic_header
+:msb
+:unaligned_bit_groups
+:quiet
+```
 
 Example:
 
@@ -131,7 +148,7 @@ data = LZWS::String.compress "TOBEORNOTTOBEORTOBEORNOT", :msb => true
 puts LZWS::String.decompress(data, :msb => true)
 ```
 
-Content-Encoding: compress:
+Default options are compatible with UNIX compress (`Content-Encoding: compress`):
 
 ```ruby
 require "lzws"
@@ -143,52 +160,50 @@ get "/" do
 end
 ```
 
+Please read more about compatibility in lzws docs.
+
 ## Docs
 
 `String`:
 
+String maintains destination buffer only, so it accepts `destination_buffer_length` option only.
+
 ```
 ::compress(source, options = {})
-```
-
-Compress source string (with options).
-
-```
 ::decompress(source, options = {})
 ```
 
-Decompress source string (with options).
+`source` is a source string.
 
 `File`:
 
+File maintains both source and destination buffers, it accepts both `source_buffer_length` and `destination_buffer_length` options.
+
 ```
 ::compress(source, destination, options = {})
-```
-
-Compress source file path to destination file path (with options).
-
-```
 ::decompress(source, destination, options = {})
 ```
 
-Decompress source file path to destination file path (with options).
+`source` and `destination` are file pathes.
 
 `Stream::Writer`:
 
 Its behaviour is similar to builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipWriter.html).
 
+Writer maintains destination buffer only, so it accepts `destination_buffer_length` option only.
+
 ```
 ::open(file_path, options = {}, :external_encoding => nil, :transcode_options => {}, &block)
 ```
 
-Open file path and create stream writer (with options) associated with opened file.
+Open file path and create stream writer associated with opened file.
 Data will be transcoded to `:external_encoding` using `:transcode_options` before writing.
 
 ```
 ::new(destination_io, options = {}, :external_encoding => nil, :transcode_options => {})
 ```
 
-Create stream writer (with options) associated with destination io.
+Create stream writer associated with destination io.
 Data will be transcoded to `:external_encoding` using `:transcode_options` before writing.
 
 ```
@@ -226,9 +241,9 @@ See [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib
 #close_nonblock(*options)
 ```
 
-Special asynchronous methods that are missing in `Zlib::GzipWriter`.
-`rewind` wants to do `close`, `close` wants to do `write` something and `flush`, `flush` want to `write` something.
-So it is possible to have asynchronous variants for all synchronous methods.
+Special asynchronous methods missing in `Zlib::GzipWriter`.
+`rewind` wants to `close`, `close` wants to `write` something and `flush`, `flush` want to `write` something.
+So it is possible to have asynchronous variants for these synchronous methods.
 Behaviour is the same as `IO#write_nonblock` method.
 
 ```
@@ -245,19 +260,21 @@ Typical helpers, see [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.6.1/libd
 
 Its behaviour is similar to builtin [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.6.1/libdoc/zlib/rdoc/Zlib/GzipReader.html).
 
+Reader maintains both source and destination buffers, it accepts both `source_buffer_length` and `destination_buffer_length` options.
+
 ```
 ::open(file_path, options = {}, :external_encoding => nil, :internal_encoding => nil, :transcode_options => {}, &block)
 ```
 
-Open file path and create stream reader (with options) associated with opened file.
-Data will be forced encoded to `:external_encoding` and transcoded to `:external_encoding` using `:transcode_options` after reading.
+Open file path and create stream reader associated with opened file.
+Data will be force encoded to `:external_encoding` and transcoded to `:internal_encoding` using `:transcode_options` after reading.
 
 ```
 ::new(source_io, options = {}, :external_encoding => nil, :internal_encoding => nil, :transcode_options => {})
 ```
 
-Create stream reader (with options) associated with source io.
-Data will be forced encoded to `:external_encoding` and transcoded to `:external_encoding` using `:transcode_options` after reading.
+Create stream reader associated with source io.
+Data will be force encoded to `:external_encoding` and transcoded to `:internal_encoding` using `:transcode_options` after reading.
 
 ```
 #set_encoding(external_encoding, internal_encoding, transcode_options)
