@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 set -e
 
 cd "$(dirname $0)"
@@ -6,9 +6,19 @@ cd "$(dirname $0)"
 # This script is for CI machines only, it provides junk and removes some config files.
 # Please do not use it on your machine.
 
-# We can let CI use ruby version from its own config.
+# CI may not want to provide target ruby version.
+# We can just use the latest available ruby based on target major version.
 cd ".."
+ruby_version=$(< ".ruby-version")
+ruby_major_version=$(echo "${ruby_version%.*}" | sed "s/\./\\\./g") # escaping for perl regex
+ruby_version=$(rvm list | grep -Po "$ruby_major_version\.\d+" | sort | tail -n 1)
+
 mv ".ruby-version" ".ruby-version.bak"
+echo "$ruby_version" > ".ruby-version"
+
+rvm use "."
+gem install bundler
+bundle install
 
 # Fix path environment params.
 export PATH="$PATH:/usr/local/bin"
@@ -48,13 +58,9 @@ for dictionary in "linked-list" "sparse-array"; do
   # "sudo" may be required for "/usr/local".
   sudo make install
 
-  bash -cl '\
-    rvm list && \
+  bash -cl "\
     cd ../../../.. && \
-    rvm list && \
-    gem install bundler && \
-    bundle install && \
     bundle exec rake clean && \
     bundle exec rake \
-  '
+  "
 done
