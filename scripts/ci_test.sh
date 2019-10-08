@@ -48,10 +48,8 @@ for dictionary in "linked-list" "sparse-array"; do
   # "sudo" may be required for "/usr/local".
   sudo make install
 
-  # "rvm" wants bash login mode.
-  # Sourcing "rvm" is required for some CI.
   bash -cl '\
-    source ~/.rvm/scripts/rvm &&
+    source ~/.rvm/scripts/rvm && \
     cd ../../../.. && \
     gem install bundler &&
     bundle install && \
