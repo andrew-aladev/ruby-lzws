@@ -13,15 +13,6 @@ static inline VALUE get_option(VALUE options, const char* name)
   return rb_funcall(options, rb_intern("[]"), 1, ID2SYM(rb_intern(name)));
 }
 
-unsigned long lzws_ext_get_fixnum_option(VALUE options, const char* name)
-{
-  VALUE value = get_option(options, name);
-
-  Check_Type(value, T_FIXNUM);
-
-  return NUM2UINT(value);
-}
-
 bool lzws_ext_get_bool_option(VALUE options, const char* name)
 {
   VALUE value = get_option(options, name);
@@ -32,4 +23,13 @@ bool lzws_ext_get_bool_option(VALUE options, const char* name)
   }
 
   return type == T_TRUE;
+}
+
+unsigned long lzws_ext_get_fixnum_option(VALUE options, const char* name)
+{
+  VALUE value = get_option(options, name);
+
+  Check_Type(value, T_FIXNUM);
+
+  return NUM2UINT(value);
 }

@@ -5,6 +5,8 @@
 #define LZWS_EXT_STREAM_COMPRESSOR_H
 
 #include <lzws/compressor/state.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "ruby.h"
 

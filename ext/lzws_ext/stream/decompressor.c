@@ -7,6 +7,8 @@
 #include <lzws/decompressor/common.h>
 #include <lzws/decompressor/main.h>
 #include <lzws/decompressor/state.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "lzws_ext/error.h"
 #include "lzws_ext/option.h"
