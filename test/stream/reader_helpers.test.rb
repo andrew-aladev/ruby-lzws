@@ -275,6 +275,7 @@ module LZWS
 
                   decompressed_text = lines.join ""
                   decompressed_text.force_encoding text.encoding
+
                   assert_equal text, decompressed_text
 
                   # each_line
@@ -377,19 +378,21 @@ module LZWS
               get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 decompressed_text = Target.open ARCHIVE_PATH, decompressor_options, &:read
                 decompressed_text.force_encoding text.encoding
+
                 assert_equal text, decompressed_text
               end
             end
           end
         end
 
-        def test_native_compress
+        def test_open_with_large_texts_and_native_compress
           LARGE_TEXTS.each do |text|
             ::File.write NATIVE_SOURCE_PATH, text
             Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
 
             decompressed_text = Target.open NATIVE_ARCHIVE_PATH, &:read
             decompressed_text.force_encoding text.encoding
+
             assert_equal text, decompressed_text
           end
         end

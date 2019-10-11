@@ -26,8 +26,10 @@ module LZWS
 
       protected def initialize_source_buffer_length
         source_buffer_length = @options[:source_buffer_length]
-        Validation.validate_not_negative_integer source_buffer_length if @options.key? :source_buffer_length
-        source_buffer_length = Buffer::DEFAULT_SOURCE_BUFFER_LENGTH_FOR_DECOMPRESSOR if source_buffer_length == 0
+        Validation.validate_not_negative_integer source_buffer_length unless source_buffer_length.nil?
+
+        source_buffer_length = Buffer::DEFAULT_SOURCE_BUFFER_LENGTH_FOR_DECOMPRESSOR \
+          if source_buffer_length == 0 || source_buffer_length.nil?
 
         @source_buffer_length = source_buffer_length
       end

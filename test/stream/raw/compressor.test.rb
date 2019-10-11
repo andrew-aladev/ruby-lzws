@@ -107,7 +107,7 @@ module LZWS
             end
           end
 
-          def test_native_compress
+          def test_large_texts_and_native_compress
             LARGE_TEXTS.each do |text|
               compressor = Target.new
 
@@ -132,6 +132,7 @@ module LZWS
 
               decompressed_text = ::File.read NATIVE_SOURCE_PATH
               decompressed_text.force_encoding text.encoding
+
               assert_equal text, decompressed_text
             end
           end

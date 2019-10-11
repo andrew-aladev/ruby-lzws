@@ -53,9 +53,9 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
   GET_FILE(source);
   GET_FILE(destination);
   Check_Type(options, T_HASH);
+  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
   LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, source_buffer_length);
   LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
-  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
   lzws_result_t result = lzws_compress_file(
     source_file, source_buffer_length,
@@ -78,9 +78,9 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   GET_FILE(source);
   GET_FILE(destination);
   Check_Type(options, T_HASH);
+  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
   LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, source_buffer_length);
   LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
-  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
   lzws_result_t result = lzws_decompress_file(
     source_file, source_buffer_length,

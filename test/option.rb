@@ -12,7 +12,7 @@ module LZWS
         [
           Validation::INVALID_HASHES,
           buffer_length_names.flat_map do |name|
-            Validation::INVALID_NOT_NEGATIVE_INTEGERS.map do |invalid_integer|
+            (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).map do |invalid_integer|
               { name => invalid_integer }
             end
           end,

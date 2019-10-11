@@ -129,8 +129,8 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
 {
   GET_SOURCE_DATA(source_value);
   Check_Type(options, T_HASH);
-  LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
+  LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
   lzws_compressor_state_t* state_ptr;
 
@@ -242,8 +242,8 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
 {
   GET_SOURCE_DATA(source_value);
   Check_Type(options, T_HASH);
-  LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
+  LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
   lzws_decompressor_state_t* state_ptr;
 

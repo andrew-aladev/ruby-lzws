@@ -23,7 +23,7 @@ module LZWS
       ]
       .each { |path| FileUtils.touch path }
 
-      PORT = 54_001
+      PORT = 54_010
 
       ENCODINGS = %w[
         binary
