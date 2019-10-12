@@ -103,7 +103,7 @@ static inline lzws_ext_result_t increase_destination_buffer(
     break;                                                                                                             \
   }
 
-static inline lzws_ext_result_t compress_data(
+static inline lzws_ext_result_t compress(
   lzws_compressor_state_t* state_ptr,
   uint8_t* remaining_source, size_t remaining_source_length,
   VALUE destination_value, size_t destination_buffer_length)
@@ -163,7 +163,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  lzws_ext_result_t ext_result = compress_data(
+  lzws_ext_result_t ext_result = compress(
     state_ptr,
     remaining_source, remaining_source_length,
     destination_value, destination_buffer_length);
@@ -179,7 +179,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
 
 // -- decompress --
 
-static inline lzws_ext_result_t decompress_data(
+static inline lzws_ext_result_t decompress(
   lzws_decompressor_state_t* state_ptr,
   uint8_t* remaining_source, size_t remaining_source_length,
   VALUE destination_value, size_t destination_buffer_length)
@@ -274,7 +274,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
   }
 
-  lzws_ext_result_t ext_result = decompress_data(
+  lzws_ext_result_t ext_result = decompress(
     state_ptr,
     remaining_source, remaining_source_length,
     destination_value, destination_buffer_length);
