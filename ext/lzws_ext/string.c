@@ -78,7 +78,7 @@ static inline lzws_ext_result_t increase_destination_buffer(
     uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length; \
     size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;                           \
                                                                                                                        \
-    result = (function)(__VA_ARGS__, &remaining_destination_buffer, &remaining_destination_buffer_length);             \
+    result = function(__VA_ARGS__, &remaining_destination_buffer, &remaining_destination_buffer_length);               \
                                                                                                                        \
     if (                                                                                                               \
       result != 0 &&                                                                                                   \
@@ -114,8 +114,8 @@ static inline lzws_ext_result_t compress_data(
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
 
-  BUFFERED_COMPRESS(&lzws_compress, state_ptr, &remaining_source, &remaining_source_length);
-  BUFFERED_COMPRESS(&lzws_compressor_finish, state_ptr);
+  BUFFERED_COMPRESS(lzws_compress, state_ptr, &remaining_source, &remaining_source_length);
+  BUFFERED_COMPRESS(lzws_compressor_finish, state_ptr);
 
   int exception;
 
