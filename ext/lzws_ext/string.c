@@ -18,14 +18,6 @@
 #include "lzws_ext/option.h"
 #include "ruby.h"
 
-#define GET_SOURCE_DATA(source_value)                              \
-  Check_Type(source_value, T_STRING);                              \
-                                                                   \
-  const char* source                  = RSTRING_PTR(source_value); \
-  size_t      source_length           = RSTRING_LEN(source_value); \
-  uint8_t*    remaining_source        = (uint8_t*)source;          \
-  size_t      remaining_source_length = source_length;
-
 // -- buffer --
 
 static inline VALUE create_buffer(VALUE length)
@@ -68,6 +60,16 @@ static inline lzws_ext_result_t increase_destination_buffer(
 
   return 0;
 }
+
+// -- utils --
+
+#define GET_SOURCE_DATA(source_value)                              \
+  Check_Type(source_value, T_STRING);                              \
+                                                                   \
+  const char* source                  = RSTRING_PTR(source_value); \
+  size_t      source_length           = RSTRING_LEN(source_value); \
+  uint8_t*    remaining_source        = (uint8_t*)source;          \
+  size_t      remaining_source_length = source_length;
 
 // -- compress --
 
