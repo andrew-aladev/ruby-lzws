@@ -69,7 +69,7 @@ Each API supports several options:
 :destination_buffer_length
 ```
 
-There is internal buffer for compressed and decompressed data.
+There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as source buffer length for compressor - please use 256 B as destination buffer length.
 You want to use 256 B as source buffer length for decompressor - please use 1 KB as destination buffer length.
 
@@ -82,35 +82,30 @@ Values: 0, 2 - infinity, default value: 0.
 ```
 
 Values: 9 - 16, default value: 16.
-Please read lzws docs for more info.
 
 ```
 :block_mode
 ```
 
 Values: true/false, default value: true.
-Please read lzws docs for more info.
 
 ```
 :without_magic_header
 ```
 
 Values: true/false, default value: false.
-Please read lzws docs for more info.
 
 ```
 :msb
 ```
 
 Values: true/false, default value: false.
-Please read lzws docs for more info.
 
 ```
 :unaligned_bit_groups
 ```
 
 Values: true/false, default value: false.
-Please read lzws docs for more info.
 
 ```
 :quiet
@@ -118,6 +113,8 @@ Please read lzws docs for more info.
 
 Values: true/false, default value: false.
 Disables lzws library logging.
+
+Please read lzws docs for more info about options.
 
 Possible compressor options:
 ```
