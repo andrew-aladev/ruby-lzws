@@ -35,7 +35,7 @@ cd "$build"
 
 # Remove orphaned directory.
 rm -rf "lzws"
-git clone --depth 1 --branch "$LZWS_BRANCH" "https://github.com/andrew-aladev/lzws.git" "lzws"
+git clone "https://github.com/andrew-aladev/lzws.git" --single-branch --branch "$LZWS_BRANCH" --depth 1 "lzws"
 cd "lzws/build"
 
 for dictionary in "linked-list" "sparse-array"; do
