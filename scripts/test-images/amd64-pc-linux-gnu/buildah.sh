@@ -15,7 +15,10 @@ run mkdir -p /home
 copy ../entrypoint.sh /home/
 
 copy root/ /
-build emerge -v dev-vcs/git dev-util/cmake dev-libs/gmp app-arch/ncompress dev-lang/ruby:2.6 dev-ruby/rubygems
+build emerge -v \
+  dev-vcs/git dev-util/cmake \
+  dev-libs/gmp app-arch/ncompress \
+  dev-lang/ruby:2.6 virtual/rubygems
 
 build "update && upgrade && cleanup"
 
