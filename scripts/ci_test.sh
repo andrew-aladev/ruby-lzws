@@ -19,7 +19,7 @@ if [ $? -eq 0 ]; then
 fi
 
 bash -cl "\
-  (rvm use '.' || :) && \
+  rvm use '.'; \
   gem install bundler && \
   bundle install \
 "
@@ -64,7 +64,7 @@ for dictionary in "linked-list" "sparse-array"; do
 
   bash -cl "\
     cd ../../../.. && \
-    (rvm use '.' || :) && \
+    rvm use '.'; \
     bundle exec rake clean && \
     bundle exec rake \
   "
