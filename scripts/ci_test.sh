@@ -59,7 +59,7 @@ for dictionary in "linked-list" "sparse-array"; do
   make -j2
 
   # "sudo" may be required for "/usr/local".
-  sudo make install
+  if command -v sudo > /dev/null 2>&1; then sudo make install; else make install; fi
 
   bash -cl "\
     cd ../../../.. && \
