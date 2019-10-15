@@ -3,6 +3,7 @@
 
 #include "ruby/io.h"
 
+#include <lzws/common.h>
 #include <lzws/file.h>
 
 #include "lzws_ext/common.h"

@@ -4,6 +4,7 @@
 #include "lzws_ext/stream/decompressor.h"
 
 #include <lzws/buffer.h>
+#include <lzws/common.h>
 #include <lzws/decompressor/common.h>
 #include <lzws/decompressor/main.h>
 #include <lzws/decompressor/state.h>
