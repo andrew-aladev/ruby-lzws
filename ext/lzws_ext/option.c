@@ -25,11 +25,11 @@ bool lzws_ext_get_bool_option_value(VALUE options, const char* name)
   return raw_type == T_TRUE;
 }
 
-unsigned long lzws_ext_get_fixnum_option_value(VALUE options, const char* name)
+unsigned long lzws_ext_get_ulong_option_value(VALUE options, const char* name)
 {
   VALUE raw_value = get_raw_option_value(options, name);
 
   Check_Type(raw_value, T_FIXNUM);
 
-  return NUM2UINT(raw_value);
+  return NUM2ULONG(raw_value);
 }
