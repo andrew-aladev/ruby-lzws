@@ -38,8 +38,7 @@ module LZWS
       Validation.validate_positive_integer max_code_bit_length
 
       raise ValidateError, "invalid max code bit length" if
-        max_code_bit_length < LOWEST_MAX_CODE_BIT_LENGTH ||
-        max_code_bit_length > BIGGEST_MAX_CODE_BIT_LENGTH
+        max_code_bit_length < LOWEST_MAX_CODE_BIT_LENGTH || max_code_bit_length > BIGGEST_MAX_CODE_BIT_LENGTH
 
       Validation.validate_bool options[:without_magic_header]
       Validation.validate_bool options[:block_mode]
