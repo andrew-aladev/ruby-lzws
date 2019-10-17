@@ -8,14 +8,18 @@ require_relative "validation"
 module LZWS
   module Test
     module Option
+      private_class_method def self.get_invalid_buffer_length_options(buffer_length_names)
+        buffer_length_names.flat_map do |name|
+          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).map do |invalid_integer|
+            { name => invalid_integer }
+          end
+        end
+      end
+
       def self.get_invalid_decompressor_options(buffer_length_names)
         [
           Validation::INVALID_HASHES,
-          buffer_length_names.flat_map do |name|
-            (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).map do |invalid_integer|
-              { name => invalid_integer }
-            end
-          end,
+          get_invalid_buffer_length_options(buffer_length_names),
           Validation::INVALID_BOOLS.flat_map do |invalid_bool|
             [
               { :without_magic_header => invalid_bool },
@@ -67,13 +71,17 @@ module LZWS
       )
       .freeze
 
+      private_class_method def self.get_buffer_length_option_data(buffer_length_names)
+        buffer_length_names.map do |name|
+          BUFFER_LENGTHS.map do |buffer_length|
+            { name => buffer_length }
+          end
+        end
+      end
+
       private_class_method def self.get_compressor_option_data(buffer_length_names)
         [
-          buffer_length_names.map do |name|
-            BUFFER_LENGTHS.map do |buffer_length|
-              { name => buffer_length }
-            end
-          end,
+          get_buffer_length_option_data(buffer_length_names),
           [
             MAX_CODE_BIT_LENGTHS.map do |max_code_bit_length|
               { :max_code_bit_length => max_code_bit_length }
@@ -110,7 +118,7 @@ module LZWS
         end
       end
 
-      def self.get_compressor_option_combinations(buffer_length_names, &_block)
+      def self.get_compressor_option_combinations(buffer_length_names)
         get_option_combinations get_compressor_option_data(buffer_length_names)
       end
 
