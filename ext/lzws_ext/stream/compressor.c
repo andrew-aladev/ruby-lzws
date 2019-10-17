@@ -193,9 +193,9 @@ VALUE lzws_ext_compressor_close(VALUE self)
 
 void lzws_ext_compressor_exports(VALUE root_module)
 {
-  VALUE stream = rb_define_module_under(root_module, "Stream");
+  VALUE module = rb_define_module_under(root_module, "Stream");
 
-  VALUE compressor = rb_define_class_under(stream, "NativeCompressor", rb_cObject);
+  VALUE compressor = rb_define_class_under(module, "NativeCompressor", rb_cObject);
   rb_define_alloc_func(compressor, lzws_ext_allocate_compressor);
   rb_define_method(compressor, "initialize", lzws_ext_initialize_compressor, 1);
   rb_define_method(compressor, "write", lzws_ext_compress, 1);
