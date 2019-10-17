@@ -13,9 +13,9 @@ static inline NORETURN(void raise(const char* name, const char* description))
   rb_raise(error, "%s", description);
 }
 
-void lzws_ext_raise_error(lzws_ext_result_t result)
+void lzws_ext_raise_error(lzws_ext_result_t ext_result)
 {
-  switch (result) {
+  switch (ext_result) {
     case LZWS_EXT_ERROR_ALLOCATE_FAILED:
       raise("AllocateError", "allocate error");
     case LZWS_EXT_ERROR_VALIDATE_FAILED:

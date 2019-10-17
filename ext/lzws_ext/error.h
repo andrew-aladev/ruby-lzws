@@ -25,6 +25,6 @@ enum {
   LZWS_EXT_ERROR_UNEXPECTED
 };
 
-NORETURN(void lzws_ext_raise_error(lzws_ext_result_t result));
+NORETURN(void lzws_ext_raise_error(lzws_ext_result_t ext_result));
 
 #endif // LZWS_EXT_ERROR_H
