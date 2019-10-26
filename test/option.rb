@@ -2,6 +2,7 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 require "lzws/option"
+require "ocg"
 
 require_relative "validation"
 
