@@ -11,10 +11,12 @@ addons:
     packages:
       - libgmp-dev
       - ncompress
+    update: true
   homebrew:
     packages:
       - gmp
       - ncompress
+    update: true
 
 before_install:
   - gem install bundler
