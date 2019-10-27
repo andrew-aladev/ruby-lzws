@@ -26,21 +26,21 @@ module LZWS
 
         Validation::INVALID_BOOLS.each do |invalid_bool|
           yield({ :without_magic_header => invalid_bool })
-          yield({ :msb => invalid_bool })
+          yield({ :msb                  => invalid_bool })
           yield({ :unaligned_bit_groups => invalid_bool })
-          yield({ :quiet => invalid_bool })
+          yield({ :quiet                => invalid_bool })
         end
       end
 
       def self.get_invalid_compressor_options(buffer_length_names, &block)
         get_invalid_decompressor_options buffer_length_names, &block
 
-        yield({ :max_code_bit_length => LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1 })
-        yield({ :max_code_bit_length => LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1 })
-
         Validation::INVALID_POSITIVE_INTEGERS.each do |invalid_integer|
           yield({ :max_code_bit_length => invalid_integer })
         end
+
+        yield({ :max_code_bit_length => LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1 })
+        yield({ :max_code_bit_length => LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1 })
 
         Validation::INVALID_BOOLS.each do |invalid_bool|
           yield({ :block_mode => invalid_bool })
