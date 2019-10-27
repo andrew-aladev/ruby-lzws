@@ -31,8 +31,6 @@ module LZWS
         }
         .freeze
 
-        COMPRESSOR_OPTION_COMBINATIONS = Option.get_compressor_option_combinations(BUFFER_LENGTH_NAMES).freeze
-
         LIMITS = [nil, 1].freeze
 
         def test_invalid_ungetbyte
@@ -47,7 +45,7 @@ module LZWS
 
         def test_byte
           TEXTS.each do |text|
-            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            get_compressor_options do |compressor_options|
               write_archive text, compressor_options
 
               get_compatible_decompressor_options(compressor_options) do |decompressor_options|
@@ -93,7 +91,7 @@ module LZWS
 
         def test_char
           TEXTS.each do |text|
-            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            get_compressor_options do |compressor_options|
               write_archive text, compressor_options
 
               get_compatible_decompressor_options(compressor_options) do |decompressor_options|
@@ -132,7 +130,7 @@ module LZWS
             (ENCODINGS - [external_encoding]).each do |internal_encoding|
               target_text = text.encode internal_encoding, TRANSCODE_OPTIONS
 
-              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              get_compressor_options do |compressor_options|
                 write_archive text, compressor_options
 
                 get_compatible_decompressor_options(compressor_options) do |decompressor_options|
@@ -213,7 +211,7 @@ module LZWS
                 text[0]
               end
 
-            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            get_compressor_options do |compressor_options|
               write_archive text, compressor_options
 
               get_compatible_decompressor_options(compressor_options) do |decompressor_options|
@@ -305,7 +303,7 @@ module LZWS
             (ENCODINGS - [external_encoding]).each do |internal_encoding|
               target_text = text.encode internal_encoding, TRANSCODE_OPTIONS
 
-              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              get_compressor_options do |compressor_options|
                 write_archive text, compressor_options
 
                 get_compatible_decompressor_options(compressor_options) do |decompressor_options|
@@ -372,7 +370,7 @@ module LZWS
 
         def test_open
           TEXTS.each do |text|
-            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            get_compressor_options do |compressor_options|
               write_archive text, compressor_options
 
               get_compatible_decompressor_options(compressor_options) do |decompressor_options|
@@ -402,6 +400,10 @@ module LZWS
         protected def write_archive(text, compressor_options)
           compressed_text = String.compress text, compressor_options
           ::File.write ARCHIVE_PATH, compressed_text
+        end
+
+        def get_compressor_options(&block)
+          Option.get_compressor_options(BUFFER_LENGTH_NAMES, &block)
         end
 
         def get_compatible_decompressor_options(compressor_options, &block)

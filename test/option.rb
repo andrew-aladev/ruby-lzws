@@ -9,45 +9,42 @@ require_relative "validation"
 module LZWS
   module Test
     module Option
-      private_class_method def self.get_invalid_buffer_length_options(buffer_length_names)
-        buffer_length_names.flat_map do |name|
-          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).map do |invalid_integer|
-            { name => invalid_integer }
+      private_class_method def self.get_invalid_buffer_length_options(buffer_length_names, &_block)
+        buffer_length_names.each do |name|
+          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
+            yield({ name => invalid_integer })
           end
         end
       end
 
-      def self.get_invalid_decompressor_options(buffer_length_names)
-        [
-          Validation::INVALID_HASHES,
-          get_invalid_buffer_length_options(buffer_length_names),
-          Validation::INVALID_BOOLS.flat_map do |invalid_bool|
-            [
-              { :without_magic_header => invalid_bool },
-              { :msb => invalid_bool },
-              { :unaligned_bit_groups => invalid_bool },
-              { :quiet => invalid_bool }
-            ]
-          end
-        ]
-        .flatten 1
+      def self.get_invalid_decompressor_options(buffer_length_names, &block)
+        Validation::INVALID_HASHES.each do |invalid_hash|
+          yield invalid_hash
+        end
+
+        get_invalid_buffer_length_options buffer_length_names, &block
+
+        Validation::INVALID_BOOLS.each do |invalid_bool|
+          yield({ :without_magic_header => invalid_bool })
+          yield({ :msb => invalid_bool })
+          yield({ :unaligned_bit_groups => invalid_bool })
+          yield({ :quiet => invalid_bool })
+        end
       end
 
-      def self.get_invalid_compressor_options(buffer_length_names)
-        [
-          get_invalid_decompressor_options(buffer_length_names),
-          [
-            { :max_code_bit_length => LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1 },
-            { :max_code_bit_length => LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1 }
-          ],
-          Validation::INVALID_POSITIVE_INTEGERS.map do |invalid_integer|
-            { :max_code_bit_length => invalid_integer }
-          end,
-          Validation::INVALID_BOOLS.map do |invalid_bool|
-            { :block_mode => invalid_bool }
-          end
-        ]
-        .flatten 1
+      def self.get_invalid_compressor_options(buffer_length_names, &block)
+        get_invalid_decompressor_options buffer_length_names, &block
+
+        yield({ :max_code_bit_length => LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1 })
+        yield({ :max_code_bit_length => LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1 })
+
+        Validation::INVALID_POSITIVE_INTEGERS.map do |invalid_integer|
+          yield({ :max_code_bit_length => invalid_integer })
+        end
+
+        Validation::INVALID_BOOLS.map do |invalid_bool|
+          yield({ :block_mode => invalid_bool })
+        end
       end
 
       # -----
@@ -72,55 +69,30 @@ module LZWS
       )
       .freeze
 
-      private_class_method def self.get_buffer_length_option_data(buffer_length_names)
-        buffer_length_names.map do |name|
-          BUFFER_LENGTHS.map do |buffer_length|
-            { name => buffer_length }
-          end
-        end
+      private_class_method def self.get_buffer_length_option_generator(buffer_length_names)
+        OCG.new(
+          Hash[buffer_length_names.map { |name| [name, BUFFER_LENGTHS] }]
+        )
       end
 
-      private_class_method def self.get_compressor_option_data(buffer_length_names)
-        [
-          get_buffer_length_option_data(buffer_length_names),
-          [
-            MAX_CODE_BIT_LENGTHS.map do |max_code_bit_length|
-              { :max_code_bit_length => max_code_bit_length }
-            end,
-            BOOLS.map do |block_mode|
-              { :block_mode => block_mode }
-            end,
-            BOOLS.map do |without_magic_header|
-              { :without_magic_header => without_magic_header }
-            end,
-            BOOLS.map do |msb|
-              { :msb => msb }
-            end,
-            BOOLS.map do |unaligned_bit_groups|
-              { :unaligned_bit_groups => unaligned_bit_groups }
-            end
-          ]
-        ]
-        .flatten 1
-      end
+      def self.get_compressor_options(buffer_length_names, &_block)
+        buffer_length_generator = get_buffer_length_option_generator buffer_length_names
 
-      private_class_method def self.get_option_combinations(data)
-        combinations = data
-          .inject([]) do |result, array|
-            next array if result.empty?
+        main_generator = OCG.new(
+          :max_code_bit_length  => MAX_CODE_BIT_LENGTHS,
+          :block_mode           => BOOLS,
+          :without_magic_header => BOOLS,
+          :msb                  => BOOLS,
+          :unaligned_bit_groups => BOOLS
+        )
 
-            result
-              .product(array)
-              .map(&:flatten)
-          end
+        other_generator = OCG.new(
+          :quiet => BOOLS
+        )
 
-        combinations.map do |options|
-          options.reduce({}, :merge)
-        end
-      end
+        complete_generator = buffer_length_generator.and(main_generator).mix other_generator
 
-      def self.get_compressor_option_combinations(buffer_length_names)
-        get_option_combinations get_compressor_option_data(buffer_length_names)
+        yield complete_generator.next until complete_generator.finished?
       end
 
       def self.get_compatible_decompressor_options(compressor_options, buffer_length_name_mapping, &_block)

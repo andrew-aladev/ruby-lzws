@@ -25,11 +25,9 @@ module LZWS
         BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
         BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
 
-        COMPRESSOR_OPTION_COMBINATIONS = Option.get_compressor_option_combinations(BUFFER_LENGTH_NAMES).freeze
-
         def test_print
           TEXTS.each do |text|
-            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            get_compressor_options do |compressor_options|
               Target.open ARCHIVE_PATH, compressor_options do |instance|
                 $LAST_READ_LINE = text
 
@@ -60,7 +58,7 @@ module LZWS
               sources.each { |source| target_text << source + field_separator }
               target_text << record_separator
 
-              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              get_compressor_options do |compressor_options|
                 Target.open ARCHIVE_PATH, compressor_options do |instance|
                   $OUTPUT_FIELD_SEPARATOR  = field_separator
                   $OUTPUT_RECORD_SEPARATOR = record_separator
@@ -88,9 +86,9 @@ module LZWS
             PORTION_LENGTHS.each do |portion_length|
               sources = get_sources text, portion_length
 
-              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              get_compressor_options do |compressor_options|
                 Target.open ARCHIVE_PATH, compressor_options do |instance|
-                  sources.each { |source| instance.printf "%s", source }
+                  sources.each { |source| instance.printf "%s", source } # rubocop:disable Style/FormatStringToken
                 end
 
                 compressed_text = ::File.read ARCHIVE_PATH
@@ -115,7 +113,7 @@ module LZWS
 
         def test_putc
           TEXTS.each do |text|
-            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            get_compressor_options do |compressor_options|
               Target.open ARCHIVE_PATH, compressor_options do |instance|
                 # Putc should process numbers and strings.
                 text.chars.map.with_index do |char, index|
@@ -150,7 +148,7 @@ module LZWS
               target_text = "".encode text.encoding
               sources.each { |source| target_text << source + newline }
 
-              COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+              get_compressor_options do |compressor_options|
                 Target.open ARCHIVE_PATH, compressor_options do |instance|
                   # Puts should ignore additional newlines and process arrays.
                   args = sources.map.with_index do |source, index|
@@ -189,7 +187,7 @@ module LZWS
 
         def test_open
           TEXTS.each do |text|
-            COMPRESSOR_OPTION_COMBINATIONS.each do |compressor_options|
+            get_compressor_options do |compressor_options|
               Target.open(ARCHIVE_PATH, compressor_options) { |instance| instance.write text }
 
               compressed_text = ::File.read ARCHIVE_PATH
@@ -232,6 +230,10 @@ module LZWS
           decompressed_text.force_encoding text.encoding
 
           assert_equal text, decompressed_text
+        end
+
+        def get_compressor_options(&block)
+          Option.get_compressor_options(BUFFER_LENGTH_NAMES, &block)
         end
 
         def get_compatible_decompressor_options(compressor_options, &block)
