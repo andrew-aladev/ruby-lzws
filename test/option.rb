@@ -38,11 +38,11 @@ module LZWS
         yield({ :max_code_bit_length => LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1 })
         yield({ :max_code_bit_length => LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1 })
 
-        Validation::INVALID_POSITIVE_INTEGERS.map do |invalid_integer|
+        Validation::INVALID_POSITIVE_INTEGERS.each do |invalid_integer|
           yield({ :max_code_bit_length => invalid_integer })
         end
 
-        Validation::INVALID_BOOLS.map do |invalid_bool|
+        Validation::INVALID_BOOLS.each do |invalid_bool|
           yield({ :block_mode => invalid_bool })
         end
       end
