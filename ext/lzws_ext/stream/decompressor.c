@@ -126,7 +126,7 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
     }
   }
 
-  VALUE bytes_read             = UINT2NUM(source_length - remaining_source_length);
+  VALUE bytes_read             = SIZET2NUM(source_length - remaining_source_length);
   VALUE needs_more_destination = result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_read, needs_more_destination);

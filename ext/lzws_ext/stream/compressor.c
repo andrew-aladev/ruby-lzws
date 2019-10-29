@@ -120,7 +120,7 @@ VALUE lzws_ext_compress(VALUE self, VALUE source_value)
     lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
   }
 
-  VALUE bytes_written          = UINT2NUM(source_length - remaining_source_length);
+  VALUE bytes_written          = SIZET2NUM(source_length - remaining_source_length);
   VALUE needs_more_destination = result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_written, needs_more_destination);

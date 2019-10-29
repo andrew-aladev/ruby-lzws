@@ -4,6 +4,7 @@
 #include "lzws_ext/option.h"
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "lzws_ext/error.h"
 #include "ruby.h"
@@ -34,11 +35,11 @@ unsigned int lzws_ext_get_uint_option_value(VALUE options, const char* name)
   return NUM2UINT(raw_value);
 }
 
-unsigned long lzws_ext_get_ulong_option_value(VALUE options, const char* name)
+size_t lzws_ext_get_size_option_value(VALUE options, const char* name)
 {
   VALUE raw_value = get_raw_option_value(options, name);
 
   Check_Type(raw_value, T_FIXNUM);
 
-  return NUM2ULONG(raw_value);
+  return NUM2SIZET(raw_value);
 }
