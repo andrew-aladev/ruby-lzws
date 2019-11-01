@@ -64,13 +64,11 @@ static inline lzws_ext_result_t increase_destination_buffer(
 
 // -- utils --
 
-#define GET_SOURCE_DATA(source_value)                              \
-  Check_Type(source_value, T_STRING);                              \
-                                                                   \
-  const char* source                  = RSTRING_PTR(source_value); \
-  size_t      source_length           = RSTRING_LEN(source_value); \
-  uint8_t*    remaining_source        = (uint8_t*)source;          \
-  size_t      remaining_source_length = source_length;
+#define GET_SOURCE_DATA(source_value)                    \
+  Check_Type(source_value, T_STRING);                    \
+                                                         \
+  const char* source        = RSTRING_PTR(source_value); \
+  size_t      source_length = RSTRING_LEN(source_value);
 
 // -- compress --
 
@@ -106,11 +104,14 @@ static inline lzws_ext_result_t increase_destination_buffer(
 
 static inline lzws_ext_result_t compress(
   lzws_compressor_state_t* state_ptr,
-  uint8_t* remaining_source, size_t remaining_source_length,
+  const char* source, size_t source_length,
   VALUE destination_value, size_t destination_buffer_length)
 {
   lzws_result_t     result;
   lzws_ext_result_t ext_result;
+
+  uint8_t* remaining_source        = (uint8_t*)source;
+  size_t   remaining_source_length = source_length;
 
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
@@ -166,7 +167,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
 
   lzws_ext_result_t ext_result = compress(
     state_ptr,
-    remaining_source, remaining_source_length,
+    source, source_length,
     destination_value, destination_buffer_length);
 
   lzws_compressor_free_state(state_ptr);
@@ -182,11 +183,14 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
 
 static inline lzws_ext_result_t decompress(
   lzws_decompressor_state_t* state_ptr,
-  uint8_t* remaining_source, size_t remaining_source_length,
+  const char* source, size_t source_length,
   VALUE destination_value, size_t destination_buffer_length)
 {
   lzws_result_t     result;
   lzws_ext_result_t ext_result;
+
+  uint8_t* remaining_source        = (uint8_t*)source;
+  size_t   remaining_source_length = source_length;
 
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
@@ -277,7 +281,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
 
   lzws_ext_result_t ext_result = decompress(
     state_ptr,
-    remaining_source, remaining_source_length,
+    source, source_length,
     destination_value, destination_buffer_length);
 
   lzws_decompressor_free_state(state_ptr);
