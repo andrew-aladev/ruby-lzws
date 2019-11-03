@@ -5,7 +5,7 @@ cd "$(dirname $0)"
 
 cd ".."
 
-SIZE=50
+SIZE=10
 DIRECTORY="tmp"
 
 kernel_name=$(uname -s)

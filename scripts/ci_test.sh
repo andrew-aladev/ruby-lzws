@@ -7,7 +7,11 @@ cd "$(dirname $0)"
 # Please do not use it on your machine.
 
 # "sudo" may be required for ramfs.
-if command -v sudo > /dev/null 2>&1; then sudo ./tmp_ramfs.sh; else ./tmp_ramfs.sh; fi
+if command -v sudo > /dev/null 2>&1; then
+  sudo ./tmp_ramfs.sh || true
+else
+  ./tmp_ramfs.sh || true
+fi
 
 cd ".."
 
@@ -62,7 +66,11 @@ for dictionary in "linked-list" "sparse-array"; do
   make -j2
 
   # "sudo" may be required for "/usr/local".
-  if command -v sudo > /dev/null 2>&1; then sudo make install; else make install; fi
+  if command -v sudo > /dev/null 2>&1; then
+    sudo make install
+  else
+    make install
+  fi
 
   bash -cl "\
     cd ../../../.. && \
