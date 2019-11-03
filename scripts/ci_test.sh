@@ -39,7 +39,7 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
 # Compiling library from source.
 LZWS_BRANCH="v1.3.0"
 
-build="tmp/lzws-build"
+build="build"
 mkdir -p "$build"
 cd "$build"
 
@@ -73,7 +73,7 @@ for dictionary in "linked-list" "sparse-array"; do
   fi
 
   bash -cl "\
-    cd ../../../.. && \
+    cd ../../.. && \
     rvm use '.'; \
     bundle exec rake clean && \
     bundle exec rake \
