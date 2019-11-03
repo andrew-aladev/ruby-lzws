@@ -6,6 +6,9 @@ cd "$(dirname $0)"
 # This script is for CI machines only, it provides junk and changes some config files.
 # Please do not use it on your machine.
 
+# "sudo" may be required for ramfs.
+if command -v sudo > /dev/null 2>&1; then sudo ./tmp_ramfs.sh; else ./tmp_ramfs.sh; fi
+
 cd ".."
 
 # CI may not want to provide target ruby version.

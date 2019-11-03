@@ -55,7 +55,7 @@ module LZWS
       .freeze
 
       LARGE_TEXTS = generate_texts(
-        ::SecureRandom.random_bytes(1 << 20) # 1 MB
+        ::SecureRandom.random_bytes(1 << 21) # 2 MB
       )
       .freeze
 
