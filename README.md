@@ -1,6 +1,6 @@
 # Ruby bindings for lzws library
 
-[![Travis test status](https://travis-ci.org/andrew-aladev/ruby-lzws.svg?branch=master)](https://travis-ci.org/andrew-aladev/ruby-lzws)
+[![Travis test status](https://travis-ci.com/andrew-aladev/ruby-lzws.svg?branch=master)](https://travis-ci.com/andrew-aladev/ruby-lzws)
 [![AppVeyor test status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-lzws?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-lzws/branch/master)
 [![Cirrus test status](https://api.cirrus-ci.com/github/andrew-aladev/ruby-lzws.svg?branch=master)](https://cirrus-ci.com/github/andrew-aladev/ruby-lzws)
 [![Circle test status](https://circleci.com/gh/andrew-aladev/ruby-lzws/tree/master.svg?style=shield)](https://circleci.com/gh/andrew-aladev/ruby-lzws/tree/master)
