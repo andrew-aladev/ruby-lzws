@@ -6,6 +6,9 @@ os:
   - linux
   - osx
 
+dist: bionic
+osx_image: xcode11.2
+
 arch:
   - amd64
   - arm64
@@ -13,14 +16,13 @@ arch:
 addons:
   apt:
     packages:
+      - cmake
       - libgmp-dev
       - ncompress
-    update: true
   homebrew:
     packages:
       - gmp
       - ncompress
-    update: true
 
 before_install:
   - gem install bundler
