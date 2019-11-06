@@ -10,7 +10,7 @@ require_relative "validation"
 
 module LZWS
   module Test
-    class File < Minitest::Unit::TestCase
+    class File < Minitest::Test
       Target = LZWS::File
 
       SOURCE_PATH         = Common::SOURCE_PATH

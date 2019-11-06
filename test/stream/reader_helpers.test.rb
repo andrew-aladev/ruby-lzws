@@ -12,7 +12,7 @@ require_relative "../validation"
 module LZWS
   module Test
     module Stream
-      class ReaderHelpers < Minitest::Unit::TestCase
+      class ReaderHelpers < Minitest::Test
         Target = LZWS::Stream::Reader
         String = LZWS::String
 

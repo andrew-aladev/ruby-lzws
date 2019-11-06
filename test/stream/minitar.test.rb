@@ -11,7 +11,7 @@ require_relative "../minitest"
 module LZWS
   module Test
     module Stream
-      class MinitarTest < Minitest::Unit::TestCase
+      class MinitarTest < Minitest::Test
         Reader = LZWS::Stream::Reader
         Writer = LZWS::Stream::Writer
 

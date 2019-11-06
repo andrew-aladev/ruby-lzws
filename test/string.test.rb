@@ -10,7 +10,7 @@ require_relative "validation"
 
 module LZWS
   module Test
-    class String < Minitest::Unit::TestCase
+    class String < Minitest::Test
       Target = LZWS::String
 
       NATIVE_SOURCE_PATH  = Common::NATIVE_SOURCE_PATH
