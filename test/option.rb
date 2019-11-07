@@ -90,7 +90,7 @@ module LZWS
           :quiet => BOOLS
         )
 
-        complete_generator = buffer_length_generator.and(main_generator).mix other_generator
+        complete_generator = buffer_length_generator.mix(main_generator).mix other_generator
 
         yield complete_generator.next until complete_generator.finished?
       end
