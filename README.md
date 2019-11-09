@@ -82,7 +82,7 @@ Values: 0, 2 - infinity, default value: 0.
 :max_code_bit_length
 ```
 
-Values: 9 - 16, default value: 16.
+Values: `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH` - `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH`, default value: `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH`.
 
 ```
 :block_mode
