@@ -64,8 +64,7 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
     without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
   if (result != 0) {
-    lzws_ext_result_t ext_result = get_file_error(result);
-    lzws_ext_raise_error(ext_result);
+    lzws_ext_raise_error(get_file_error(result));
   }
 
   // Ruby itself won't flush stdio file before closing fd, flush is required.
@@ -89,8 +88,7 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
     without_magic_header, msb, unaligned_bit_groups, quiet);
 
   if (result != 0) {
-    lzws_ext_result_t ext_result = get_file_error(result);
-    lzws_ext_raise_error(ext_result);
+    lzws_ext_raise_error(get_file_error(result));
   }
 
   // Ruby itself won't flush stdio file before closing fd, flush is required.
