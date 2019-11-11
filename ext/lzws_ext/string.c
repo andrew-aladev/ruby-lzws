@@ -14,32 +14,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "lzws_ext/buffer.h"
 #include "lzws_ext/error.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
 #include "ruby.h"
 
 // -- buffer --
-
-static inline VALUE create_buffer(VALUE length)
-{
-  return rb_str_new(NULL, NUM2SIZET(length));
-}
-
-#define CREATE_BUFFER(buffer, length, exception) \
-  VALUE buffer = rb_protect(create_buffer, SIZET2NUM(length), &exception);
-
-static inline VALUE resize_buffer(VALUE args)
-{
-  VALUE buffer = rb_ary_entry(args, 0);
-  VALUE length = rb_ary_entry(args, 1);
-  return rb_str_resize(buffer, NUM2SIZET(length));
-}
-
-#define RESIZE_BUFFER(buffer, length, exception)                                        \
-  VALUE resize_buffer_args = rb_ary_new_from_args(2, buffer, SIZET2NUM(length));        \
-  buffer                   = rb_protect(resize_buffer, resize_buffer_args, &exception); \
-  RB_GC_GUARD(resize_buffer_args);
 
 static inline lzws_ext_result_t increase_destination_buffer(
   VALUE destination_value, size_t destination_length,
@@ -52,7 +33,7 @@ static inline lzws_ext_result_t increase_destination_buffer(
 
   int exception;
 
-  RESIZE_BUFFER(destination_value, destination_length + destination_buffer_length, exception);
+  LZWS_EXT_RESIZE_STRING_BUFFER(destination_value, destination_length + destination_buffer_length, exception);
   if (exception != 0) {
     return LZWS_EXT_ERROR_ALLOCATE_FAILED;
   }
@@ -121,7 +102,7 @@ static inline lzws_ext_result_t compress(
 
   int exception;
 
-  RESIZE_BUFFER(destination_value, destination_length, exception);
+  LZWS_EXT_RESIZE_STRING_BUFFER(destination_value, destination_length, exception);
   if (exception != 0) {
     return LZWS_EXT_ERROR_ALLOCATE_FAILED;
   }
@@ -159,7 +140,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
 
   int exception;
 
-  CREATE_BUFFER(destination_value, destination_buffer_length, exception);
+  LZWS_EXT_CREATE_STRING_BUFFER(destination_value, destination_buffer_length, exception);
   if (exception != 0) {
     lzws_compressor_free_state(state_ptr);
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
@@ -237,7 +218,7 @@ static inline lzws_ext_result_t decompress(
 
   int exception;
 
-  RESIZE_BUFFER(destination_value, destination_length, exception);
+  LZWS_EXT_RESIZE_STRING_BUFFER(destination_value, destination_length, exception);
   if (exception != 0) {
     return LZWS_EXT_ERROR_ALLOCATE_FAILED;
   }
@@ -273,7 +254,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
 
   int exception;
 
-  CREATE_BUFFER(destination_value, destination_buffer_length, exception);
+  LZWS_EXT_CREATE_STRING_BUFFER(destination_value, destination_buffer_length, exception);
   if (exception != 0) {
     lzws_decompressor_free_state(state_ptr);
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
