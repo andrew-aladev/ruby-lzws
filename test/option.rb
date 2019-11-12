@@ -9,6 +9,15 @@ require_relative "validation"
 module LZWS
   module Test
     module Option
+      INVALID_MAX_CODE_BIT_LENGTHS = (
+        Validation::INVALID_POSITIVE_INTEGERS +
+        [
+          LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1,
+          LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1
+        ]
+      )
+      .freeze
+
       private_class_method def self.get_invalid_buffer_length_options(buffer_length_names, &_block)
         buffer_length_names.each do |name|
           (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
@@ -35,12 +44,9 @@ module LZWS
       def self.get_invalid_compressor_options(buffer_length_names, &block)
         get_invalid_decompressor_options buffer_length_names, &block
 
-        Validation::INVALID_POSITIVE_INTEGERS.each do |invalid_integer|
-          yield({ :max_code_bit_length => invalid_integer })
+        INVALID_MAX_CODE_BIT_LENGTHS.each do |invalid_max_code_bit_length|
+          yield({ :max_code_bit_length => invalid_max_code_bit_length })
         end
-
-        yield({ :max_code_bit_length => LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1 })
-        yield({ :max_code_bit_length => LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1 })
 
         Validation::INVALID_BOOLS.each do |invalid_bool|
           yield({ :block_mode => invalid_bool })
