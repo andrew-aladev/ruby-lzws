@@ -4,7 +4,6 @@
 require_relative "../helper"
 
 require "English"
-
 require "lzws/stream/reader"
 require "lzws/string"
 

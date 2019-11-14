@@ -3,10 +3,9 @@
 
 require_relative "../helper"
 
-require "socket"
-
 require "lzws/stream/reader"
 require "lzws/string"
+require "socket"
 
 require_relative "abstract"
 require_relative "../common"
