@@ -3,6 +3,7 @@
 
 require "lzws/stream/writer"
 require "lzws/string"
+require "ocg"
 require "socket"
 
 require_relative "abstract"
@@ -154,6 +155,14 @@ module LZWS
         # -- asynchronous --
 
         def test_write_nonblock
+          modes = OCG.new(
+            :write_nonblock => [true, false],
+            :flush_nonblock => [true, false],
+            :close_nonblock => [true, false]
+          )
+          .to_a
+          .reject { |mode| mode[:write_nonblock] && mode[:flush_nonblock] && mode[:close_nonblock] }
+
           start_server do |server|
             TEXTS.each do |text|
               PORTION_LENGTHS.each do |portion_length|
@@ -161,50 +170,64 @@ module LZWS
 
                 get_compressor_options do |compressor_options|
                   get_compatible_decompressor_options(compressor_options) do |decompressor_options|
-                    server_nonblock_test(server, text, portion_length, compressor_options, decompressor_options) do |instance|
-                      sources.each do |source|
-                        loop do
-                          begin
-                            bytes_written = instance.write_nonblock source
-                          rescue ::IO::WaitWritable
-                            ::IO.select nil, [socket]
-                            retry
+                    modes.each do |mode|
+                      server_nonblock_test(server, text, portion_length, compressor_options, decompressor_options) do |instance|
+                        if mode[:write_nonblock]
+                          sources.each do |source|
+                            loop do
+                              begin
+                                bytes_written = instance.write_nonblock source
+                              rescue ::IO::WaitWritable
+                                ::IO.select nil, [socket]
+                                retry
+                              end
+
+                              source = source.byteslice bytes_written, source.bytesize - bytes_written
+                              break if source.bytesize == 0
+                            end
                           end
-
-                          source = source.byteslice bytes_written, source.bytesize - bytes_written
-                          break if source.bytesize == 0
-                        end
-                      end
-
-                      loop do
-                        begin
-                          is_flushed = instance.flush_nonblock
-                        rescue ::IO::WaitWritable
-                          ::IO.select nil, [socket]
-                          retry
+                        else
+                          sources.each { |source| instance.write source }
                         end
 
-                        break if is_flushed
-                      end
+                        if mode[:flush_nonblock]
+                          loop do
+                            begin
+                              is_flushed = instance.flush_nonblock
+                            rescue ::IO::WaitWritable
+                              ::IO.select nil, [socket]
+                              retry
+                            end
 
-                      assert_equal instance.pos, text.bytesize
-                      assert_equal instance.pos, instance.tell
-
-                    ensure
-                      refute instance.closed?
-
-                      loop do
-                        begin
-                          is_closed = instance.close_nonblock
-                        rescue ::IO::WaitWritable
-                          ::IO.select nil, [socket]
-                          retry
+                            break if is_flushed
+                          end
+                        else
+                          instance.flush
                         end
 
-                        break if is_closed
-                      end
+                        assert_equal instance.pos, text.bytesize
+                        assert_equal instance.pos, instance.tell
 
-                      assert instance.closed?
+                      ensure
+                        refute instance.closed?
+
+                        if mode[:close_nonblock]
+                          loop do
+                            begin
+                              is_closed = instance.close_nonblock
+                            rescue ::IO::WaitWritable
+                              ::IO.select nil, [socket]
+                              retry
+                            end
+
+                            break if is_closed
+                          end
+                        else
+                          instance.close
+                        end
+
+                        assert instance.closed?
+                      end
                     end
                   end
                 end
@@ -261,7 +284,7 @@ module LZWS
           end
         end
 
-        # -----
+        # -- server --
 
         protected def start_server(&block)
           ::TCPServer.open PORT, &block
@@ -300,6 +323,8 @@ module LZWS
 
           check_text text, compressed_text, decompressor_options
         end
+
+        # -----
 
         protected def get_sources(text, portion_length)
           sources = text
