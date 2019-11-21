@@ -18,11 +18,12 @@ module LZWS
           Target = LZWS::Stream::Raw::Decompressor
           String = LZWS::String
 
-          NATIVE_SOURCE_PATH  = Common::NATIVE_SOURCE_PATH
-          NATIVE_ARCHIVE_PATH = Common::NATIVE_ARCHIVE_PATH
-          TEXTS               = Common::TEXTS
-          LARGE_TEXTS         = Common::LARGE_TEXTS
-          PORTION_LENGTHS     = Common::PORTION_LENGTHS
+          NATIVE_SOURCE_PATH    = Common::NATIVE_SOURCE_PATH
+          NATIVE_ARCHIVE_PATH   = Common::NATIVE_ARCHIVE_PATH
+          TEXTS                 = Common::TEXTS
+          LARGE_TEXTS           = Common::LARGE_TEXTS
+          PORTION_LENGTHS       = Common::PORTION_LENGTHS
+          LARGE_PORTION_LENGTHS = Common::LARGE_PORTION_LENGTHS
 
           BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
           BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
@@ -112,33 +113,42 @@ module LZWS
 
           def test_large_texts_and_native_compress
             LARGE_TEXTS.each do |text|
-              ::File.write NATIVE_SOURCE_PATH, text
-              Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
+              LARGE_PORTION_LENGTHS.each do |portion_length|
+                ::File.write NATIVE_SOURCE_PATH, text
+                Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
 
-              decompressed_buffer = ::StringIO.new
-              decompressed_buffer.set_encoding ::Encoding::BINARY
+                compressed_text = ::File.read NATIVE_ARCHIVE_PATH
 
-              writer = proc { |portion| decompressed_buffer << portion }
+                decompressed_buffer = ::StringIO.new
+                decompressed_buffer.set_encoding ::Encoding::BINARY
 
-              decompressor = Target.new
+                writer = proc { |portion| decompressed_buffer << portion }
 
-              begin
-                source = ::File.read NATIVE_ARCHIVE_PATH
+                decompressor = Target.new
 
-                loop do
-                  bytes_read = decompressor.read source, &writer
-                  source     = source.byteslice bytes_read, source.bytesize - bytes_read
+                begin
+                  source                 = "".b
+                  compressed_text_offset = 0
 
-                  break if source.empty?
+                  loop do
+                    portion = compressed_text.byteslice compressed_text_offset, portion_length
+                    break if portion.nil?
+
+                    compressed_text_offset += portion_length
+                    source << portion
+
+                    bytes_read = decompressor.read source, &writer
+                    source     = source.byteslice bytes_read, source.bytesize - bytes_read
+                  end
+                ensure
+                  decompressor.close(&writer)
                 end
-              ensure
-                decompressor.close(&writer)
+
+                decompressed_text = decompressed_buffer.string
+                decompressed_text.force_encoding text.encoding
+
+                assert_equal text, decompressed_text
               end
-
-              decompressed_text = decompressed_buffer.string
-              decompressed_text.force_encoding text.encoding
-
-              assert_equal text, decompressed_text
             end
           end
 

@@ -18,11 +18,12 @@ module LZWS
           Target = LZWS::Stream::Raw::Compressor
           String = LZWS::String
 
-          ARCHIVE_PATH       = Common::ARCHIVE_PATH
-          NATIVE_SOURCE_PATH = Common::NATIVE_SOURCE_PATH
-          TEXTS              = Common::TEXTS
-          LARGE_TEXTS        = Common::LARGE_TEXTS
-          PORTION_LENGTHS    = Common::PORTION_LENGTHS
+          ARCHIVE_PATH          = Common::ARCHIVE_PATH
+          NATIVE_SOURCE_PATH    = Common::NATIVE_SOURCE_PATH
+          TEXTS                 = Common::TEXTS
+          LARGE_TEXTS           = Common::LARGE_TEXTS
+          PORTION_LENGTHS       = Common::PORTION_LENGTHS
+          LARGE_PORTION_LENGTHS = Common::LARGE_PORTION_LENGTHS
 
           BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
           BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
@@ -106,31 +107,38 @@ module LZWS
 
           def test_large_texts_and_native_compress
             LARGE_TEXTS.each do |text|
-              compressor = Target.new
+              LARGE_PORTION_LENGTHS.each do |portion_length|
+                compressor = Target.new
 
-              ::File.open(ARCHIVE_PATH, "wb") do |archive|
-                writer = proc { |portion| archive << portion }
+                ::File.open(ARCHIVE_PATH, "wb") do |archive|
+                  writer = proc { |portion| archive << portion }
 
-                begin
-                  source = text.dup
+                  begin
+                    source      = "".b
+                    text_offset = 0
 
-                  loop do
-                    bytes_written = compressor.write source, &writer
-                    source        = source.byteslice bytes_written, source.bytesize - bytes_written
+                    loop do
+                      portion = text.byteslice text_offset, portion_length
+                      break if portion.nil?
 
-                    break if source.empty?
+                      text_offset += portion_length
+                      source << portion
+
+                      bytes_written = compressor.write source, &writer
+                      source        = source.byteslice bytes_written, source.bytesize - bytes_written
+                    end
+                  ensure
+                    compressor.close(&writer)
                   end
-                ensure
-                  compressor.close(&writer)
                 end
+
+                Common.native_decompress ARCHIVE_PATH, NATIVE_SOURCE_PATH
+
+                decompressed_text = ::File.read NATIVE_SOURCE_PATH
+                decompressed_text.force_encoding text.encoding
+
+                assert_equal text, decompressed_text
               end
-
-              Common.native_decompress ARCHIVE_PATH, NATIVE_SOURCE_PATH
-
-              decompressed_text = ::File.read NATIVE_SOURCE_PATH
-              decompressed_text.force_encoding text.encoding
-
-              assert_equal text, decompressed_text
             end
           end
 

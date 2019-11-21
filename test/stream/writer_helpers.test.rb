@@ -17,11 +17,12 @@ module LZWS
         Target = LZWS::Stream::Writer
         String = LZWS::String
 
-        ARCHIVE_PATH       = Common::ARCHIVE_PATH
-        NATIVE_SOURCE_PATH = Common::NATIVE_SOURCE_PATH
-        TEXTS              = Common::TEXTS
-        LARGE_TEXTS        = Common::LARGE_TEXTS
-        PORTION_LENGTHS    = Common::PORTION_LENGTHS
+        ARCHIVE_PATH          = Common::ARCHIVE_PATH
+        NATIVE_SOURCE_PATH    = Common::NATIVE_SOURCE_PATH
+        TEXTS                 = Common::TEXTS
+        LARGE_TEXTS           = Common::LARGE_TEXTS
+        PORTION_LENGTHS       = Common::PORTION_LENGTHS
+        LARGE_PORTION_LENGTHS = Common::LARGE_PORTION_LENGTHS
 
         BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
         BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
@@ -201,14 +202,20 @@ module LZWS
 
         def test_open_with_large_texts_and_native_compress
           LARGE_TEXTS.each do |text|
-            Target.open(ARCHIVE_PATH) { |instance| instance.write text }
+            LARGE_PORTION_LENGTHS.each do |portion_length|
+              sources = get_sources text, portion_length
 
-            Common.native_decompress ARCHIVE_PATH, NATIVE_SOURCE_PATH
+              Target.open(ARCHIVE_PATH) do |instance|
+                sources.each { |source| instance.write source }
+              end
 
-            decompressed_text = ::File.read NATIVE_SOURCE_PATH
-            decompressed_text.force_encoding text.encoding
+              Common.native_decompress ARCHIVE_PATH, NATIVE_SOURCE_PATH
 
-            assert_equal text, decompressed_text
+              decompressed_text = ::File.read NATIVE_SOURCE_PATH
+              decompressed_text.force_encoding text.encoding
+
+              assert_equal text, decompressed_text
+            end
           end
         end
 
