@@ -59,9 +59,10 @@ module LZWS
       )
       .freeze
 
+      # It is better to have text lengths not divisible by portion lengths.
       PORTION_LENGTHS = [
-        1,
-        128
+        100,
+        500
       ]
       .freeze
 
