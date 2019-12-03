@@ -12,8 +12,8 @@ SimpleCov.formatters = SimpleCov::Formatter::MultiFormatter.new(
 )
 
 # Workaround for https://bugs.ruby-lang.org/issues/15980
-SimpleCov.class_eval do |klass|
-  def klass.start(profile = nil, &block)
+SimpleCov.module_eval do |mod|
+  def mod.start(profile = nil, &block)
     require "coverage"
 
     load_profile profile if profile
