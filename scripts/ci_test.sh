@@ -21,8 +21,8 @@ cd ".."
 if command -v rvm > /dev/null 2>&1; then
   ruby_version=$(< ".ruby-version")
   ruby_major_version=$(echo "${ruby_version%.*}" | sed "s/\./\\\./g") # escaping for regex
-  ruby_version=$(rvm list | grep -o -e "$ruby_major_version\.[0-9]\+" | sort | tail -n 1)
-  echo "$ruby_version" > ".ruby-version"
+  ruby_version=$(rvm list | grep -o -e "${ruby_major_version}\.[0-9]\+" | sort | tail -n 1)
+  echo "${ruby_version}" > ".ruby-version"
 fi
 
 bash -cl "\
@@ -32,10 +32,10 @@ bash -cl "\
 "
 
 # Fix path environment params.
-export PATH="$PATH:/usr/local/bin"
-export C_INCLUDE_PATH="$C_INCLUDE_PATH:/usr/local/include"
-export LIBRARY_PATH="$C_INCLUDE_PATH:/usr/local/lib"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+export PATH="${PATH}:/usr/local/bin"
+export C_INCLUDE_PATH="${C_INCLUDE_PATH}:/usr/local/include"
+export LIBRARY_PATH="${C_INCLUDE_PATH}:/usr/local/lib"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib"
 
 # Compiling library from source.
 LZWS_BRANCH="v1.3.0"
@@ -50,7 +50,7 @@ git clone "https://github.com/andrew-aladev/lzws.git" --single-branch --branch "
 cd "lzws/build"
 
 for dictionary in "linked-list" "sparse-array"; do
-  echo "dictionary: $dictionary"
+  echo "dictionary: ${dictionary}"
 
   # Remove previous cmake files.
   find . \( -name "CMake*" -o -name "*.cmake" \) -exec rm -rf {} +
