@@ -80,7 +80,7 @@ module LZWS
           TEXTS.each do |text|
             # We don't need to transcode between same encodings.
             (ENCODINGS - [text.encoding]).each do |external_encoding|
-              target_text = text.encode external_encoding, TRANSCODE_OPTIONS
+              target_text = text.encode external_encoding, **TRANSCODE_OPTIONS
 
               get_compressor_options do |compressor_options|
                 ::File.open ARCHIVE_PATH, "wb" do |file|
