@@ -17,7 +17,7 @@ copy root/ /
 build emerge -v \
   dev-vcs/git dev-util/cmake \
   dev-libs/gmp app-arch/ncompress \
-  dev-lang/ruby:2.6 virtual/rubygems
+  dev-lang/ruby:2.7 virtual/rubygems
 
 run update
 build upgrade
