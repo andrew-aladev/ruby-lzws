@@ -4,6 +4,8 @@ set -e
 DIR=$(dirname "${BASH_SOURCE[0]}")
 cd "$DIR"
 
+CPU_COUNT=$(grep -c "^processor" "/proc/cpuinfo" || sysctl -n "hw.ncpu")
+
 # This script is for CI machines only, it provides junk and changes some config files.
 # Please do not use it on your machine.
 
@@ -64,7 +66,7 @@ for dictionary in "linked-list" "sparse-array"; do
     -DCMAKE_BUILD_TYPE="RELEASE" \
     -DCMAKE_C_FLAGS_RELEASE="-O2 -march=native"
   make clean
-  make -j2
+  make -j${CPU_COUNT}
 
   # "sudo" may be required for "/usr/local".
   if command -v sudo > /dev/null 2>&1; then
