@@ -63,8 +63,7 @@ for dictionary in "linked-list" "sparse-array"; do
     -DLZWS_TESTS=OFF \
     -DLZWS_EXAMPLES=OFF \
     -DLZWS_MAN=OFF \
-    -DCMAKE_BUILD_TYPE="RELEASE" \
-    -DCMAKE_C_FLAGS_RELEASE="-O2 -march=native"
+    -DCMAKE_BUILD_TYPE="RELEASE"
   make clean
   make -j${CPU_COUNT}
 
