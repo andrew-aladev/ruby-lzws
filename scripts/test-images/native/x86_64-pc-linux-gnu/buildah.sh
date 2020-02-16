@@ -7,11 +7,11 @@ cd "$DIR"
 source "../../utils.sh"
 source "./env.sh"
 
-docker_pull "$FROM_IMAGE_NAME"
+pull "$FROM_IMAGE_NAME"
 check_up_to_date
 
-CONTAINER=$(buildah from "$FROM_IMAGE_NAME")
-buildah config --label maintainer="$MAINTAINER" --entrypoint "/home/entrypoint.sh" "$CONTAINER"
+CONTAINER=$(from "$FROM_IMAGE_NAME")
+config --arch="amd64" --entrypoint "/home/entrypoint.sh"
 
 # Add pic for gmp https://bugs.gentoo.org/707332.
 run find "/usr/portage/dev-libs/gmp" -maxdepth 1 -name gmp-*.ebuild \
