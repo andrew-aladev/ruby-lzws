@@ -5,16 +5,16 @@
 #define LZWS_EXT_STREAM_COMPRESSOR_H
 
 #include <lzws/compressor/state.h>
-#include <stdint.h>
 #include <stdlib.h>
 
+#include "lzws_ext/common.h"
 #include "ruby.h"
 
 typedef struct {
   lzws_compressor_state_t* state_ptr;
-  uint8_t*                 destination_buffer;
+  lzws_ext_symbol_t*       destination_buffer;
   size_t                   destination_buffer_length;
-  uint8_t*                 remaining_destination_buffer;
+  lzws_ext_symbol_t*       remaining_destination_buffer;
   size_t                   remaining_destination_buffer_length;
 } lzws_ext_compressor_t;
 

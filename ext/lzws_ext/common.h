@@ -10,4 +10,7 @@
 
 typedef uint_fast8_t lzws_ext_result_t;
 
+typedef uint8_t      lzws_ext_symbol_t;
+typedef uint_fast8_t lzws_ext_symbol_fast_t;
+
 #endif // LZWS_EXT_COMMON_H

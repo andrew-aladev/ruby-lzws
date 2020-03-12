@@ -2,7 +2,6 @@
 // Copyright (c) 2019 AUTHORS, MIT License.
 
 #include "lzws_ext/buffer.h"
-#include "lzws_ext/common.h"
 #include "lzws_ext/io.h"
 #include "lzws_ext/stream/compressor.h"
 #include "lzws_ext/stream/decompressor.h"

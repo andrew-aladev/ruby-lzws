@@ -11,7 +11,6 @@
 #include <lzws/decompressor/common.h>
 #include <lzws/decompressor/main.h>
 #include <lzws/decompressor/state.h>
-#include <stdint.h>
 #include <stdlib.h>
 
 #include "lzws_ext/buffer.h"
@@ -53,34 +52,34 @@ static inline lzws_ext_result_t increase_destination_buffer(
 
 // -- compress --
 
-#define BUFFERED_COMPRESS(function, ...)                                                                               \
-  while (true) {                                                                                                       \
-    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length; \
-    size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;                           \
-                                                                                                                       \
-    result = function(__VA_ARGS__, &remaining_destination_buffer, &remaining_destination_buffer_length);               \
-                                                                                                                       \
-    if (                                                                                                               \
-      result != 0 &&                                                                                                   \
-      result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {                                                              \
-      return LZWS_EXT_ERROR_UNEXPECTED;                                                                                \
-    }                                                                                                                  \
-                                                                                                                       \
-    destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;              \
-                                                                                                                       \
-    if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {                                                            \
-      ext_result = increase_destination_buffer(                                                                        \
-        destination_value, destination_length,                                                                         \
-        &remaining_destination_buffer_length, destination_buffer_length);                                              \
-                                                                                                                       \
-      if (ext_result != 0) {                                                                                           \
-        return ext_result;                                                                                             \
-      }                                                                                                                \
-                                                                                                                       \
-      continue;                                                                                                        \
-    }                                                                                                                  \
-                                                                                                                       \
-    break;                                                                                                             \
+#define BUFFERED_COMPRESS(function, ...)                                                                                                   \
+  while (true) {                                                                                                                           \
+    lzws_ext_symbol_t* remaining_destination_buffer             = (lzws_ext_symbol_t*)RSTRING_PTR(destination_value) + destination_length; \
+    size_t             prev_remaining_destination_buffer_length = remaining_destination_buffer_length;                                     \
+                                                                                                                                           \
+    result = function(__VA_ARGS__, &remaining_destination_buffer, &remaining_destination_buffer_length);                                   \
+                                                                                                                                           \
+    if (                                                                                                                                   \
+      result != 0 &&                                                                                                                       \
+      result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {                                                                                  \
+      return LZWS_EXT_ERROR_UNEXPECTED;                                                                                                    \
+    }                                                                                                                                      \
+                                                                                                                                           \
+    destination_length += prev_remaining_destination_buffer_length - remaining_destination_buffer_length;                                  \
+                                                                                                                                           \
+    if (result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {                                                                                \
+      ext_result = increase_destination_buffer(                                                                                            \
+        destination_value, destination_length,                                                                                             \
+        &remaining_destination_buffer_length, destination_buffer_length);                                                                  \
+                                                                                                                                           \
+      if (ext_result != 0) {                                                                                                               \
+        return ext_result;                                                                                                                 \
+      }                                                                                                                                    \
+                                                                                                                                           \
+      continue;                                                                                                                            \
+    }                                                                                                                                      \
+                                                                                                                                           \
+    break;                                                                                                                                 \
   }
 
 static inline lzws_ext_result_t compress(
@@ -91,8 +90,8 @@ static inline lzws_ext_result_t compress(
   lzws_result_t     result;
   lzws_ext_result_t ext_result;
 
-  uint8_t* remaining_source        = (uint8_t*)source;
-  size_t   remaining_source_length = source_length;
+  lzws_ext_symbol_t* remaining_source        = (lzws_ext_symbol_t*)source;
+  size_t             remaining_source_length = source_length;
 
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
@@ -170,15 +169,15 @@ static inline lzws_ext_result_t decompress(
   lzws_result_t     result;
   lzws_ext_result_t ext_result;
 
-  uint8_t* remaining_source        = (uint8_t*)source;
-  size_t   remaining_source_length = source_length;
+  lzws_ext_symbol_t* remaining_source        = (lzws_ext_symbol_t*)source;
+  size_t             remaining_source_length = source_length;
 
   size_t destination_length                  = 0;
   size_t remaining_destination_buffer_length = destination_buffer_length;
 
   while (true) {
-    uint8_t* remaining_destination_buffer             = (uint8_t*)RSTRING_PTR(destination_value) + destination_length;
-    size_t   prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
+    lzws_ext_symbol_t* remaining_destination_buffer             = (lzws_ext_symbol_t*)RSTRING_PTR(destination_value) + destination_length;
+    size_t             prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
     result = lzws_decompress(
       state_ptr,

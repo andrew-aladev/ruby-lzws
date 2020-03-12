@@ -6,7 +6,6 @@
 #include <lzws/common.h>
 #include <lzws/file.h>
 
-#include "lzws_ext/common.h"
 #include "lzws_ext/error.h"
 #include "lzws_ext/io.h"
 #include "lzws_ext/macro.h"

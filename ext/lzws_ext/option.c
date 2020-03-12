@@ -3,9 +3,6 @@
 
 #include "lzws_ext/option.h"
 
-#include <stdbool.h>
-#include <stdlib.h>
-
 #include "lzws_ext/error.h"
 #include "ruby.h"
 

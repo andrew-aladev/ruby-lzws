@@ -3,7 +3,6 @@
 
 #include "lzws_ext/error.h"
 
-#include "lzws_ext/common.h"
 #include "ruby.h"
 
 static inline NORETURN(void raise(const char* name, const char* description))
