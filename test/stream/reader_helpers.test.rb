@@ -61,7 +61,7 @@ module LZWS
                   begin
                     byte = instance.readbyte
                     instance.ungetc byte
-                  rescue ::EOFError # rubocop:disable Lint/SuppressedException
+                  rescue ::EOFError
                     # ok
                   end
 
@@ -107,7 +107,7 @@ module LZWS
                   begin
                     char = instance.readchar
                     instance.ungetc char
-                  rescue ::EOFError # rubocop:disable Lint/SuppressedException
+                  rescue ::EOFError
                     # ok
                   end
 
@@ -154,7 +154,7 @@ module LZWS
                       assert_equal char.encoding, internal_encoding
 
                       instance.ungetc char
-                    rescue ::EOFError # rubocop:disable Lint/SuppressedException
+                    rescue ::EOFError
                       # ok
                     end
 
@@ -257,7 +257,7 @@ module LZWS
 
                     instance.ungetline line
                     assert_equal instance.lineno, 0
-                  rescue ::EOFError # rubocop:disable Lint/SuppressedException
+                  rescue ::EOFError
                     # ok
                   end
 
@@ -321,7 +321,7 @@ module LZWS
                       assert_equal line.encoding, internal_encoding
 
                       instance.ungetline line
-                    rescue ::EOFError # rubocop:disable Lint/SuppressedException
+                    rescue ::EOFError
                       # ok
                     end
 
