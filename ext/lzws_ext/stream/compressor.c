@@ -20,7 +20,7 @@ static void free_compressor(lzws_ext_compressor_t* compressor_ptr)
     lzws_compressor_free_state(state_ptr);
   }
 
-  lzws_ext_symbol_t* destination_buffer = compressor_ptr->destination_buffer;
+  lzws_ext_byte_t* destination_buffer = compressor_ptr->destination_buffer;
   if (destination_buffer != NULL) {
     free(destination_buffer);
   }
@@ -71,7 +71,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
     }
   }
 
-  lzws_ext_symbol_t* destination_buffer;
+  lzws_ext_byte_t* destination_buffer;
 
   result = lzws_create_destination_buffer_for_compressor(&destination_buffer, &destination_buffer_length, quiet);
   if (result != 0) {
@@ -93,13 +93,13 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
     lzws_ext_raise_error(LZWS_EXT_ERROR_USED_AFTER_CLOSE);                               \
   }
 
-#define GET_SOURCE_DATA(source_value)                                      \
-  Check_Type(source_value, T_STRING);                                      \
-                                                                           \
-  const char*        source                  = RSTRING_PTR(source_value);  \
-  size_t             source_length           = RSTRING_LEN(source_value);  \
-  lzws_ext_symbol_t* remaining_source        = (lzws_ext_symbol_t*)source; \
-  size_t             remaining_source_length = source_length;
+#define GET_SOURCE_DATA(source_value)                                   \
+  Check_Type(source_value, T_STRING);                                   \
+                                                                        \
+  const char*      source                  = RSTRING_PTR(source_value); \
+  size_t           source_length           = RSTRING_LEN(source_value); \
+  lzws_ext_byte_t* remaining_source        = (lzws_ext_byte_t*)source;  \
+  size_t           remaining_source_length = source_length;
 
 VALUE lzws_ext_compress(VALUE self, VALUE source_value)
 {
@@ -149,9 +149,9 @@ VALUE lzws_ext_compressor_read_result(VALUE self)
   GET_COMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(compressor_ptr);
 
-  lzws_ext_symbol_t* destination_buffer                  = compressor_ptr->destination_buffer;
-  size_t             destination_buffer_length           = compressor_ptr->destination_buffer_length;
-  size_t             remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
+  lzws_ext_byte_t* destination_buffer                  = compressor_ptr->destination_buffer;
+  size_t           destination_buffer_length           = compressor_ptr->destination_buffer_length;
+  size_t           remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
 
   const char* result        = (const char*)destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
@@ -176,7 +176,7 @@ VALUE lzws_ext_compressor_close(VALUE self)
     compressor_ptr->state_ptr = NULL;
   }
 
-  lzws_ext_symbol_t* destination_buffer = compressor_ptr->destination_buffer;
+  lzws_ext_byte_t* destination_buffer = compressor_ptr->destination_buffer;
   if (destination_buffer != NULL) {
     free(destination_buffer);
 

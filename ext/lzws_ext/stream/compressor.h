@@ -12,9 +12,9 @@
 
 typedef struct {
   lzws_compressor_state_t* state_ptr;
-  lzws_ext_symbol_t*       destination_buffer;
+  lzws_ext_byte_t*         destination_buffer;
   size_t                   destination_buffer_length;
-  lzws_ext_symbol_t*       remaining_destination_buffer;
+  lzws_ext_byte_t*         remaining_destination_buffer;
   size_t                   remaining_destination_buffer_length;
 } lzws_ext_compressor_t;
 
