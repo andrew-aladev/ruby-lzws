@@ -5,6 +5,7 @@ require "lzws/stream/writer"
 require "lzws/string"
 require "ocg"
 require "socket"
+require "stringio"
 
 require_relative "abstract"
 require_relative "../common"
@@ -33,7 +34,7 @@ module LZWS
         def test_invalid_initialize
           get_invalid_compressor_options do |invalid_options|
             assert_raises ValidateError do
-              target.new ::STDOUT, invalid_options
+              target.new ::StringIO.new, invalid_options
             end
           end
 
@@ -48,25 +49,24 @@ module LZWS
               sources = get_sources text, portion_length
 
               get_compressor_options do |compressor_options|
-                ::File.open ARCHIVE_PATH, "wb" do |file|
-                  instance = target.new file, compressor_options
+                io       = ::StringIO.new
+                instance = target.new io, compressor_options
 
-                  begin
-                    sources.each_slice(2) do |current_sources|
-                      instance.write(*current_sources)
-                      instance.flush
-                    end
-
-                    assert_equal instance.pos, text.bytesize
-                    assert_equal instance.pos, instance.tell
-                  ensure
-                    refute instance.closed?
-                    instance.close
-                    assert instance.closed?
+                begin
+                  sources.each_slice(2) do |current_sources|
+                    instance.write(*current_sources)
+                    instance.flush
                   end
+
+                  assert_equal instance.pos, text.bytesize
+                  assert_equal instance.pos, instance.tell
+                ensure
+                  refute instance.closed?
+                  instance.close
+                  assert instance.closed?
                 end
 
-                compressed_text = ::File.read ARCHIVE_PATH
+                compressed_text = io.string
 
                 get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   check_text text, compressed_text, decompressor_options
@@ -83,28 +83,29 @@ module LZWS
               target_text = text.encode external_encoding, **TRANSCODE_OPTIONS
 
               get_compressor_options do |compressor_options|
-                ::File.open ARCHIVE_PATH, "wb" do |file|
-                  instance = target.new(
-                    file,
-                    compressor_options,
-                    :external_encoding => external_encoding,
-                    :transcode_options => TRANSCODE_OPTIONS
-                  )
+                io = ::StringIO.new
+
+                instance = target.new(
+                  io,
+                  compressor_options,
+                  :external_encoding => external_encoding,
+                  :transcode_options => TRANSCODE_OPTIONS
+                )
+
+                assert_equal instance.external_encoding, external_encoding
+                assert_equal instance.transcode_options, TRANSCODE_OPTIONS
+
+                begin
+                  instance.set_encoding external_encoding, nil, TRANSCODE_OPTIONS
                   assert_equal instance.external_encoding, external_encoding
                   assert_equal instance.transcode_options, TRANSCODE_OPTIONS
 
-                  begin
-                    instance.set_encoding external_encoding, nil, TRANSCODE_OPTIONS
-                    assert_equal instance.external_encoding, external_encoding
-                    assert_equal instance.transcode_options, TRANSCODE_OPTIONS
-
-                    instance.write text
-                  ensure
-                    instance.close
-                  end
+                  instance.write text
+                ensure
+                  instance.close
                 end
 
-                compressed_text = ::File.read ARCHIVE_PATH
+                compressed_text = io.string
 
                 get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   check_text target_text, compressed_text, decompressor_options

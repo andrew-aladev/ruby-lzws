@@ -5,6 +5,19 @@ require_relative "error"
 
 module LZWS
   module Validation
+    IO_METHODS = %i[
+      read
+      write
+      readpartial
+      read_nonblock
+      write_nonblock
+      eof?
+      flush
+      close
+      closed?
+    ]
+    .freeze
+
     def self.validate_bool(value)
       raise ValidateError, "invalid bool" unless value.is_a?(::TrueClass) || value.is_a?(::FalseClass)
     end
@@ -22,7 +35,7 @@ module LZWS
     end
 
     def self.validate_io(value)
-      raise ValidateError, "invalid io" unless value.is_a? ::IO
+      raise ValidateError, "invalid io" unless IO_METHODS.all? { |method| value.respond_to? method }
     end
 
     def self.validate_hash(value)
