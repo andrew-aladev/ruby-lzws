@@ -38,7 +38,7 @@ export LIBRARY_PATH="${C_INCLUDE_PATH}:/usr/local/lib"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib"
 
 # Compiling library from source.
-LZWS_BRANCH="v1.3.2"
+LZWS_BRANCH="v1.3.3"
 
 cd "tmp"
 
