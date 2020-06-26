@@ -12,7 +12,8 @@ rake gem
 
 # Packing source.
 
-NAME="ruby-lzws"
+VERSION=$(grep "VERSION" "lib/lzws/version.rb" | sed "s/.*VERSION\s*=\s*['\"]\([0-9.]*\).*/\1/g")
+NAME="ruby-lzws-${VERSION}"
 
 COMPRESSION_LEVEL="-9"
 TAR_COMMANDS=(
