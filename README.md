@@ -36,6 +36,27 @@ LZWS::File.decompress "file.txt.Z", "file.txt"
 
 LZWS::Stream::Writer.open("file.txt.Z") { |writer| writer << "TOBEORNOTTOBEORTOBEORNOT" }
 puts LZWS::Stream::Reader.open("file.txt.Z") { |reader| reader.read }
+
+writer = LZWS::Stream::Writer.new output_socket
+begin
+  bytes_written = writer.write_nonblock "TOBEORNOTTOBEORTOBEORNOT"
+  # handle "bytes_written"
+rescue IO::WaitWritable
+  # handle wait
+ensure
+  writer.close
+end
+
+reader = LZWS::Stream::Reader.new input_socket
+begin
+  puts reader.read_nonblock(512)
+rescue IO::WaitReadable
+  # handle wait
+rescue ::EOFError
+  # handle eof
+ensure
+  reader.close
+end
 ```
 
 You can create and read `tar.Z` archives with `minitar` for example.
