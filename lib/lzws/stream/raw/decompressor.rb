@@ -51,8 +51,6 @@ module LZWS
           Validation.validate_proc writer
 
           super
-
-          nil
         end
       end
     end

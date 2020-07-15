@@ -50,6 +50,8 @@ module LZWS
 
           @native_stream.close
           @is_closed = true
+
+          nil
         end
 
         def closed?

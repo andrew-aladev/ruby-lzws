@@ -69,8 +69,6 @@ module LZWS
           end
 
           super
-
-          nil
         end
       end
     end
