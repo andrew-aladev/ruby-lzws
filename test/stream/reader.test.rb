@@ -62,7 +62,7 @@ module LZWS
             end
           end
 
-          corrupted_compressed_text = String.compress("1111") + "1111"
+          corrupted_compressed_text = "#{String.compress('1111')}1111".b
           instance                  = target.new ::StringIO.new(corrupted_compressed_text)
 
           assert_raises DecompressorCorruptedSourceError do
@@ -348,9 +348,8 @@ module LZWS
             end
           end
 
-          corrupted_compressed_text = String.compress("1111") + "1111"
-
-          instance = target.new ::StringIO.new(corrupted_compressed_text)
+          corrupted_compressed_text = "#{String.compress('1111')}1111".b
+          instance                  = target.new ::StringIO.new(corrupted_compressed_text)
 
           assert_raises DecompressorCorruptedSourceError do
             instance.readpartial 1

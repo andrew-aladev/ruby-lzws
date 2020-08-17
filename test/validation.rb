@@ -18,7 +18,7 @@ module LZWS
         :a,
         {},
         [],
-        ::STDOUT,
+        $stdout,
         ::StringIO,
         NOOP_PROC
       ]
@@ -29,7 +29,7 @@ module LZWS
       INVALID_BOOLS    = (TYPES - [true]).freeze
       INVALID_STRINGS  = (TYPES - %w[1 a]).freeze
       INVALID_HASHES   = (TYPES - [{}]).freeze
-      INVALID_IOS      = (TYPES - [::STDOUT, ::StringIO]).freeze
+      INVALID_IOS      = (TYPES - [$stdout, ::StringIO]).freeze
       INVALID_CHARS    = (INVALID_NUMBERS & INVALID_STRINGS).freeze
 
       INVALID_POSITIVE_INTEGERS     = (INVALID_INTEGERS + [0, -1]).freeze
