@@ -99,9 +99,11 @@ There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
 You want to use 256 B as `source_buffer_length` for decompressor - please use 1 KB as `destination_buffer_length`.
 
-Please use `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH` and `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH` values as `max_code_bit_length` limits.
-
 You can also read lzws docs for more info about options.
+
+| Option                | Related constants |
+|-----------------------|-------------------|
+| `max_code_bit_length` | `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH`, `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH` |
 
 Possible compressor options:
 ```
