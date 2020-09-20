@@ -103,7 +103,7 @@ You can also read lzws docs for more info about options.
 
 | Option                | Related constants |
 |-----------------------|-------------------|
-| `max_code_bit_length` | `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH`, `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH` |
+| `max_code_bit_length` | `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH` = 9, `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH` = 16 |
 
 Possible compressor options:
 ```
