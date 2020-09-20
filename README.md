@@ -84,57 +84,21 @@ end
 
 ## Options
 
-Each API supports several options:
-
-```
-:source_buffer_length
-:destination_buffer_length
-```
+| Option                      | Values          | Default            | Description |
+|-----------------------------|-----------------|--------------------|-------------|
+| `source_buffer_length`      | 0, 2 - infinity | 0 (auto selection) | internal buffer length for source data |
+| `destination_buffer_length` | 0, 2 - infinity | 0 (auto selection) | internal buffer length for description data |
+| `max_code_bit_length`       | `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH` - | `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH` | max code bit length |
+|                             | `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH`  |                                             |                     |
+| `block_mode`                | true/false | true  | enables block mode |
+| `without_magic_header`      | true/false | false | disables magic header |
+| `msb`                       | true/false | false | enables most significant bit mode |
+| `unaligned_bit_groups`      | true/false | false | enables unaligned bit groups |
+| `quiet`                     | true/false | false | disables lzws library logging |
 
 There are internal buffers for compressed and decompressed data.
-For example you want to use 1 KB as source buffer length for compressor - please use 256 B as destination buffer length.
-You want to use 256 B as source buffer length for decompressor - please use 1 KB as destination buffer length.
-
-Values: 0, 2 - infinity, default value: 0.
-0 means automatic buffer length selection.
-1 byte is not enough, 2 bytes is minimal buffer length.
-
-```
-:max_code_bit_length
-```
-
-Values: `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH` - `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH`, default value: `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH`.
-
-```
-:block_mode
-```
-
-Values: true/false, default value: true.
-
-```
-:without_magic_header
-```
-
-Values: true/false, default value: false.
-
-```
-:msb
-```
-
-Values: true/false, default value: false.
-
-```
-:unaligned_bit_groups
-```
-
-Values: true/false, default value: false.
-
-```
-:quiet
-```
-
-Values: true/false, default value: false.
-Disables lzws library logging.
+For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
+You want to use 256 B as `source_buffer_length` for decompressor - please use 1 KB as `destination_buffer_length`.
 
 Please read lzws docs for more info about options.
 
