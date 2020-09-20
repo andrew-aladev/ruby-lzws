@@ -88,19 +88,19 @@ end
 |-----------------------------|-----------------|--------------------|-------------|
 | `source_buffer_length`      | 0, 2 - infinity | 0 (auto selection) | internal buffer length for source data |
 | `destination_buffer_length` | 0, 2 - infinity | 0 (auto selection) | internal buffer length for description data |
-| `max_code_bit_length`       | `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH` - | `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH` | max code bit length |
-|                             | `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH`  |                                             |                     |
-| `block_mode`                | true/false | true  | enables block mode |
-| `without_magic_header`      | true/false | false | disables magic header |
-| `msb`                       | true/false | false | enables most significant bit mode |
-| `unaligned_bit_groups`      | true/false | false | enables unaligned bit groups |
-| `quiet`                     | true/false | false | disables lzws library logging |
+| `max_code_bit_length`       | 9 - 16          | 16                 | max code bit length |
+| `block_mode`                | true/false      | true               | enables block mode |
+| `without_magic_header`      | true/false      | false              | disables magic header |
+| `msb`                       | true/false      | false              | enables most significant bit mode |
+| `unaligned_bit_groups`      | true/false      | false              | enables unaligned bit groups |
+| `quiet`                     | true/false      | false              | disables lzws library logging |
 
 There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
 You want to use 256 B as `source_buffer_length` for decompressor - please use 1 KB as `destination_buffer_length`.
 
-Please read lzws docs for more info about options.
+Please use `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH` and `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH` values as `max_code_bit_length` limits.
+You can also read lzws docs for more info about options.
 
 Possible compressor options:
 ```
