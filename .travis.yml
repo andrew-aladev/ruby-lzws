@@ -22,7 +22,6 @@ addons:
     packages:
       - gmp
       - ncompress
-    update: true
 
 before_install:
   - gem install bundler
