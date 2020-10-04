@@ -49,6 +49,9 @@ git clone "https://github.com/andrew-aladev/lzws.git" \
   "lzws"
 cd "lzws/build"
 
+# "sudo" may be required for "/usr/local".
+sudo_command=$(command -v sudo || echo "")
+
 for dictionary in "linked-list" "sparse-array"; do
   echo "dictionary: ${dictionary}"
 
@@ -67,13 +70,7 @@ for dictionary in "linked-list" "sparse-array"; do
 
   make clean
   make -j${CPU_COUNT}
-
-  # "sudo" may be required for "/usr/local".
-  if command -v sudo > /dev/null 2>&1; then
-    sudo make install
-  else
-    make install
-  fi
+  "$sudo_command" make install
 
   bash -cl "\
     cd ../../.. && \
@@ -81,4 +78,6 @@ for dictionary in "linked-list" "sparse-array"; do
     bundle exec rake clean && \
     bundle exec rake \
   "
+
+  "$sudo_command" xargs rm < "install_manifest.txt"
 done
