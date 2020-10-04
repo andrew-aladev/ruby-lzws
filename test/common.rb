@@ -23,8 +23,8 @@ module LZWS
       ]
       .each { |path| FileUtils.touch path }
 
-      # Port will be changed each 20 seconds.
-      PORT = 51_000 + (Time.now.to_i / 20) % 1000
+      # Port will be changed each 2 seconds.
+      PORT = 51_000 + (Time.now.to_i / 2) % 1000
 
       ENCODINGS = %w[
         binary
