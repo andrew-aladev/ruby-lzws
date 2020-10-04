@@ -20,7 +20,6 @@ module LZWS
         String = LZWS::String
 
         ARCHIVE_PATH          = Common::ARCHIVE_PATH
-        PORT                  = Common::PORT
         ENCODINGS             = Common::ENCODINGS
         TRANSCODE_OPTIONS     = Common::TRANSCODE_OPTIONS
         TEXTS                 = Common::TEXTS
@@ -391,7 +390,7 @@ module LZWS
         # -- server --
 
         protected def start_server(&block)
-          ::TCPServer.open PORT, &block
+          ::TCPServer.open 0, &block
         end
 
         protected def server_nonblock_test(server, text, portion_length, compressor_options = {}, decompressor_options = {}, &_block)
@@ -413,7 +412,7 @@ module LZWS
             end
           end
 
-          TCPSocket.open "localhost", PORT do |socket|
+          TCPSocket.open "localhost", server.addr[1] do |socket|
             instance = target.new socket, compressor_options
 
             begin
