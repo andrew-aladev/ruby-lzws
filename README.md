@@ -86,16 +86,16 @@ end
 
 ## Options
 
-| Option                      | Values       | Default    | Description |
-|-----------------------------|--------------|------------|-------------|
-| `source_buffer_length`      | `0, 2 - inf` | `0 (auto)` | internal buffer length for source data |
-| `destination_buffer_length` | `0, 2 - inf` | `0 (auto)` | internal buffer length for description data |
-| `max_code_bit_length`       | `9 - 16`     | `16`       | max code bit length |
-| `block_mode`                | `true/false` | `true`     | enables block mode |
-| `without_magic_header`      | `true/false` | `false`    | disables magic header |
-| `msb`                       | `true/false` | `false`    | enables most significant bit mode |
-| `unaligned_bit_groups`      | `true/false` | `false`    | enables unaligned bit groups |
-| `quiet`                     | `true/false` | `false`    | disables lzws library logging |
+| Option                      | Values     | Default  | Description |
+|-----------------------------|------------|----------|-------------|
+| `source_buffer_length`      | 0, 2 - inf | 0 (auto) | internal buffer length for source data |
+| `destination_buffer_length` | 0, 2 - inf | 0 (auto) | internal buffer length for description data |
+| `max_code_bit_length`       | 9 - 16     | 16       | max code bit length |
+| `block_mode`                | true/false | true     | enables block mode |
+| `without_magic_header`      | true/false | false    | disables magic header |
+| `msb`                       | true/false | false    | enables most significant bit mode |
+| `unaligned_bit_groups`      | true/false | false    | enables unaligned bit groups |
+| `quiet`                     | true/false | false    | disables lzws library logging |
 
 There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
@@ -105,7 +105,7 @@ You can also read lzws docs for more info about options.
 
 | Option                | Related constants |
 |-----------------------|-------------------|
-| `max_code_bit_length` | `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH = 9`, `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH = 16` |
+| `max_code_bit_length` | `LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH` = 9, `LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH` = 16 |
 
 Possible compressor options:
 ```
