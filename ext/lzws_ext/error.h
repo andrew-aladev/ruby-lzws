@@ -9,7 +9,8 @@
 
 // Results for errors listed in "lib/lzws/error" used in c extension.
 
-enum {
+enum
+{
   LZWS_EXT_ERROR_ALLOCATE_FAILED = 1,
   LZWS_EXT_ERROR_VALIDATE_FAILED,
 

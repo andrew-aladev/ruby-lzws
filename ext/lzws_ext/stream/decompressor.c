@@ -56,9 +56,8 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
 
   lzws_decompressor_state_t* state_ptr;
 
-  lzws_result_t result = lzws_decompressor_get_initial_state(
-    &state_ptr,
-    without_magic_header, msb, unaligned_bit_groups, quiet);
+  lzws_result_t result =
+    lzws_decompressor_get_initial_state(&state_ptr, without_magic_header, msb, unaligned_bit_groups, quiet);
 
   if (result != 0) {
     switch (result) {
@@ -96,7 +95,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
                                                                         \
   const char*      source                  = RSTRING_PTR(source_value); \
   size_t           source_length           = RSTRING_LEN(source_value); \
-  lzws_ext_byte_t* remaining_source        = (lzws_ext_byte_t*)source;  \
+  lzws_ext_byte_t* remaining_source        = (lzws_ext_byte_t*) source; \
   size_t           remaining_source_length = source_length;
 
 VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
@@ -107,12 +106,12 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
 
   lzws_result_t result = lzws_decompress(
     decompressor_ptr->state_ptr,
-    &remaining_source, &remaining_source_length,
-    &decompressor_ptr->remaining_destination_buffer, &decompressor_ptr->remaining_destination_buffer_length);
+    &remaining_source,
+    &remaining_source_length,
+    &decompressor_ptr->remaining_destination_buffer,
+    &decompressor_ptr->remaining_destination_buffer_length);
 
-  if (
-    result != 0 &&
-    result != LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
+  if (result != 0 && result != LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
     switch (result) {
       case LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER:
       case LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
@@ -139,7 +138,7 @@ VALUE lzws_ext_decompressor_read_result(VALUE self)
   size_t           destination_buffer_length           = decompressor_ptr->destination_buffer_length;
   size_t           remaining_destination_buffer_length = decompressor_ptr->remaining_destination_buffer_length;
 
-  const char* result        = (const char*)destination_buffer;
+  const char* result        = (const char*) destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
 
   VALUE result_value = rb_str_new(result, result_length);

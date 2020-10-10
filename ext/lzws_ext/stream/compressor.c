@@ -57,8 +57,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
   lzws_compressor_state_t* state_ptr;
 
   lzws_result_t result = lzws_compressor_get_initial_state(
-    &state_ptr,
-    without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
+    &state_ptr, without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
 
   if (result != 0) {
     switch (result) {
@@ -98,7 +97,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
                                                                         \
   const char*      source                  = RSTRING_PTR(source_value); \
   size_t           source_length           = RSTRING_LEN(source_value); \
-  lzws_ext_byte_t* remaining_source        = (lzws_ext_byte_t*)source;  \
+  lzws_ext_byte_t* remaining_source        = (lzws_ext_byte_t*) source; \
   size_t           remaining_source_length = source_length;
 
 VALUE lzws_ext_compress(VALUE self, VALUE source_value)
@@ -109,12 +108,12 @@ VALUE lzws_ext_compress(VALUE self, VALUE source_value)
 
   lzws_result_t result = lzws_compress(
     compressor_ptr->state_ptr,
-    &remaining_source, &remaining_source_length,
-    &compressor_ptr->remaining_destination_buffer, &compressor_ptr->remaining_destination_buffer_length);
+    &remaining_source,
+    &remaining_source_length,
+    &compressor_ptr->remaining_destination_buffer,
+    &compressor_ptr->remaining_destination_buffer_length);
 
-  if (
-    result != 0 &&
-    result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
+  if (result != 0 && result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
     lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
   }
 
@@ -131,17 +130,14 @@ VALUE lzws_ext_compressor_finish(VALUE self)
 
   lzws_result_t result = lzws_compressor_finish(
     compressor_ptr->state_ptr,
-    &compressor_ptr->remaining_destination_buffer, &compressor_ptr->remaining_destination_buffer_length);
+    &compressor_ptr->remaining_destination_buffer,
+    &compressor_ptr->remaining_destination_buffer_length);
 
-  if (
-    result != 0 &&
-    result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
+  if (result != 0 && result != LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION) {
     lzws_ext_raise_error(LZWS_EXT_ERROR_UNEXPECTED);
   }
 
-  VALUE needs_more_destination = result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION ? Qtrue : Qfalse;
-
-  return needs_more_destination;
+  return result == LZWS_COMPRESSOR_NEEDS_MORE_DESTINATION ? Qtrue : Qfalse;
 }
 
 VALUE lzws_ext_compressor_read_result(VALUE self)
@@ -153,7 +149,7 @@ VALUE lzws_ext_compressor_read_result(VALUE self)
   size_t           destination_buffer_length           = compressor_ptr->destination_buffer_length;
   size_t           remaining_destination_buffer_length = compressor_ptr->remaining_destination_buffer_length;
 
-  const char* result        = (const char*)destination_buffer;
+  const char* result        = (const char*) destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
 
   VALUE result_value = rb_str_new(result, result_length);

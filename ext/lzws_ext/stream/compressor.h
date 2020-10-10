@@ -10,7 +10,8 @@
 #include "lzws_ext/common.h"
 #include "ruby.h"
 
-typedef struct {
+typedef struct
+{
   lzws_compressor_state_t* state_ptr;
   lzws_ext_byte_t*         destination_buffer;
   size_t                   destination_buffer_length;

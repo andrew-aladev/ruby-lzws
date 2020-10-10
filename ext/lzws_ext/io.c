@@ -1,16 +1,16 @@
 // Ruby bindings for lzws library.
 // Copyright (c) 2019 AUTHORS, MIT License.
 
-#include "ruby/io.h"
+#include "lzws_ext/io.h"
 
 #include <lzws/common.h>
 #include <lzws/file.h>
 
 #include "lzws_ext/error.h"
-#include "lzws_ext/io.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
 #include "ruby.h"
+#include "ruby/io.h"
 
 #define GET_FILE(target)                               \
   Check_Type(target, T_FILE);                          \
@@ -58,9 +58,16 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
   LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
   lzws_result_t result = lzws_compress_file(
-    source_file, source_buffer_length,
-    destination_file, destination_buffer_length,
-    without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
+    source_file,
+    source_buffer_length,
+    destination_file,
+    destination_buffer_length,
+    without_magic_header,
+    max_code_bit_length,
+    block_mode,
+    msb,
+    unaligned_bit_groups,
+    quiet);
 
   if (result != 0) {
     lzws_ext_raise_error(get_file_error(result));
@@ -82,9 +89,14 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
   lzws_result_t result = lzws_decompress_file(
-    source_file, source_buffer_length,
-    destination_file, destination_buffer_length,
-    without_magic_header, msb, unaligned_bit_groups, quiet);
+    source_file,
+    source_buffer_length,
+    destination_file,
+    destination_buffer_length,
+    without_magic_header,
+    msb,
+    unaligned_bit_groups,
+    quiet);
 
   if (result != 0) {
     lzws_ext_raise_error(get_file_error(result));
