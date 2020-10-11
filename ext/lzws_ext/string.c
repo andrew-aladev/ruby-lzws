@@ -4,7 +4,6 @@
 #include "lzws_ext/string.h"
 
 #include <lzws/buffer.h>
-#include <lzws/common.h>
 #include <lzws/compressor/common.h>
 #include <lzws/compressor/main.h>
 #include <lzws/compressor/state.h>
@@ -90,12 +89,10 @@ static inline lzws_ext_result_t compress(
 {
   lzws_result_t     result;
   lzws_ext_result_t ext_result;
-
-  lzws_ext_byte_t* remaining_source        = (lzws_ext_byte_t*) source;
-  size_t           remaining_source_length = source_length;
-
-  size_t destination_length                  = 0;
-  size_t remaining_destination_buffer_length = destination_buffer_length;
+  lzws_ext_byte_t*  remaining_source                    = (lzws_ext_byte_t*) source;
+  size_t            remaining_source_length             = source_length;
+  size_t            destination_length                  = 0;
+  size_t            remaining_destination_buffer_length = destination_buffer_length;
 
   BUFFERED_COMPRESS(lzws_compress, state_ptr, &remaining_source, &remaining_source_length);
   BUFFERED_COMPRESS(lzws_compressor_finish, state_ptr);
@@ -168,12 +165,10 @@ static inline lzws_ext_result_t decompress(
 {
   lzws_result_t     result;
   lzws_ext_result_t ext_result;
-
-  lzws_ext_byte_t* remaining_source        = (lzws_ext_byte_t*) source;
-  size_t           remaining_source_length = source_length;
-
-  size_t destination_length                  = 0;
-  size_t remaining_destination_buffer_length = destination_buffer_length;
+  lzws_ext_byte_t*  remaining_source                    = (lzws_ext_byte_t*) source;
+  size_t            remaining_source_length             = source_length;
+  size_t            destination_length                  = 0;
+  size_t            remaining_destination_buffer_length = destination_buffer_length;
 
   while (true) {
     lzws_ext_byte_t* remaining_destination_buffer =

@@ -3,7 +3,6 @@
 
 #include "lzws_ext/io.h"
 
-#include <lzws/common.h>
 #include <lzws/file.h>
 
 #include "lzws_ext/error.h"

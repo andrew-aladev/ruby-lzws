@@ -4,7 +4,6 @@
 #include "lzws_ext/stream/compressor.h"
 
 #include <lzws/buffer.h>
-#include <lzws/common.h>
 #include <lzws/compressor/common.h>
 #include <lzws/compressor/main.h>
 #include <lzws/compressor/state.h>
@@ -31,8 +30,7 @@ static void free_compressor(lzws_ext_compressor_t* compressor_ptr)
 VALUE lzws_ext_allocate_compressor(VALUE klass)
 {
   lzws_ext_compressor_t* compressor_ptr;
-
-  VALUE self = Data_Make_Struct(klass, lzws_ext_compressor_t, NULL, free_compressor, compressor_ptr);
+  VALUE                  self = Data_Make_Struct(klass, lzws_ext_compressor_t, NULL, free_compressor, compressor_ptr);
 
   compressor_ptr->state_ptr                           = NULL;
   compressor_ptr->destination_buffer                  = NULL;
@@ -151,8 +149,7 @@ VALUE lzws_ext_compressor_read_result(VALUE self)
 
   const char* result        = (const char*) destination_buffer;
   size_t      result_length = destination_buffer_length - remaining_destination_buffer_length;
-
-  VALUE result_value = rb_str_new(result, result_length);
+  VALUE       result_value  = rb_str_new(result, result_length);
 
   compressor_ptr->remaining_destination_buffer        = destination_buffer;
   compressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
