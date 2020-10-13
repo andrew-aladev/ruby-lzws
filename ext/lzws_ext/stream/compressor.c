@@ -4,7 +4,6 @@
 #include "lzws_ext/stream/compressor.h"
 
 #include <lzws/buffer.h>
-#include <lzws/compressor/common.h>
 #include <lzws/compressor/main.h>
 #include <lzws/compressor/state.h>
 
@@ -54,9 +53,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
 
   lzws_compressor_state_t* state_ptr;
 
-  lzws_result_t result = lzws_compressor_get_initial_state(
-    &state_ptr, without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
-
+  lzws_result_t result = lzws_compressor_get_initial_state(&state_ptr, &compressor_options);
   if (result != 0) {
     switch (result) {
       case LZWS_COMPRESSOR_ALLOCATE_FAILED:
@@ -70,7 +67,9 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
 
   lzws_ext_byte_t* destination_buffer;
 
-  result = lzws_create_destination_buffer_for_compressor(&destination_buffer, &destination_buffer_length, quiet);
+  result = lzws_create_destination_buffer_for_compressor(
+    &destination_buffer, &destination_buffer_length, compressor_options.quiet);
+
   if (result != 0) {
     lzws_compressor_free_state(state_ptr);
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);

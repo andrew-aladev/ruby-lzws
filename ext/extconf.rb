@@ -13,10 +13,10 @@ end
 
 require_header "lzws/buffer.h"
 require_header "lzws/common.h", %w[lzws_result_t]
-require_header "lzws/compressor/common.h"
+require_header "lzws/compressor/common.h", %w[lzws_compressor_options_t]
 require_header "lzws/compressor/main.h"
 require_header "lzws/compressor/state.h", %w[lzws_compressor_state_t]
-require_header "lzws/decompressor/common.h"
+require_header "lzws/decompressor/common.h", %w[lzws_decompressor_options_t]
 require_header "lzws/decompressor/main.h"
 require_header "lzws/decompressor/state.h", %w[lzws_decompressor_state_t]
 require_header "lzws/file.h"

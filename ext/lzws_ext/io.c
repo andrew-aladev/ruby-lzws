@@ -57,16 +57,7 @@ VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE dest
   LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
   lzws_result_t result = lzws_compress_file(
-    source_file,
-    source_buffer_length,
-    destination_file,
-    destination_buffer_length,
-    without_magic_header,
-    max_code_bit_length,
-    block_mode,
-    msb,
-    unaligned_bit_groups,
-    quiet);
+    source_file, source_buffer_length, destination_file, destination_buffer_length, &compressor_options);
 
   if (result != 0) {
     lzws_ext_raise_error(get_file_error(result));
@@ -88,14 +79,7 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
 
   lzws_result_t result = lzws_decompress_file(
-    source_file,
-    source_buffer_length,
-    destination_file,
-    destination_buffer_length,
-    without_magic_header,
-    msb,
-    unaligned_bit_groups,
-    quiet);
+    source_file, source_buffer_length, destination_file, destination_buffer_length, &decompressor_options);
 
   if (result != 0) {
     lzws_ext_raise_error(get_file_error(result));

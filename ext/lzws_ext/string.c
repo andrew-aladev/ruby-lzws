@@ -4,10 +4,8 @@
 #include "lzws_ext/string.h"
 
 #include <lzws/buffer.h>
-#include <lzws/compressor/common.h>
 #include <lzws/compressor/main.h>
 #include <lzws/compressor/state.h>
-#include <lzws/decompressor/common.h>
 #include <lzws/decompressor/main.h>
 #include <lzws/decompressor/state.h>
 #include <stdlib.h>
@@ -116,9 +114,7 @@ VALUE lzws_ext_compress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value, 
 
   lzws_compressor_state_t* state_ptr;
 
-  lzws_result_t result = lzws_compressor_get_initial_state(
-    &state_ptr, without_magic_header, max_code_bit_length, block_mode, msb, unaligned_bit_groups, quiet);
-
+  lzws_result_t result = lzws_compressor_get_initial_state(&state_ptr, &compressor_options);
   if (result != 0) {
     switch (result) {
       case LZWS_COMPRESSOR_ALLOCATE_FAILED:
@@ -229,9 +225,7 @@ VALUE lzws_ext_decompress_string(VALUE LZWS_EXT_UNUSED(self), VALUE source_value
 
   lzws_decompressor_state_t* state_ptr;
 
-  lzws_result_t result =
-    lzws_decompressor_get_initial_state(&state_ptr, without_magic_header, msb, unaligned_bit_groups, quiet);
-
+  lzws_result_t result = lzws_decompressor_get_initial_state(&state_ptr, &decompressor_options);
   if (result != 0) {
     switch (result) {
       case LZWS_DECOMPRESSOR_ALLOCATE_FAILED:

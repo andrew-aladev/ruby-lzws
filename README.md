@@ -8,7 +8,7 @@ See [lzws library](https://github.com/andrew-aladev/lzws).
 
 ## Installation
 
-Please install lzws library first, use latest 1.3.0+ version.
+Please install lzws library first, use latest 1.4.0+ version.
 
 ```sh
 gem install ruby-lzws

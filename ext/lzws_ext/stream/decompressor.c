@@ -4,7 +4,6 @@
 #include "lzws_ext/stream/decompressor.h"
 
 #include <lzws/buffer.h>
-#include <lzws/decompressor/common.h>
 #include <lzws/decompressor/main.h>
 #include <lzws/decompressor/state.h>
 
@@ -54,9 +53,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
 
   lzws_decompressor_state_t* state_ptr;
 
-  lzws_result_t result =
-    lzws_decompressor_get_initial_state(&state_ptr, without_magic_header, msb, unaligned_bit_groups, quiet);
-
+  lzws_result_t result = lzws_decompressor_get_initial_state(&state_ptr, &decompressor_options);
   if (result != 0) {
     switch (result) {
       case LZWS_DECOMPRESSOR_ALLOCATE_FAILED:
@@ -68,7 +65,9 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
 
   lzws_ext_byte_t* destination_buffer;
 
-  result = lzws_create_destination_buffer_for_decompressor(&destination_buffer, &destination_buffer_length, quiet);
+  result = lzws_create_destination_buffer_for_decompressor(
+    &destination_buffer, &destination_buffer_length, decompressor_options.quiet);
+
   if (result != 0) {
     lzws_decompressor_free_state(state_ptr);
     lzws_ext_raise_error(LZWS_EXT_ERROR_ALLOCATE_FAILED);
