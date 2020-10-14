@@ -10,7 +10,7 @@ module LZWS
   module Test
     module Option
       INVALID_MAX_CODE_BIT_LENGTHS = (
-        Validation::INVALID_POSITIVE_INTEGERS +
+        Validation::INVALID_POSITIVE_INTEGERS - [nil] +
         [
           LZWS::Option::LOWEST_MAX_CODE_BIT_LENGTH - 1,
           LZWS::Option::BIGGEST_MAX_CODE_BIT_LENGTH + 1
@@ -33,7 +33,7 @@ module LZWS
 
         get_invalid_buffer_length_options buffer_length_names, &block
 
-        Validation::INVALID_BOOLS.each do |invalid_bool|
+        (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
           yield({ :without_magic_header => invalid_bool })
           yield({ :msb                  => invalid_bool })
           yield({ :unaligned_bit_groups => invalid_bool })
@@ -48,7 +48,7 @@ module LZWS
           yield({ :max_code_bit_length => invalid_max_code_bit_length })
         end
 
-        Validation::INVALID_BOOLS.each do |invalid_bool|
+        (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
           yield({ :block_mode => invalid_bool })
         end
       end
@@ -85,9 +85,9 @@ module LZWS
         buffer_length_generator = get_buffer_length_option_generator buffer_length_names
 
         main_generator = OCG.new(
+          :without_magic_header => BOOLS,
           :max_code_bit_length  => MAX_CODE_BIT_LENGTHS,
           :block_mode           => BOOLS,
-          :without_magic_header => BOOLS,
           :msb                  => BOOLS,
           :unaligned_bit_groups => BOOLS
         )
