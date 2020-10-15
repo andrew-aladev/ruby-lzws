@@ -49,7 +49,7 @@ VALUE lzws_ext_initialize_compressor(VALUE self, VALUE options)
   GET_COMPRESSOR(self);
   Check_Type(options, T_HASH);
   LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
-  LZWS_EXT_GET_BUFFER_LENGTH_OPTION(options, destination_buffer_length);
+  LZWS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
 
   lzws_compressor_state_t* state_ptr;
 
