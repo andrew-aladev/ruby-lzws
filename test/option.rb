@@ -18,20 +18,20 @@ module LZWS
       )
       .freeze
 
-      private_class_method def self.get_invalid_buffer_length_options(buffer_length_names, &_block)
-        buffer_length_names.each do |name|
-          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
-            yield({ name => invalid_integer })
-          end
-        end
-      end
-
       def self.get_invalid_decompressor_options(buffer_length_names, &block)
         Validation::INVALID_HASHES.each do |invalid_hash|
           block.call invalid_hash
         end
 
-        get_invalid_buffer_length_options buffer_length_names, &block
+        buffer_length_names.each do |name|
+          (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
+            yield({ name => invalid_integer })
+          end
+        end
+
+        Validation::INVALID_BOOLS.each do |invalid_bool|
+          yield({ :gvl => invalid_bool })
+        end
 
         (Validation::INVALID_BOOLS - [nil]).each do |invalid_bool|
           yield({ :without_magic_header => invalid_bool })
@@ -84,19 +84,35 @@ module LZWS
       def self.get_compressor_options(buffer_length_names, &_block)
         buffer_length_generator = get_buffer_length_option_generator buffer_length_names
 
+        # main
+
         main_generator = OCG.new(
-          :without_magic_header => BOOLS,
           :max_code_bit_length  => MAX_CODE_BIT_LENGTHS,
           :block_mode           => BOOLS,
-          :msb                  => BOOLS,
           :unaligned_bit_groups => BOOLS
         )
 
+        # thread
+
+        thread_generator = OCG.new(
+          :gvl => BOOLS
+        )
+
+        # other
+
         other_generator = OCG.new(
+          :without_magic_header => BOOLS
+        )
+        .mix(
+          :msb => BOOLS
+        )
+        .mix(
           :quiet => BOOLS
         )
 
-        complete_generator = buffer_length_generator.mix(main_generator).mix other_generator
+        # complete
+
+        complete_generator = buffer_length_generator.mix(main_generator).mix(thread_generator).mix other_generator
 
         yield complete_generator.next until complete_generator.finished?
       end

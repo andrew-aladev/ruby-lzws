@@ -10,13 +10,35 @@ module LZWS
   module Option
     DEFAULT_BUFFER_LENGTH = 0
 
+    COMPRESSOR_DEFAULTS = {
+      :gvl                  => false,
+      :max_code_bit_length  => nil,
+      :without_magic_header => nil,
+      :block_mode           => nil,
+      :msb                  => nil,
+      :unaligned_bit_groups => nil,
+      :quiet                => nil
+    }
+    .freeze
+
+    DECOMPRESSOR_DEFAULTS = {
+      :gvl                  => false,
+      :without_magic_header => nil,
+      :msb                  => nil,
+      :unaligned_bit_groups => nil,
+      :quiet                => nil
+    }
+    .freeze
+
     def self.get_compressor_options(options, buffer_length_names)
       Validation.validate_hash options
 
       buffer_length_defaults = buffer_length_names.each_with_object({}) { |name, defaults| defaults[name] = DEFAULT_BUFFER_LENGTH }
-      options                = buffer_length_defaults.merge options
+      options                = COMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
 
       buffer_length_names.each { |name| Validation.validate_not_negative_integer options[name] }
+
+      Validation.validate_bool options[:gvl]
 
       max_code_bit_length = options[:max_code_bit_length]
       unless max_code_bit_length.nil?
@@ -47,9 +69,11 @@ module LZWS
       Validation.validate_hash options
 
       buffer_length_defaults = buffer_length_names.each_with_object({}) { |name, defaults| defaults[name] = DEFAULT_BUFFER_LENGTH }
-      options                = buffer_length_defaults.merge options
+      options                = DECOMPRESSOR_DEFAULTS.merge(buffer_length_defaults).merge options
 
       buffer_length_names.each { |name| Validation.validate_not_negative_integer options[name] }
+
+      Validation.validate_bool options[:gvl]
 
       without_magic_header = options[:without_magic_header]
       Validation.validate_bool without_magic_header unless without_magic_header.nil?

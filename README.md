@@ -90,6 +90,7 @@ end
 |-----------------------------|------------|----------|-------------|
 | `source_buffer_length`      | 0, 2 - inf | 0 (auto) | internal buffer length for source data |
 | `destination_buffer_length` | 0, 2 - inf | 0 (auto) | internal buffer length for description data |
+| `gvl`                       | true/false | false    | enables global VM lock where possible |
 | `max_code_bit_length`       | 9 - 16     | 16       | max code bit length |
 | `block_mode`                | true/false | true     | enables block mode |
 | `without_magic_header`      | true/false | false    | disables magic header |
@@ -101,6 +102,10 @@ There are internal buffers for compressed and decompressed data.
 For example you want to use 1 KB as `source_buffer_length` for compressor - please use 256 B as `destination_buffer_length`.
 You want to use 256 B as `source_buffer_length` for decompressor - please use 1 KB as `destination_buffer_length`.
 
+`gvl` is disabled by default, this mode allows running multiple compressors/decompressors in different threads simultaneously.
+Please consider enabling `gvl` if you don't want to launch processors in separate threads.
+If `gvl` is enabled ruby won't waste time on acquiring/releasing VM lock.
+
 You can also read lzws docs for more info about options.
 
 | Option                | Related constants |
@@ -111,6 +116,7 @@ Possible compressor options:
 ```
 :source_buffer_length
 :destination_buffer_length
+:gvl
 :max_code_bit_length
 :block_mode
 :without_magic_header
@@ -123,6 +129,7 @@ Possible decompressor options:
 ```
 :source_buffer_length
 :destination_buffer_length
+:gvl
 :without_magic_header
 :msb
 :unaligned_bit_groups
