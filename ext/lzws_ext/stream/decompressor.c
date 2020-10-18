@@ -8,8 +8,11 @@
 #include <lzws/decompressor/state.h>
 
 #include "lzws_ext/error.h"
+#include "lzws_ext/gvl.h"
 #include "lzws_ext/option.h"
 #include "ruby.h"
+
+// -- initialization --
 
 static void free_decompressor(lzws_ext_decompressor_t* decompressor_ptr)
 {
@@ -50,6 +53,7 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   Check_Type(options, T_HASH);
   LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
   LZWS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
+  LZWS_EXT_GET_BOOL_OPTION(options, gvl);
 
   lzws_decompressor_state_t* state_ptr;
 
@@ -78,38 +82,60 @@ VALUE lzws_ext_initialize_decompressor(VALUE self, VALUE options)
   decompressor_ptr->destination_buffer_length           = destination_buffer_length;
   decompressor_ptr->remaining_destination_buffer        = destination_buffer;
   decompressor_ptr->remaining_destination_buffer_length = destination_buffer_length;
+  decompressor_ptr->gvl                                 = gvl;
 
   return Qnil;
 }
+
+// -- decompress --
 
 #define DO_NOT_USE_AFTER_CLOSE(decompressor_ptr)                                             \
   if (decompressor_ptr->state_ptr == NULL || decompressor_ptr->destination_buffer == NULL) { \
     lzws_ext_raise_error(LZWS_EXT_ERROR_USED_AFTER_CLOSE);                                   \
   }
 
-#define GET_SOURCE_DATA(source_value)                                   \
-  Check_Type(source_value, T_STRING);                                   \
-                                                                        \
-  const char*      source                  = RSTRING_PTR(source_value); \
-  size_t           source_length           = RSTRING_LEN(source_value); \
-  lzws_ext_byte_t* remaining_source        = (lzws_ext_byte_t*) source; \
-  size_t           remaining_source_length = source_length;
+typedef struct
+{
+  lzws_ext_decompressor_t* decompressor_ptr;
+  lzws_ext_byte_t*         remaining_source;
+  size_t*                  remaining_source_length_ptr;
+  lzws_result_t            result;
+} decompress_args_t;
+
+static inline void* decompress_wrapper(void* data)
+{
+  decompress_args_t*       args             = data;
+  lzws_ext_decompressor_t* decompressor_ptr = args->decompressor_ptr;
+
+  args->result = lzws_decompress(
+    decompressor_ptr->state_ptr,
+    &args->remaining_source,
+    args->remaining_source_length_ptr,
+    &decompressor_ptr->remaining_destination_buffer,
+    &decompressor_ptr->remaining_destination_buffer_length);
+
+  return NULL;
+}
 
 VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
 {
   GET_DECOMPRESSOR(self);
   DO_NOT_USE_AFTER_CLOSE(decompressor_ptr);
-  GET_SOURCE_DATA(source_value);
+  Check_Type(source_value, T_STRING);
 
-  lzws_result_t result = lzws_decompress(
-    decompressor_ptr->state_ptr,
-    &remaining_source,
-    &remaining_source_length,
-    &decompressor_ptr->remaining_destination_buffer,
-    &decompressor_ptr->remaining_destination_buffer_length);
+  const char*      source                  = RSTRING_PTR(source_value);
+  size_t           source_length           = RSTRING_LEN(source_value);
+  lzws_ext_byte_t* remaining_source        = (lzws_ext_byte_t*) source;
+  size_t           remaining_source_length = source_length;
 
-  if (result != 0 && result != LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
-    switch (result) {
+  decompress_args_t args = {
+    .decompressor_ptr            = decompressor_ptr,
+    .remaining_source            = remaining_source,
+    .remaining_source_length_ptr = &remaining_source_length};
+
+  LZWS_EXT_GVL_WRAP(decompressor_ptr->gvl, decompress_wrapper, &args);
+  if (args.result != 0 && args.result != LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
+    switch (args.result) {
       case LZWS_DECOMPRESSOR_INVALID_MAGIC_HEADER:
       case LZWS_DECOMPRESSOR_INVALID_MAX_CODE_BIT_LENGTH:
         lzws_ext_raise_error(LZWS_EXT_ERROR_VALIDATE_FAILED);
@@ -121,10 +147,12 @@ VALUE lzws_ext_decompress(VALUE self, VALUE source_value)
   }
 
   VALUE bytes_read             = SIZET2NUM(source_length - remaining_source_length);
-  VALUE needs_more_destination = result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION ? Qtrue : Qfalse;
+  VALUE needs_more_destination = args.result == LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION ? Qtrue : Qfalse;
 
   return rb_ary_new_from_args(2, bytes_read, needs_more_destination);
 }
+
+// -- other --
 
 VALUE lzws_ext_decompressor_read_result(VALUE self)
 {
@@ -144,6 +172,8 @@ VALUE lzws_ext_decompressor_read_result(VALUE self)
 
   return result_value;
 }
+
+// -- cleanup --
 
 VALUE lzws_ext_decompressor_close(VALUE self)
 {
@@ -169,6 +199,8 @@ VALUE lzws_ext_decompressor_close(VALUE self)
 
   return Qnil;
 }
+
+// -- exports --
 
 void lzws_ext_decompressor_exports(VALUE root_module)
 {
