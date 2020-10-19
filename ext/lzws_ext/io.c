@@ -6,10 +6,13 @@
 #include <lzws/file.h>
 
 #include "lzws_ext/error.h"
+#include "lzws_ext/gvl.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
 #include "ruby.h"
 #include "ruby/io.h"
+
+// -- utils --
 
 #define GET_FILE(target)                               \
   Check_Type(target, T_FILE);                          \
@@ -47,26 +50,84 @@ static inline lzws_ext_result_t get_file_error(lzws_result_t result)
   }
 }
 
+// -- compress --
+
+typedef struct
+{
+  FILE*                      source_file;
+  size_t                     source_buffer_length;
+  FILE*                      destination_file;
+  size_t                     destination_buffer_length;
+  lzws_compressor_options_t* compressor_options_ptr;
+  lzws_result_t              result;
+} compress_args_t;
+
+static inline void* compress_wrapper(void* data)
+{
+  compress_args_t* args = data;
+
+  args->result = lzws_compress_file(
+    args->source_file,
+    args->source_buffer_length,
+    args->destination_file,
+    args->destination_buffer_length,
+    args->compressor_options_ptr);
+
+  return NULL;
+}
+
 VALUE lzws_ext_compress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
 {
   GET_FILE(source);
   GET_FILE(destination);
   Check_Type(options, T_HASH);
-  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
   LZWS_EXT_GET_SIZE_OPTION(options, source_buffer_length);
   LZWS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
+  LZWS_EXT_GET_BOOL_OPTION(options, gvl);
+  LZWS_EXT_GET_COMPRESSOR_OPTIONS(options);
 
-  lzws_result_t result = lzws_compress_file(
-    source_file, source_buffer_length, destination_file, destination_buffer_length, &compressor_options);
+  compress_args_t args = {
+    .source_file               = source_file,
+    .source_buffer_length      = source_buffer_length,
+    .destination_file          = destination_file,
+    .destination_buffer_length = destination_buffer_length,
+    .compressor_options_ptr    = &compressor_options};
 
-  if (result != 0) {
-    lzws_ext_raise_error(get_file_error(result));
+  LZWS_EXT_GVL_WRAP(gvl, compress_wrapper, &args);
+  if (args.result != 0) {
+    lzws_ext_raise_error(get_file_error(args.result));
   }
 
   // Ruby itself won't flush stdio file before closing fd, flush is required.
   fflush(destination_file);
 
   return Qnil;
+}
+
+// -- decompress --
+
+typedef struct
+{
+  FILE*                        source_file;
+  size_t                       source_buffer_length;
+  FILE*                        destination_file;
+  size_t                       destination_buffer_length;
+  lzws_decompressor_options_t* decompressor_options_ptr;
+  lzws_result_t                result;
+} decompress_args_t;
+
+static inline void* decompress_wrapper(void* data)
+{
+  decompress_args_t* args = data;
+
+  args->result = lzws_decompress_file(
+    args->source_file,
+    args->source_buffer_length,
+    args->destination_file,
+    args->destination_buffer_length,
+    args->decompressor_options_ptr);
+
+  return NULL;
 }
 
 VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE destination, VALUE options)
@@ -74,15 +135,21 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
   GET_FILE(source);
   GET_FILE(destination);
   Check_Type(options, T_HASH);
-  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
   LZWS_EXT_GET_SIZE_OPTION(options, source_buffer_length);
   LZWS_EXT_GET_SIZE_OPTION(options, destination_buffer_length);
+  LZWS_EXT_GET_BOOL_OPTION(options, gvl);
+  LZWS_EXT_GET_DECOMPRESSOR_OPTIONS(options);
 
-  lzws_result_t result = lzws_decompress_file(
-    source_file, source_buffer_length, destination_file, destination_buffer_length, &decompressor_options);
+  decompress_args_t args = {
+    .source_file               = source_file,
+    .source_buffer_length      = source_buffer_length,
+    .destination_file          = destination_file,
+    .destination_buffer_length = destination_buffer_length,
+    .decompressor_options_ptr  = &decompressor_options};
 
-  if (result != 0) {
-    lzws_ext_raise_error(get_file_error(result));
+  LZWS_EXT_GVL_WRAP(gvl, decompress_wrapper, &args);
+  if (args.result != 0) {
+    lzws_ext_raise_error(get_file_error(args.result));
   }
 
   // Ruby itself won't flush stdio file before closing fd, flush is required.
@@ -90,6 +157,8 @@ VALUE lzws_ext_decompress_io(VALUE LZWS_EXT_UNUSED(self), VALUE source, VALUE de
 
   return Qnil;
 }
+
+// -- exports --
 
 void lzws_ext_io_exports(VALUE root_module)
 {
