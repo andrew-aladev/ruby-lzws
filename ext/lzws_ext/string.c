@@ -49,7 +49,7 @@ typedef struct
   lzws_compressor_state_t* state_ptr;
   lzws_ext_byte_t**        remaining_source_ptr;
   size_t*                  remaining_source_length_ptr;
-  lzws_ext_byte_t**        remaining_destination_buffer_ptr;
+  lzws_ext_byte_t*         remaining_destination_buffer;
   size_t*                  remaining_destination_buffer_length_ptr;
   lzws_result_t            result;
 } compress_args_t;
@@ -57,7 +57,7 @@ typedef struct
 typedef struct
 {
   lzws_compressor_state_t* state_ptr;
-  lzws_ext_byte_t**        remaining_destination_buffer_ptr;
+  lzws_ext_byte_t*         remaining_destination_buffer;
   size_t*                  remaining_destination_buffer_length_ptr;
   lzws_result_t            result;
 } compressor_finish_args_t;
@@ -70,7 +70,7 @@ static inline void* compress_wrapper(void* data)
     args->state_ptr,
     args->remaining_source_ptr,
     args->remaining_source_length_ptr,
-    args->remaining_destination_buffer_ptr,
+    &args->remaining_destination_buffer,
     args->remaining_destination_buffer_length_ptr);
 
   return NULL;
@@ -81,7 +81,7 @@ static inline void* compressor_finish_wrapper(void* data)
   compressor_finish_args_t* args = data;
 
   args->result = lzws_compressor_finish(
-    args->state_ptr, args->remaining_destination_buffer_ptr, args->remaining_destination_buffer_length_ptr);
+    args->state_ptr, &args->remaining_destination_buffer, args->remaining_destination_buffer_length_ptr);
 
   return NULL;
 }
@@ -92,7 +92,7 @@ static inline void* compressor_finish_wrapper(void* data)
       (lzws_ext_byte_t*) RSTRING_PTR(destination_value) + destination_length;                                    \
     size_t prev_remaining_destination_buffer_length = remaining_destination_buffer_length;                       \
                                                                                                                  \
-    args.remaining_destination_buffer_ptr        = &remaining_destination_buffer;                                \
+    args.remaining_destination_buffer            = remaining_destination_buffer;                                 \
     args.remaining_destination_buffer_length_ptr = &remaining_destination_buffer_length;                         \
                                                                                                                  \
     LZWS_EXT_GVL_WRAP(gvl, wrapper, &args);                                                                      \
@@ -206,7 +206,7 @@ typedef struct
   lzws_decompressor_state_t* state_ptr;
   lzws_ext_byte_t**          remaining_source_ptr;
   size_t*                    remaining_source_length_ptr;
-  lzws_ext_byte_t**          remaining_destination_buffer_ptr;
+  lzws_ext_byte_t*           remaining_destination_buffer;
   size_t*                    remaining_destination_buffer_length_ptr;
   lzws_result_t              result;
 } decompress_args_t;
@@ -219,7 +219,7 @@ static inline void* decompress_wrapper(void* data)
     args->state_ptr,
     args->remaining_source_ptr,
     args->remaining_source_length_ptr,
-    args->remaining_destination_buffer_ptr,
+    &args->remaining_destination_buffer,
     args->remaining_destination_buffer_length_ptr);
 
   return NULL;
@@ -239,17 +239,18 @@ static inline lzws_ext_result_t decompress(
   size_t            destination_length                  = 0;
   size_t            remaining_destination_buffer_length = destination_buffer_length;
 
+  decompress_args_t args = {
+    .state_ptr                   = state_ptr,
+    .remaining_source_ptr        = &remaining_source,
+    .remaining_source_length_ptr = &remaining_source_length};
+
   while (true) {
     lzws_ext_byte_t* remaining_destination_buffer =
       (lzws_ext_byte_t*) RSTRING_PTR(destination_value) + destination_length;
     size_t prev_remaining_destination_buffer_length = remaining_destination_buffer_length;
 
-    decompress_args_t args = {
-      .state_ptr                               = state_ptr,
-      .remaining_source_ptr                    = &remaining_source,
-      .remaining_source_length_ptr             = &remaining_source_length,
-      .remaining_destination_buffer_ptr        = &remaining_destination_buffer,
-      .remaining_destination_buffer_length_ptr = &remaining_destination_buffer_length};
+    args.remaining_destination_buffer            = remaining_destination_buffer;
+    args.remaining_destination_buffer_length_ptr = &remaining_destination_buffer_length;
 
     LZWS_EXT_GVL_WRAP(gvl, decompress_wrapper, &args);
     if (args.result != 0 && args.result != LZWS_DECOMPRESSOR_NEEDS_MORE_DESTINATION) {
