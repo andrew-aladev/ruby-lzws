@@ -60,14 +60,14 @@ module LZWS
       # It is better to have text lengths not divisible by portion lengths.
       PORTION_LENGTHS = [
         10**2,
-        5 * 10**2
+        5 * (10**2)
       ]
       .freeze
 
       # It is better to have large text lengths not divisible by large portion lengths.
       LARGE_PORTION_LENGTHS = [
         10**6,
-        5 * 10**6
+        5 * (10**6)
       ]
       .freeze
 
