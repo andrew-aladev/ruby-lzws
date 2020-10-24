@@ -60,16 +60,19 @@ module LZWS
       end
 
       def test_texts
-        TEXTS.each do |text|
-          ::File.write SOURCE_PATH, text
+        Common.parallel_each TEXTS do |text, worker_index|
+          source_path  = "#{SOURCE_PATH}_#{worker_index}"
+          archive_path = "#{ARCHIVE_PATH}_#{worker_index}"
+
+          ::File.write source_path, text
 
           get_compressor_options do |compressor_options|
-            Target.compress SOURCE_PATH, ARCHIVE_PATH, compressor_options
+            Target.compress source_path, archive_path, compressor_options
 
             get_compatible_decompressor_options(compressor_options) do |decompressor_options|
-              Target.decompress ARCHIVE_PATH, SOURCE_PATH, decompressor_options
+              Target.decompress archive_path, source_path, decompressor_options
 
-              decompressed_text = ::File.read SOURCE_PATH
+              decompressed_text = ::File.read source_path
               decompressed_text.force_encoding text.encoding
 
               assert_equal text, decompressed_text
@@ -79,21 +82,26 @@ module LZWS
       end
 
       def test_large_texts_and_native_compress
-        LARGE_TEXTS.each do |text|
-          ::File.write NATIVE_SOURCE_PATH, text
-          Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
-          Target.decompress NATIVE_ARCHIVE_PATH, SOURCE_PATH
+        Common.parallel_each LARGE_TEXTS do |text, worker_index|
+          source_path         = "#{SOURCE_PATH}_#{worker_index}"
+          archive_path        = "#{ARCHIVE_PATH}_#{worker_index}"
+          native_source_path  = "#{NATIVE_SOURCE_PATH}_#{worker_index}"
+          native_archive_path = "#{NATIVE_ARCHIVE_PATH}_#{worker_index}"
 
-          decompressed_text = ::File.read SOURCE_PATH
+          ::File.write native_source_path, text
+          Common.native_compress native_source_path, native_archive_path
+          Target.decompress native_archive_path, source_path
+
+          decompressed_text = ::File.read source_path
           decompressed_text.force_encoding text.encoding
 
           assert_equal text, decompressed_text
 
-          ::File.write SOURCE_PATH, text
-          Target.compress SOURCE_PATH, ARCHIVE_PATH
-          Common.native_decompress ARCHIVE_PATH, NATIVE_SOURCE_PATH
+          ::File.write source_path, text
+          Target.compress source_path, archive_path
+          Common.native_decompress archive_path, native_source_path
 
-          decompressed_text = ::File.read NATIVE_SOURCE_PATH
+          decompressed_text = ::File.read native_source_path
           decompressed_text.force_encoding text.encoding
 
           assert_equal text, decompressed_text

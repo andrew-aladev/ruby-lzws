@@ -54,7 +54,7 @@ module LZWS
       end
 
       def test_texts
-        TEXTS.each do |text|
+        Common.parallel_each TEXTS do |text|
           get_compressor_options do |compressor_options|
             compressed_text = Target.compress text, compressor_options
 
@@ -69,10 +69,13 @@ module LZWS
       end
 
       def test_large_texts_and_native_compress
-        LARGE_TEXTS.each do |text|
-          ::File.write NATIVE_SOURCE_PATH, text
-          Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
-          compressed_text = ::File.read NATIVE_ARCHIVE_PATH
+        Common.parallel_each LARGE_TEXTS do |text, worker_index|
+          native_source_path  = "#{NATIVE_SOURCE_PATH}_#{worker_index}"
+          native_archive_path = "#{NATIVE_ARCHIVE_PATH}_#{worker_index}"
+
+          ::File.write native_source_path, text
+          Common.native_compress native_source_path, native_archive_path
+          compressed_text = ::File.read native_archive_path
 
           decompressed_text = Target.decompress compressed_text
           decompressed_text.force_encoding text.encoding
@@ -80,10 +83,10 @@ module LZWS
           assert_equal text, decompressed_text
 
           compressed_text = Target.compress text
-          ::File.write NATIVE_ARCHIVE_PATH, compressed_text
-          Common.native_decompress NATIVE_ARCHIVE_PATH, NATIVE_SOURCE_PATH
+          ::File.write native_archive_path, compressed_text
+          Common.native_decompress native_archive_path, native_source_path
 
-          decompressed_text = ::File.read NATIVE_SOURCE_PATH
+          decompressed_text = ::File.read native_source_path
           decompressed_text.force_encoding text.encoding
 
           assert_equal text, decompressed_text

@@ -63,92 +63,108 @@ module LZWS
           end
 
           def test_texts
-            TEXTS.each do |text|
-              PORTION_LENGTHS.each do |portion_length|
-                get_compressor_options do |compressor_options|
-                  compressed_text = String.compress text, compressor_options
+            options_groups = OCG.new(
+              :text           => TEXTS,
+              :portion_length => PORTION_LENGTHS
+            )
+            .to_a
 
-                  get_compatible_decompressor_options(compressor_options) do |decompressor_options|
-                    decompressed_buffer = ::StringIO.new
-                    decompressed_buffer.set_encoding ::Encoding::BINARY
+            Common.parallel_each options_groups do |options|
+              text           = options[:text]
+              portion_length = options[:portion_length]
 
-                    writer = proc { |portion| decompressed_buffer << portion }
+              get_compressor_options do |compressor_options|
+                compressed_text = String.compress text, compressor_options
 
-                    decompressor = Target.new decompressor_options
+                get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  decompressed_buffer = ::StringIO.new
+                  decompressed_buffer.set_encoding ::Encoding::BINARY
 
-                    begin
-                      source                 = "".b
-                      compressed_text_offset = 0
-                      index                  = 0
+                  writer = proc { |portion| decompressed_buffer << portion }
 
-                      loop do
-                        portion = compressed_text.byteslice compressed_text_offset, portion_length
-                        break if portion.nil?
+                  decompressor = Target.new decompressor_options
 
-                        compressed_text_offset += portion_length
-                        source << portion
+                  begin
+                    source                 = "".b
+                    compressed_text_offset = 0
+                    index                  = 0
 
-                        bytes_read = decompressor.read source, &writer
-                        source     = source.byteslice bytes_read, source.bytesize - bytes_read
+                    loop do
+                      portion = compressed_text.byteslice compressed_text_offset, portion_length
+                      break if portion.nil?
 
-                        decompressor.flush(&writer) if index.even?
-                        index += 1
-                      end
+                      compressed_text_offset += portion_length
+                      source << portion
 
-                    ensure
-                      refute decompressor.closed?
-                      decompressor.close(&writer)
-                      assert decompressor.closed?
+                      bytes_read = decompressor.read source, &writer
+                      source     = source.byteslice bytes_read, source.bytesize - bytes_read
+
+                      decompressor.flush(&writer) if index.even?
+                      index += 1
                     end
 
-                    decompressed_text = decompressed_buffer.string
-                    decompressed_text.force_encoding text.encoding
-
-                    assert_equal text, decompressed_text
+                  ensure
+                    refute decompressor.closed?
+                    decompressor.close(&writer)
+                    assert decompressor.closed?
                   end
+
+                  decompressed_text = decompressed_buffer.string
+                  decompressed_text.force_encoding text.encoding
+
+                  assert_equal text, decompressed_text
                 end
               end
             end
           end
 
           def test_large_texts_and_native_compress
-            LARGE_TEXTS.each do |text|
-              LARGE_PORTION_LENGTHS.each do |portion_length|
-                ::File.write NATIVE_SOURCE_PATH, text
-                Common.native_compress NATIVE_SOURCE_PATH, NATIVE_ARCHIVE_PATH
+            options_groups = OCG.new(
+              :text           => LARGE_TEXTS,
+              :portion_length => LARGE_PORTION_LENGTHS
+            )
+            .to_a
 
-                compressed_text = ::File.read NATIVE_ARCHIVE_PATH
+            Common.parallel_each options_groups do |options, worker_index|
+              text                = options[:text]
+              portion_length      = options[:portion_length]
+              native_source_path  = "#{NATIVE_SOURCE_PATH}_#{worker_index}"
+              native_archive_path = "#{NATIVE_ARCHIVE_PATH}_#{worker_index}"
 
-                decompressed_buffer = ::StringIO.new
-                decompressed_buffer.set_encoding ::Encoding::BINARY
+              ::File.write native_source_path, text
+              Common.native_compress native_source_path, native_archive_path
 
-                writer = proc { |portion| decompressed_buffer << portion }
+              compressed_text = ::File.read native_archive_path
 
-                decompressor = Target.new
+              decompressed_buffer = ::StringIO.new
+              decompressed_buffer.set_encoding ::Encoding::BINARY
 
-                begin
-                  source                 = "".b
-                  compressed_text_offset = 0
+              writer = proc { |portion| decompressed_buffer << portion }
 
-                  loop do
-                    portion = compressed_text.byteslice compressed_text_offset, portion_length
-                    break if portion.nil?
+              decompressor = Target.new
 
-                    compressed_text_offset += portion_length
-                    source << portion
+              begin
+                source                 = "".b
+                compressed_text_offset = 0
 
-                    bytes_read = decompressor.read source, &writer
-                    source     = source.byteslice bytes_read, source.bytesize - bytes_read
-                  end
-                ensure
-                  decompressor.close(&writer)
+                loop do
+                  portion = compressed_text.byteslice compressed_text_offset, portion_length
+                  break if portion.nil?
+
+                  compressed_text_offset += portion_length
+                  source << portion
+
+                  bytes_read = decompressor.read source, &writer
+                  source     = source.byteslice bytes_read, source.bytesize - bytes_read
                 end
-
-                decompressed_text = decompressed_buffer.string
-                decompressed_text.force_encoding text.encoding
-
-                assert_equal text, decompressed_text
+              ensure
+                decompressor.close(&writer)
               end
+
+              decompressed_text = decompressed_buffer.string
+              decompressed_text.force_encoding text.encoding
+
+              assert_equal text, decompressed_text
             end
           end
 
