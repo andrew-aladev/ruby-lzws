@@ -1,4 +1,4 @@
-# Ruby bindings for lzws library
+# Ruby bindings for lzws library (compatible with UNIX compress)
 
 | Travis | AppVeyor | Circle | Codecov | Gem   |
 | :---:  | :---:    | :---:  | :---:   | :---: |
@@ -61,8 +61,8 @@ ensure
 end
 ```
 
-You can create and read `tar.Z` archives with `minitar` for example.
-LZWS is compatible with UNIX compress (with default options).
+You can create and read `tar.Z` archives with [minitar](https://github.com/halostatue/minitar) for example.
+LZWS is compatible with [UNIX compress](https://en.wikipedia.org/wiki/Compress) (with default options).
 
 ```ruby
 require "lzws"
@@ -81,6 +81,18 @@ LZWS::Stream::Reader.open "file.tar.Z" do |reader|
       puts entry.read
     end
   end
+end
+```
+
+You can also use `Content-Encoding: compress` with [sinatra](http://sinatrarb.com):
+
+```ruby
+require "lzws"
+require "sinatra"
+
+get "/" do
+  headers["Content-Encoding"] = "compress"
+  LZWS::String.compress "TOBEORNOTTOBEORTOBEORNOT"
 end
 ```
 
@@ -143,18 +155,6 @@ require "lzws"
 
 data = LZWS::String.compress "TOBEORNOTTOBEORTOBEORNOT", :msb => true
 puts LZWS::String.decompress(data, :msb => true)
-```
-
-Default options are compatible with UNIX compress (`Content-Encoding: compress`):
-
-```ruby
-require "lzws"
-require "sinatra"
-
-get "/" do
-  headers["Content-Encoding"] = "compress"
-  LZWS::String.compress "TOBEORNOTTOBEORTOBEORNOT"
-end
 ```
 
 Please read more about compatibility in lzws docs.
@@ -338,10 +338,10 @@ You should lock all shared data between threads.
 
 ## CI
 
-See universal test script [scripts/ci_test.sh](scripts/ci_test.sh) for CI.
 Please visit [scripts/test-images](scripts/test-images).
-You can run this test script using many native and cross images.
+See universal test script [scripts/ci_test.sh](scripts/ci_test.sh) for CI.
+You can run this script using many native and cross images.
 
 ## License
 
-MIT license, see LICENSE and AUTHORS.
+MIT license, see [LICENSE](LICENSE) and [AUTHORS](AUTHORS).

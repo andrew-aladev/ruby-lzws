@@ -9,7 +9,7 @@ require "lzws/version"
 
 GEMSPEC = Gem::Specification.new do |gem|
   gem.name     = "ruby-lzws"
-  gem.summary  = "Ruby bindings for lzws library."
+  gem.summary  = "Ruby bindings for lzws library (compatible with UNIX compress)."
   gem.homepage = "https://github.com/andrew-aladev/ruby-lzws"
   gem.license  = "MIT"
   gem.authors  = File.read("AUTHORS").split("\n").reject(&:empty?)
