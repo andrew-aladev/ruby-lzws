@@ -63,15 +63,15 @@ module LZWS
           end
 
           def test_texts
-            options_groups = OCG.new(
+            contexts = OCG.new(
               :text           => TEXTS,
               :portion_length => PORTION_LENGTHS
             )
             .to_a
 
-            Common.parallel_each options_groups do |options|
-              text           = options[:text]
-              portion_length = options[:portion_length]
+            Common.parallel_each contexts do |context|
+              text           = context[:text]
+              portion_length = context[:portion_length]
 
               get_compressor_options do |compressor_options|
                 compressed_text = String.compress text, compressor_options
@@ -119,15 +119,15 @@ module LZWS
           end
 
           def test_large_texts_and_native_compress
-            options_groups = OCG.new(
+            contexts = OCG.new(
               :text           => LARGE_TEXTS,
               :portion_length => LARGE_PORTION_LENGTHS
             )
             .to_a
 
-            Common.parallel_each options_groups do |options, worker_index|
-              text                = options[:text]
-              portion_length      = options[:portion_length]
+            Common.parallel_each contexts do |context, worker_index|
+              text                = context[:text]
+              portion_length      = context[:portion_length]
               native_source_path  = "#{NATIVE_SOURCE_PATH}_#{worker_index}"
               native_archive_path = "#{NATIVE_ARCHIVE_PATH}_#{worker_index}"
 

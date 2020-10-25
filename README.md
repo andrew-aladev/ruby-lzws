@@ -1,4 +1,4 @@
-# Ruby bindings for lzws library (compatible with UNIX compress)
+# Ruby bindings for lzws library
 
 | Travis | AppVeyor | Circle | Codecov | Gem   |
 | :---:  | :---:    | :---:  | :---:   | :---: |
