@@ -63,73 +63,31 @@ module LZWS
           end
 
           def test_texts
-            Common.parallel_each TEXTS do |text|
-              PORTION_LENGTHS.each do |portion_length|
-                get_compressor_options do |compressor_options|
-                  compressed_text = String.compress text, compressor_options
+            compressor_generator = get_compressor_options_generator.and(
+              :text           => TEXTS,
+              :portion_length => PORTION_LENGTHS
+            )
 
-                  get_compatible_decompressor_options(compressor_options) do |decompressor_options|
-                    decompressed_buffer = ::StringIO.new
-                    decompressed_buffer.set_encoding ::Encoding::BINARY
+            Common.parallel_options compressor_generator do |compressor_options|
+              text = compressor_options[:text]
+              compressor_options.delete :text
 
-                    writer       = proc { |portion| decompressed_buffer << portion }
-                    decompressor = Target.new decompressor_options
+              portion_length = compressor_options[:portion_length]
+              compressor_options.delete :portion_length
 
-                    begin
-                      source                 = "".b
-                      compressed_text_offset = 0
-                      index                  = 0
+              compressed_text = String.compress text, compressor_options
 
-                      loop do
-                        portion = compressed_text.byteslice compressed_text_offset, portion_length
-                        break if portion.nil?
-
-                        compressed_text_offset += portion_length
-                        source << portion
-
-                        bytes_read = decompressor.read source, &writer
-                        source     = source.byteslice bytes_read, source.bytesize - bytes_read
-
-                        decompressor.flush(&writer) if index.even?
-                        index += 1
-                      end
-
-                    ensure
-                      refute decompressor.closed?
-                      decompressor.close(&writer)
-                      assert decompressor.closed?
-                    end
-
-                    decompressed_text = decompressed_buffer.string
-                    decompressed_text.force_encoding text.encoding
-
-                    assert_equal text, decompressed_text
-                  end
-                end
-              end
-            end
-          end
-
-          def test_large_texts_and_native_compress
-            Common.parallel_each LARGE_TEXTS do |text, worker_index|
-              native_source_path  = "#{NATIVE_SOURCE_PATH}_#{worker_index}"
-              native_archive_path = "#{NATIVE_ARCHIVE_PATH}_#{worker_index}"
-
-              LARGE_PORTION_LENGTHS.each do |portion_length|
-                ::File.write native_source_path, text
-                Common.native_compress native_source_path, native_archive_path
-
-                compressed_text = ::File.read native_archive_path
-
+              get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 decompressed_buffer = ::StringIO.new
                 decompressed_buffer.set_encoding ::Encoding::BINARY
 
                 writer       = proc { |portion| decompressed_buffer << portion }
-                decompressor = Target.new
+                decompressor = Target.new decompressor_options
 
                 begin
                   source                 = "".b
                   compressed_text_offset = 0
+                  index                  = 0
 
                   loop do
                     portion = compressed_text.byteslice compressed_text_offset, portion_length
@@ -140,9 +98,15 @@ module LZWS
 
                     bytes_read = decompressor.read source, &writer
                     source     = source.byteslice bytes_read, source.bytesize - bytes_read
+
+                    decompressor.flush(&writer) if index.even?
+                    index += 1
                   end
+
                 ensure
+                  refute decompressor.closed?
                   decompressor.close(&writer)
+                  assert decompressor.closed?
                 end
 
                 decompressed_text = decompressed_buffer.string
@@ -153,14 +117,63 @@ module LZWS
             end
           end
 
+          def test_large_texts_and_native_compress
+            generator = OCG.new(
+              :text           => LARGE_TEXTS,
+              :portion_length => LARGE_PORTION_LENGTHS
+            )
+
+            Common.parallel_options generator do |options, worker_index|
+              text           = options[:text]
+              portion_length = options[:portion_length]
+
+              native_source_path  = "#{NATIVE_SOURCE_PATH}_#{worker_index}"
+              native_archive_path = "#{NATIVE_ARCHIVE_PATH}_#{worker_index}"
+
+              ::File.write native_source_path, text
+              Common.native_compress native_source_path, native_archive_path
+
+              compressed_text = ::File.read native_archive_path
+
+              decompressed_buffer = ::StringIO.new
+              decompressed_buffer.set_encoding ::Encoding::BINARY
+
+              writer       = proc { |portion| decompressed_buffer << portion }
+              decompressor = Target.new
+
+              begin
+                source                 = "".b
+                compressed_text_offset = 0
+
+                loop do
+                  portion = compressed_text.byteslice compressed_text_offset, portion_length
+                  break if portion.nil?
+
+                  compressed_text_offset += portion_length
+                  source << portion
+
+                  bytes_read = decompressor.read source, &writer
+                  source     = source.byteslice bytes_read, source.bytesize - bytes_read
+                end
+              ensure
+                decompressor.close(&writer)
+              end
+
+              decompressed_text = decompressed_buffer.string
+              decompressed_text.force_encoding text.encoding
+
+              assert_equal text, decompressed_text
+            end
+          end
+
           # -----
 
           def get_invalid_decompressor_options(&block)
             Option.get_invalid_decompressor_options BUFFER_LENGTH_NAMES, &block
           end
 
-          def get_compressor_options(&block)
-            Option.get_compressor_options BUFFER_LENGTH_NAMES, &block
+          def get_compressor_options_generator
+            Option.get_compressor_options_generator BUFFER_LENGTH_NAMES
           end
 
           def get_compatible_decompressor_options(compressor_options, &block)
