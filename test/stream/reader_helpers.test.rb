@@ -46,8 +46,8 @@ module LZWS
         end
 
         def test_byte
-          Common.parallel_options get_compressor_options_generator do |compressor_options, worker_index|
-            archive_path = "#{ARCHIVE_PATH}_#{worker_index}"
+          parallel_compressor_options do |compressor_options, worker_index|
+            archive_path = Common.get_path ARCHIVE_PATH, worker_index
 
             TEXTS.each do |text|
               write_archive archive_path, text, compressor_options
@@ -94,8 +94,8 @@ module LZWS
         end
 
         def test_char
-          Common.parallel_options get_compressor_options_generator do |compressor_options, worker_index|
-            archive_path = "#{ARCHIVE_PATH}_#{worker_index}"
+          parallel_compressor_options do |compressor_options, worker_index|
+            archive_path = Common.get_path ARCHIVE_PATH, worker_index
 
             TEXTS.each do |text|
               write_archive archive_path, text, compressor_options
@@ -130,8 +130,8 @@ module LZWS
         end
 
         def test_char_encoding
-          Common.parallel_options get_compressor_options_generator do |compressor_options, worker_index|
-            archive_path = "#{ARCHIVE_PATH}_#{worker_index}"
+          parallel_compressor_options do |compressor_options, worker_index|
+            archive_path = Common.get_path ARCHIVE_PATH, worker_index
 
             TEXTS.each do |text|
               write_archive archive_path, text, compressor_options
@@ -211,8 +211,8 @@ module LZWS
         end
 
         def test_lines
-          Common.parallel_options get_compressor_options_generator do |compressor_options, worker_index|
-            archive_path = "#{ARCHIVE_PATH}_#{worker_index}"
+          parallel_compressor_options do |compressor_options, worker_index|
+            archive_path = Common.get_path ARCHIVE_PATH, worker_index
 
             TEXTS.each do |text|
               write_archive archive_path, text, compressor_options
@@ -294,8 +294,8 @@ module LZWS
         end
 
         def test_lines_encoding
-          Common.parallel_options get_compressor_options_generator do |compressor_options, worker_index|
-            archive_path = "#{ARCHIVE_PATH}_#{worker_index}"
+          parallel_compressor_options do |compressor_options, worker_index|
+            archive_path = Common.get_path ARCHIVE_PATH, worker_index
 
             TEXTS.each do |text|
               write_archive archive_path, text, compressor_options
@@ -369,8 +369,8 @@ module LZWS
         end
 
         def test_open
-          Common.parallel_options get_compressor_options_generator do |compressor_options, worker_index|
-            archive_path = "#{ARCHIVE_PATH}_#{worker_index}"
+          parallel_compressor_options do |compressor_options, worker_index|
+            archive_path = Common.get_path ARCHIVE_PATH, worker_index
 
             TEXTS.each do |text|
               write_archive archive_path, text, compressor_options
@@ -387,8 +387,8 @@ module LZWS
 
         def test_open_with_large_texts_and_native_compress
           Common.parallel LARGE_TEXTS do |text, worker_index|
-            native_source_path  = "#{NATIVE_SOURCE_PATH}_#{worker_index}"
-            native_archive_path = "#{NATIVE_ARCHIVE_PATH}_#{worker_index}"
+            native_source_path  = Common.get_path NATIVE_SOURCE_PATH, worker_index
+            native_archive_path = Common.get_path NATIVE_ARCHIVE_PATH, worker_index
 
             ::File.write native_source_path, text
             Common.native_compress native_source_path, native_archive_path
@@ -407,8 +407,8 @@ module LZWS
           ::File.write archive_path, compressed_text
         end
 
-        def get_compressor_options_generator
-          Option.get_compressor_options_generator BUFFER_LENGTH_NAMES
+        def parallel_compressor_options(&block)
+          Common.parallel_options Option.get_compressor_options_generator(BUFFER_LENGTH_NAMES), &block
         end
 
         def get_compatible_decompressor_options(compressor_options, &block)

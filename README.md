@@ -84,7 +84,7 @@ LZWS::Stream::Reader.open "file.tar.Z" do |reader|
 end
 ```
 
-You can also use `Content-Encoding: compress` with [sinatra](http://sinatrarb.com):
+You can also use `Content-Encoding: compress` with [sinatra](http://sinatrarb.com) for example:
 
 ```ruby
 require "lzws"
@@ -93,6 +93,18 @@ require "sinatra"
 get "/" do
   headers["Content-Encoding"] = "compress"
   LZWS::String.compress "TOBEORNOTTOBEORTOBEORNOT"
+end
+```
+
+All functionality (including streaming) can be used inside multiple threads with [parallel](https://github.com/grosser/parallel) for example.
+This code will provide heavy load for your CPU.
+
+```ruby
+require "lzws"
+require "parallel"
+
+Parallel.each(large_datas) do |large_data|
+  LZWS::String.compress large_data
 end
 ```
 

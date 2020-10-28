@@ -57,7 +57,7 @@ module LZWS
           end
 
           def test_texts
-            Common.parallel_options get_compressor_options_generator do |compressor_options|
+            parallel_compressor_options do |compressor_options|
               TEXTS.each do |text|
                 PORTION_LENGTHS.each do |portion_length|
                   compressed_buffer = ::StringIO.new
@@ -114,8 +114,8 @@ module LZWS
               text           = options[:text]
               portion_length = options[:portion_length]
 
-              archive_path       = "#{ARCHIVE_PATH}_#{worker_index}"
-              native_source_path = "#{NATIVE_SOURCE_PATH}_#{worker_index}"
+              archive_path       = Common.get_path ARCHIVE_PATH, worker_index
+              native_source_path = Common.get_path NATIVE_SOURCE_PATH, worker_index
 
               compressor = Target.new
 
@@ -156,8 +156,8 @@ module LZWS
             Option.get_invalid_compressor_options BUFFER_LENGTH_NAMES, &block
           end
 
-          def get_compressor_options_generator
-            Option.get_compressor_options_generator BUFFER_LENGTH_NAMES
+          def parallel_compressor_options(&block)
+            Common.parallel_options Option.get_compressor_options_generator(BUFFER_LENGTH_NAMES), &block
           end
 
           def get_compatible_decompressor_options(compressor_options, &block)
