@@ -61,7 +61,7 @@ ensure
 end
 ```
 
-You can create and read `tar.Z` archives with [minitar](https://github.com/halostatue/minitar) for example.
+You can create and read `tar.Z` archives with [minitar](https://github.com/halostatue/minitar).
 LZWS is compatible with [UNIX compress](https://en.wikipedia.org/wiki/Compress) (with default options).
 
 ```ruby
@@ -84,7 +84,7 @@ LZWS::Stream::Reader.open "file.tar.Z" do |reader|
 end
 ```
 
-You can also use `Content-Encoding: compress` with [sinatra](http://sinatrarb.com) for example:
+You can also use `Content-Encoding: compress` with [sinatra](http://sinatrarb.com):
 
 ```ruby
 require "lzws"
@@ -96,7 +96,7 @@ get "/" do
 end
 ```
 
-All functionality (including streaming) can be used inside multiple threads with [parallel](https://github.com/grosser/parallel) for example.
+All functionality (including streaming) can be used inside multiple threads with [parallel](https://github.com/grosser/parallel).
 This code will provide heavy load for your CPU.
 
 ```ruby
