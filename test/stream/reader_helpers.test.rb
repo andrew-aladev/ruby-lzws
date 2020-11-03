@@ -358,7 +358,7 @@ module LZWS
         def test_invalid_open
           Validation::INVALID_STRINGS.each do |invalid_string|
             assert_raises ValidateError do
-              Target.open(invalid_string) {}
+              Target.open(invalid_string) {} # no-op
             end
           end
 

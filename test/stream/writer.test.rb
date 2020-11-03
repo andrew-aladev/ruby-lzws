@@ -189,7 +189,6 @@ module LZWS
             :flush_nonblock => Option::BOOLS,
             :close_nonblock => Option::BOOLS
           )
-          .to_a
 
           parallel_compressor_options do |compressor_options|
             start_server do |server|
@@ -275,7 +274,6 @@ module LZWS
             :flush_nonblock => Option::BOOLS,
             :close_nonblock => Option::BOOLS
           )
-          .to_a
 
           options_generator = OCG.new(
             :text           => LARGE_TEXTS,
