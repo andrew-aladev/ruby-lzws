@@ -185,12 +185,12 @@ module LZWS
         # -- asynchronous --
 
         def test_write_nonblock
-          modes = OCG.new(
-            :flush_nonblock => Option::BOOLS,
-            :close_nonblock => Option::BOOLS
-          )
-
           parallel_compressor_options do |compressor_options|
+            modes = OCG.new(
+              :flush_nonblock => Option::BOOLS,
+              :close_nonblock => Option::BOOLS
+            )
+
             start_server do |server|
               TEXTS.each do |text|
                 PORTION_LENGTHS.each do |portion_length|
@@ -270,11 +270,6 @@ module LZWS
         end
 
         def test_write_nonblock_with_large_texts
-          modes = OCG.new(
-            :flush_nonblock => Option::BOOLS,
-            :close_nonblock => Option::BOOLS
-          )
-
           options_generator = OCG.new(
             :text           => LARGE_TEXTS,
             :portion_length => LARGE_PORTION_LENGTHS
@@ -283,6 +278,11 @@ module LZWS
           Common.parallel_options options_generator do |options|
             text           = options[:text]
             portion_length = options[:portion_length]
+
+            modes = OCG.new(
+              :flush_nonblock => Option::BOOLS,
+              :close_nonblock => Option::BOOLS
+            )
 
             sources = get_sources text, portion_length
 
