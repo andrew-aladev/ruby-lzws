@@ -29,6 +29,11 @@ module LZWS
 
         BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
         BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
+        FINISH_MODES          = OCG.new(
+          :flush_nonblock => Option::BOOLS,
+          :close_nonblock => Option::BOOLS
+        )
+        .freeze
 
         def test_invalid_initialize
           get_invalid_compressor_options do |invalid_options|
@@ -192,12 +197,7 @@ module LZWS
                   sources = get_sources text, portion_length
 
                   get_compatible_decompressor_options(compressor_options) do |decompressor_options|
-                    modes = OCG.new(
-                      :flush_nonblock => Option::BOOLS,
-                      :close_nonblock => Option::BOOLS
-                    )
-
-                    modes.each do |mode|
+                    FINISH_MODES.each do |mode|
                       server_nonblock_test(server, text, portion_length, compressor_options, decompressor_options) do |instance, socket|
                         # write
 
@@ -282,12 +282,7 @@ module LZWS
             sources = get_sources text, portion_length
 
             start_server do |server|
-              modes = OCG.new(
-                :flush_nonblock => Option::BOOLS,
-                :close_nonblock => Option::BOOLS
-              )
-
-              modes.each do |mode|
+              FINISH_MODES.each do |mode|
                 server_nonblock_test(server, text, portion_length) do |instance, socket|
                   # write
 
