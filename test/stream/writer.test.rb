@@ -197,7 +197,7 @@ module LZWS
                   sources = get_sources text, portion_length
 
                   get_compatible_decompressor_options(compressor_options) do |decompressor_options|
-                    FINISH_MODES.each do |mode|
+                    FINISH_MODES.each do |finish_mode|
                       server_nonblock_test(server, text, portion_length, compressor_options, decompressor_options) do |instance, socket|
                         # write
 
@@ -221,7 +221,7 @@ module LZWS
 
                         # flush
 
-                        if mode[:flush_nonblock]
+                        if finish_mode[:flush_nonblock]
                           loop do
                             begin
                               is_flushed = instance.flush_nonblock
@@ -244,7 +244,7 @@ module LZWS
 
                         refute instance.closed?
 
-                        if mode[:close_nonblock]
+                        if finish_mode[:close_nonblock]
                           loop do
                             begin
                               is_closed = instance.close_nonblock
@@ -282,7 +282,7 @@ module LZWS
             sources = get_sources text, portion_length
 
             start_server do |server|
-              FINISH_MODES.each do |mode|
+              FINISH_MODES.each do |finish_mode|
                 server_nonblock_test(server, text, portion_length) do |instance, socket|
                   # write
 
@@ -306,7 +306,7 @@ module LZWS
 
                   # flush
 
-                  if mode[:flush_nonblock]
+                  if finish_mode[:flush_nonblock]
                     loop do
                       begin
                         is_flushed = instance.flush_nonblock
@@ -324,7 +324,7 @@ module LZWS
                 ensure
                   # close
 
-                  if mode[:close_nonblock]
+                  if finish_mode[:close_nonblock]
                     loop do
                       begin
                         is_closed = instance.close_nonblock
