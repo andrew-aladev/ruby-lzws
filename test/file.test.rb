@@ -65,13 +65,13 @@ module LZWS
           archive_path = Common.get_path ARCHIVE_PATH, worker_index
 
           TEXTS.each do |text|
-            ::File.write source_path, text
+            ::File.write source_path, text, :mode => "wb"
             Target.compress source_path, archive_path, compressor_options
 
             get_compatible_decompressor_options(compressor_options) do |decompressor_options|
               Target.decompress archive_path, source_path, decompressor_options
 
-              decompressed_text = ::File.read source_path
+              decompressed_text = ::File.read source_path, :mode => "rb"
               decompressed_text.force_encoding text.encoding
 
               assert_equal text, decompressed_text
@@ -87,20 +87,20 @@ module LZWS
           native_source_path  = Common.get_path NATIVE_SOURCE_PATH, worker_index
           native_archive_path = Common.get_path NATIVE_ARCHIVE_PATH, worker_index
 
-          ::File.write native_source_path, text
+          ::File.write native_source_path, text, :mode => "wb"
           Common.native_compress native_source_path, native_archive_path
           Target.decompress native_archive_path, source_path
 
-          decompressed_text = ::File.read source_path
+          decompressed_text = ::File.read source_path, :mode => "rb"
           decompressed_text.force_encoding text.encoding
 
           assert_equal text, decompressed_text
 
-          ::File.write source_path, text
+          ::File.write source_path, text, :mode => "wb"
           Target.compress source_path, archive_path
           Common.native_decompress archive_path, native_source_path
 
-          decompressed_text = ::File.read native_source_path
+          decompressed_text = ::File.read native_source_path, :mode => "rb"
           decompressed_text.force_encoding text.encoding
 
           assert_equal text, decompressed_text

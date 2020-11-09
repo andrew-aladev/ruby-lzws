@@ -390,7 +390,7 @@ module LZWS
             native_source_path  = Common.get_path NATIVE_SOURCE_PATH, worker_index
             native_archive_path = Common.get_path NATIVE_ARCHIVE_PATH, worker_index
 
-            ::File.write native_source_path, text
+            ::File.write native_source_path, text, :mode => "wb"
             Common.native_compress native_source_path, native_archive_path
 
             decompressed_text = Target.open native_archive_path, &:read
@@ -404,7 +404,7 @@ module LZWS
 
         protected def write_archive(archive_path, text, compressor_options = {})
           compressed_text = String.compress text, compressor_options
-          ::File.write archive_path, compressed_text
+          ::File.write archive_path, compressed_text, :mode => "wb"
         end
 
         def parallel_compressor_options(&block)

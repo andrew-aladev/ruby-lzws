@@ -165,7 +165,7 @@ module LZWS
 
                   assert_equal instance.rewind, 0
 
-                  compressed_texts << ::File.read(archive_path)
+                  compressed_texts << ::File.read(archive_path, :mode => "rb")
 
                   assert_equal instance.pos, 0
                   assert_equal instance.pos, instance.tell
@@ -372,7 +372,7 @@ module LZWS
                     break if is_rewinded
                   end
 
-                  compressed_texts << ::File.read(archive_path)
+                  compressed_texts << ::File.read(archive_path, :mode => "rb")
 
                   assert_equal instance.pos, 0
                   assert_equal instance.pos, instance.tell

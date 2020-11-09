@@ -143,7 +143,7 @@ module LZWS
 
               Common.native_decompress archive_path, native_source_path
 
-              decompressed_text = ::File.read native_source_path
+              decompressed_text = ::File.read native_source_path, :mode => "rb"
               decompressed_text.force_encoding text.encoding
 
               assert_equal text, decompressed_text

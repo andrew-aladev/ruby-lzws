@@ -40,7 +40,7 @@ module LZWS
                   sources.each { |current_source| instance << current_source }
                 end
 
-                compressed_text = ::File.read archive_path
+                compressed_text = ::File.read archive_path, :mode => "rb"
 
                 get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   check_text text, compressed_text, decompressor_options
@@ -69,7 +69,7 @@ module LZWS
                   instance.print(*sources, **keyword_args)
                 end
 
-                compressed_text = ::File.read archive_path
+                compressed_text = ::File.read archive_path, :mode => "rb"
 
                 get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   check_text target_text, compressed_text, decompressor_options
@@ -91,7 +91,7 @@ module LZWS
                   sources.each { |source| instance.printf "%s", source }
                 end
 
-                compressed_text = ::File.read archive_path
+                compressed_text = ::File.read archive_path, :mode => "rb"
 
                 get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   check_text text, compressed_text, decompressor_options
@@ -127,7 +127,7 @@ module LZWS
                 end
               end
 
-              compressed_text = ::File.read archive_path
+              compressed_text = ::File.read archive_path, :mode => "rb"
 
               get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 check_text text, compressed_text, decompressor_options
@@ -166,7 +166,7 @@ module LZWS
                   instance.puts(*args)
                 end
 
-                compressed_text = ::File.read archive_path
+                compressed_text = ::File.read archive_path, :mode => "rb"
 
                 get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                   check_text target_text, compressed_text, decompressor_options
@@ -196,7 +196,7 @@ module LZWS
             TEXTS.each do |text|
               Target.open(archive_path, compressor_options) { |instance| instance.write text }
 
-              compressed_text = ::File.read archive_path
+              compressed_text = ::File.read archive_path, :mode => "rb"
 
               get_compatible_decompressor_options(compressor_options) do |decompressor_options|
                 check_text text, compressed_text, decompressor_options
@@ -226,7 +226,7 @@ module LZWS
 
             Common.native_decompress archive_path, native_source_path
 
-            decompressed_text = ::File.read native_source_path
+            decompressed_text = ::File.read native_source_path, :mode => "rb"
             decompressed_text.force_encoding text.encoding
 
             assert_equal text, decompressed_text

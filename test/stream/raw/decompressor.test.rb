@@ -123,10 +123,10 @@ module LZWS
               native_source_path  = Common.get_path NATIVE_SOURCE_PATH, worker_index
               native_archive_path = Common.get_path NATIVE_ARCHIVE_PATH, worker_index
 
-              ::File.write native_source_path, text
+              ::File.write native_source_path, text, :mode => "wb"
               Common.native_compress native_source_path, native_archive_path
 
-              compressed_text = ::File.read native_archive_path
+              compressed_text = ::File.read native_archive_path, :mode => "rb"
 
               decompressed_buffer = ::StringIO.new
               decompressed_buffer.set_encoding ::Encoding::BINARY
