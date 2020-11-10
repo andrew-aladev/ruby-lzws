@@ -93,7 +93,7 @@ module LZWS
 
                   compressed_text = compressed_buffer.string
 
-                  get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+                  get_compatible_decompressor_options compressor_options do |decompressor_options|
                     decompressed_text = String.decompress compressed_text, decompressor_options
                     decompressed_text.force_encoding text.encoding
 
@@ -119,7 +119,7 @@ module LZWS
 
               compressor = Target.new
 
-              ::File.open(archive_path, "wb") do |archive|
+              ::File.open archive_path, "wb" do |archive|
                 writer = proc { |portion| archive << portion }
 
                 begin

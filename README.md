@@ -103,7 +103,7 @@ This code will provide heavy load for your CPU.
 require "lzws"
 require "parallel"
 
-Parallel.each(large_datas) do |large_data|
+Parallel.each large_datas do |large_data|
   LZWS::String.compress large_data
 end
 ```

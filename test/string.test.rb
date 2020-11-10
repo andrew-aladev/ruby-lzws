@@ -58,7 +58,7 @@ module LZWS
           TEXTS.each do |text|
             compressed_text = Target.compress text, compressor_options
 
-            get_compatible_decompressor_options(compressor_options) do |decompressor_options|
+            get_compatible_decompressor_options compressor_options do |decompressor_options|
               decompressed_text = Target.decompress compressed_text, decompressor_options
               decompressed_text.force_encoding text.encoding
 

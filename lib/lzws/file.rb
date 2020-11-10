@@ -17,7 +17,7 @@ module LZWS
 
       options = Option.get_compressor_options options, BUFFER_LENGTH_NAMES
 
-      open_files(source, destination) do |source_io, destination_io|
+      open_files source, destination do |source_io, destination_io|
         LZWS._native_compress_io source_io, destination_io, options
       end
 
@@ -30,7 +30,7 @@ module LZWS
 
       options = Option.get_decompressor_options options, BUFFER_LENGTH_NAMES
 
-      open_files(source, destination) do |source_io, destination_io|
+      open_files source, destination do |source_io, destination_io|
         LZWS._native_decompress_io source_io, destination_io, options
       end
 
