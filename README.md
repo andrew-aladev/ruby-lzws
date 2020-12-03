@@ -1,8 +1,8 @@
 # Ruby bindings for lzws library
 
-| Travis | AppVeyor | Circle | Codecov | Gem   |
+| AppVeyor | Circle | Travis | Codecov | Gem   |
 | :---:  | :---:    | :---:  | :---:   | :---: |
-| [![Travis test status](https://travis-ci.com/andrew-aladev/ruby-lzws.svg?branch=master)](https://travis-ci.com/andrew-aladev/ruby-lzws) | [![AppVeyor test status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-lzws?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-lzws/branch/master) | [![Circle test status](https://circleci.com/gh/andrew-aladev/ruby-lzws/tree/master.svg?style=shield)](https://circleci.com/gh/andrew-aladev/ruby-lzws/tree/master) | [![Codecov](https://codecov.io/gh/andrew-aladev/ruby-lzws/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-aladev/ruby-lzws) | [![Gem](https://img.shields.io/gem/v/ruby-lzws.svg)](https://rubygems.org/gems/ruby-lzws) |
+| [![AppVeyor test status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-lzws?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-lzws/branch/master) | [![Circle test status](https://circleci.com/gh/andrew-aladev/ruby-lzws/tree/master.svg?style=shield)](https://circleci.com/gh/andrew-aladev/ruby-lzws/tree/master) | [![Travis test status](https://travis-ci.com/andrew-aladev/ruby-lzws.svg?branch=master)](https://travis-ci.com/andrew-aladev/ruby-lzws)| [![Codecov](https://codecov.io/gh/andrew-aladev/ruby-lzws/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-aladev/ruby-lzws) | [![Gem](https://img.shields.io/gem/v/ruby-lzws.svg)](https://rubygems.org/gems/ruby-lzws) |
 
 See [lzws library](https://github.com/andrew-aladev/lzws).
 

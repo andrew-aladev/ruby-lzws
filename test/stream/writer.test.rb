@@ -122,13 +122,13 @@ module LZWS
                   :transcode_options => TRANSCODE_OPTIONS
                 )
 
-                assert_equal instance.external_encoding, external_encoding
-                assert_equal instance.transcode_options, TRANSCODE_OPTIONS
+                assert_equal external_encoding, instance.external_encoding
+                assert_equal TRANSCODE_OPTIONS, instance.transcode_options
 
                 begin
                   instance.set_encoding external_encoding, nil, TRANSCODE_OPTIONS
-                  assert_equal instance.external_encoding, external_encoding
-                  assert_equal instance.transcode_options, TRANSCODE_OPTIONS
+                  assert_equal external_encoding, instance.external_encoding
+                  assert_equal TRANSCODE_OPTIONS, instance.transcode_options
 
                   instance.write text
                 ensure
@@ -163,11 +163,11 @@ module LZWS
                   assert_equal instance.pos, text.bytesize
                   assert_equal instance.pos, instance.tell
 
-                  assert_equal instance.rewind, 0
+                  assert_equal 0, instance.rewind
 
                   compressed_texts << ::File.read(archive_path, :mode => "rb")
 
-                  assert_equal instance.pos, 0
+                  assert_equal 0, instance.pos
                   assert_equal instance.pos, instance.tell
 
                   file.truncate 0
@@ -372,7 +372,7 @@ module LZWS
 
                   compressed_texts << ::File.read(archive_path, :mode => "rb")
 
-                  assert_equal instance.pos, 0
+                  assert_equal 0, instance.pos
                   assert_equal instance.pos, instance.tell
 
                   file.truncate 0

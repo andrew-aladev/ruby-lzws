@@ -150,7 +150,7 @@ module LZWS
                     char = instance.getc
 
                     unless char.nil?
-                      assert_equal char.encoding, internal_encoding
+                      assert_equal internal_encoding, char.encoding
                       instance.ungetc char
                     end
 
@@ -158,7 +158,7 @@ module LZWS
 
                     begin
                       char = instance.readchar
-                      assert_equal char.encoding, internal_encoding
+                      assert_equal internal_encoding, char.encoding
 
                       instance.ungetc char
                     rescue ::EOFError
@@ -170,7 +170,7 @@ module LZWS
                     decompressed_text = ::String.new :encoding => internal_encoding
 
                     instance.each_char do |current_char|
-                      assert_equal current_char.encoding, internal_encoding
+                      assert_equal internal_encoding, current_char.encoding
                       decompressed_text << current_char
                     end
 
@@ -228,13 +228,13 @@ module LZWS
                 Target.open archive_path, decompressor_options do |instance|
                   # lineno
 
-                  assert_equal instance.lineno, 0
+                  assert_equal 0, instance.lineno
 
                   instance.lineno = 1
-                  assert_equal instance.lineno, 1
+                  assert_equal 1, instance.lineno
 
                   instance.lineno = 0
-                  assert_equal instance.lineno, 0
+                  assert_equal 0, instance.lineno
 
                   # gets
 
@@ -242,30 +242,30 @@ module LZWS
                     line = instance.gets limit
                     next if line.nil?
 
-                    assert_equal instance.lineno, 1
+                    assert_equal 1, instance.lineno
 
                     instance.ungetline line
-                    assert_equal instance.lineno, 0
+                    assert_equal 0, instance.lineno
 
                     # Same test with separator.
 
                     line = instance.gets separator, limit
                     next if line.nil?
 
-                    assert_equal instance.lineno, 1
+                    assert_equal 1, instance.lineno
 
                     instance.ungetline line
-                    assert_equal instance.lineno, 0
+                    assert_equal 0, instance.lineno
                   end
 
                   # readline
 
                   begin
                     line = instance.readline
-                    assert_equal instance.lineno, 1
+                    assert_equal 1, instance.lineno
 
                     instance.ungetline line
-                    assert_equal instance.lineno, 0
+                    assert_equal 0, instance.lineno
                   rescue ::EOFError
                     # ok
                   end
@@ -275,7 +275,7 @@ module LZWS
                   lines = instance.readlines
                   lines.each { |current_line| instance.ungetline current_line }
 
-                  decompressed_text = lines.join ""
+                  decompressed_text = lines.join
                   decompressed_text.force_encoding text.encoding
 
                   assert_equal text, decompressed_text
@@ -321,7 +321,7 @@ module LZWS
                     line = instance.gets separator
 
                     unless line.nil?
-                      assert_equal line.encoding, internal_encoding
+                      assert_equal internal_encoding, line.encoding
                       instance.ungetline line
                     end
 
@@ -329,7 +329,7 @@ module LZWS
 
                     begin
                       line = instance.readline
-                      assert_equal line.encoding, internal_encoding
+                      assert_equal internal_encoding, line.encoding
 
                       instance.ungetline line
                     rescue ::EOFError
@@ -341,7 +341,7 @@ module LZWS
                     decompressed_text = ::String.new :encoding => internal_encoding
 
                     instance.each_line do |current_line|
-                      assert_equal current_line.encoding, internal_encoding
+                      assert_equal internal_encoding, current_line.encoding
                       decompressed_text << current_line
                     end
 
