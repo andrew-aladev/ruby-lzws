@@ -62,7 +62,7 @@ for dictionary in "linked-list" "sparse-array"; do
   find . \( \
     -name "CMake*" \
     -o -name "*.cmake" \
-  \) -exec rm -rf {} +
+  \) -depth -exec rm -rf {} +
 
   cmake ".." \
     -DLZWS_COMPRESSOR_DICTIONARY="$dictionary" \
