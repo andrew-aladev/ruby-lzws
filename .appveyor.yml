@@ -25,6 +25,8 @@ for:
       - sh: sudo apt-get install -y ncompress
     test_script:
       - sh: scripts/ci_test.sh
+    after_test:
+      - sh: bash <(curl -s "https://codecov.io/bash")
 
   -
     matrix:
@@ -32,6 +34,8 @@ for:
         - job_name: MacOS
     test_script:
       - sh: sudo -E scripts/ci_test.sh
+    after_test:
+      - sh: bash <(curl -s "https://codecov.io/bash")
 
   #-
   #  matrix:
@@ -41,3 +45,5 @@ for:
   #    - cmd: set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
   #  test_script:
   #    - cmd: C:\msys64\usr\bin\bash -cl "./scripts/ci_test.sh"
+  #  after_test:
+  #    - cmd: C:\msys64\usr\bin\bash -cl "bash <(curl -s 'https://codecov.io/bash')"
