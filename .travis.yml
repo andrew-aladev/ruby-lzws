@@ -21,8 +21,6 @@ jobs:
 addons:
   apt:
     packages:
-      - cmake
-      - libgmp-dev
       - ncompress
 
 before_install:
