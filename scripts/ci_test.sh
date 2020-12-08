@@ -59,10 +59,10 @@ fi
 for dictionary in "linked-list" "sparse-array"; do
   echo "dictionary: ${dictionary}"
 
-  find . \( \
+  find . -depth \( \
     -name "CMake*" \
     -o -name "*.cmake" \
-  \) -depth -exec rm -rf {} +
+  \) -exec rm -rf {} +
 
   cmake ".." \
     -DLZWS_COMPRESSOR_DICTIONARY="$dictionary" \
