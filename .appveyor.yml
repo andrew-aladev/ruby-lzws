@@ -10,7 +10,7 @@ environment:
       appveyor_build_worker_image: macos
       APPVEYOR: True
       CI: True
-    #- job_name: Windows
+    # - job_name: Windows
     #  appveyor_build_worker_image: Visual Studio 2019
     #  CHERE_INVOKING: 1
     #  MSYSTEM: MINGW64
@@ -37,7 +37,7 @@ for:
     after_test:
       - sh: bash <(curl -s "https://codecov.io/bash")
 
-  #-
+  # -
   #  matrix:
   #    only:
   #      - job_name: Windows
