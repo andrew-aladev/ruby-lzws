@@ -43,6 +43,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Setup dependencies
+        # Using compress from latest ncompress.
+        run: |
+          brew install ncompress
+          ln -s /usr/local/opt/ncompress/bin/compress /usr/local/bin/compress
+
       - name: Ruby setup
         uses: ruby/setup-ruby@v1
         with:
