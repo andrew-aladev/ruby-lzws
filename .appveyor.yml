@@ -47,7 +47,7 @@ for:
         - job_name: Windows
     init:
       - cmd: set PATH=C:\Ruby%RUBY_VERSION%-x64\bin;%PATH%
-      - cmd: C:\msys64\usr\bin\bash -cl "curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o /mingw64/bin/compress"
+      - cmd: C:\msys64\usr\bin\bash -cl "curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o /bin/compress"
     test_script:
       # Using special mingw prefix.
       - cmd: C:\msys64\usr\bin\bash -cl "./scripts/ci_test.sh /mingw64"
