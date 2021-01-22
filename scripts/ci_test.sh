@@ -18,11 +18,14 @@ bash -cl "\
   bundle install \
 "
 
+# Using standard default prefix.
+prefix=${1:-"/usr/local"}
+
 # Fix path environment params.
-export PATH="${PATH}:/usr/local/bin"
-export C_INCLUDE_PATH="${C_INCLUDE_PATH}:/usr/local/include"
-export LIBRARY_PATH="${C_INCLUDE_PATH}:/usr/local/lib"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib"
+export PATH="${PATH}:${prefix}/bin"
+export C_INCLUDE_PATH="${C_INCLUDE_PATH}:${prefix}/include"
+export LIBRARY_PATH="${C_INCLUDE_PATH}:${prefix}/lib"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${prefix}/lib"
 
 # Compiling library from source.
 LZWS_BRANCH="v1.4.1"
@@ -39,7 +42,7 @@ git clone "https://github.com/andrew-aladev/lzws.git" \
   "lzws"
 cd "lzws/build"
 
-# "sudo" may be required for "/usr/local".
+# "sudo" may be required for prefix.
 if command -v "sudo" > /dev/null 2>&1; then
   is_sudo_required=true
 else
@@ -55,12 +58,13 @@ for dictionary in "linked-list" "sparse-array"; do
   \) -exec rm -rf {} +
 
   cmake ".." \
+    -DCMAKE_INSTALL_PREFIX="$prefix" \
+    -DCMAKE_BUILD_TYPE="RELEASE" \
     -DLZWS_COMPRESSOR_DICTIONARY="$dictionary" \
     -DLZWS_CLI=OFF \
     -DLZWS_TESTS=OFF \
     -DLZWS_EXAMPLES=OFF \
-    -DLZWS_MAN=OFF \
-    -DCMAKE_BUILD_TYPE="RELEASE"
+    -DLZWS_MAN=OFF
 
   make clean
   make -j${CPU_COUNT}

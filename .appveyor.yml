@@ -48,6 +48,7 @@ for:
     init:
       - cmd: set PATH=C:\Ruby%RUBY_VERSION%-x64\bin;%PATH%
     test_script:
-      - cmd: C:\msys64\usr\bin\bash -cl "./scripts/ci_test.sh"
+      # Using special mingw prefix.
+      - cmd: C:\msys64\usr\bin\bash -cl "./scripts/ci_test.sh /mingw64"
     after_test:
       - cmd: C:\msys64\usr\bin\bash -cl "bash <(curl -s 'https://codecov.io/bash')"

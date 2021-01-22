@@ -43,7 +43,9 @@ module LZWS
     end
 
     def self.validate_proc(value)
-      raise ValidateError, "invalid proc" unless value.is_a?(::Proc) || value.is_a?(::Method) || value.is_a?(::UnboundMethod)
+      unless value.is_a?(::Proc) || value.is_a?(::Method) || value.is_a?(::UnboundMethod)
+        raise ValidateError, "invalid proc"
+      end
     end
   end
 end

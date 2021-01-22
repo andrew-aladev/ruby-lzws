@@ -77,5 +77,6 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
 
       - name: CI test
-        run: scripts/ci_test.sh
+        # Using special mingw prefix.
+        run: scripts/ci_test.sh /mingw64
         shell: bash
