@@ -72,7 +72,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup dependencies
-        run: wget https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -O /mingw64/bin/compress
+        run: curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o /mingw64/bin/compress
 
       - name: Ruby setup
         uses: ruby/setup-ruby@v1
