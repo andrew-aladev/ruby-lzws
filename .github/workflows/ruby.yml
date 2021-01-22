@@ -78,8 +78,8 @@ jobs:
 
       - name: Setup dependencies
         run: |
-          echo "::add-path::${env:GITHUB_WORKSPACE}"
-          curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o compress
+          curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o /bin/compress
+          chmod +x /bin/compress
 
       - name: CI test
         # Using special mingw prefix.
