@@ -18,13 +18,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup dependencies
-        run: sudo apt-get install -y ncompress
-
       - name: Ruby setup
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+
+      - name: Setup dependencies
+        run: sudo apt-get install -y ncompress
 
       - name: CI test
         run: sudo scripts/ci_test.sh
@@ -43,16 +43,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Ruby setup
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
       - name: Setup dependencies
         # Using compress from latest ncompress.
         run: |
           brew install ncompress
           ln -s /usr/local/opt/ncompress/bin/compress /usr/local/bin/compress
-
-      - name: Ruby setup
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
 
       - name: CI test
         run: sudo scripts/ci_test.sh
@@ -71,13 +71,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup dependencies
-        run: curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o /mingw64/bin/compress
-
       - name: Ruby setup
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+
+      - name: Setup dependencies
+        run: curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o /mingw64/bin/compress
 
       - name: CI test
         # Using special mingw prefix.
