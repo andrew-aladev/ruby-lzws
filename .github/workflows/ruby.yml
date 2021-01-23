@@ -77,10 +77,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
 
       - name: Setup dependencies
-        run: |
-          BINARY_DIR="$(dirname $(which ruby))"
-          curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o "${BINARY_DIR}/compress"
-          chmod +x /bin/compress
+        run: curl -L "https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe" -o "C:\Program Files\Git\bin\compress"
 
       - name: CI test
         # Using special mingw prefix.
