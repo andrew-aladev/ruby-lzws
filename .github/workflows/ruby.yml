@@ -78,7 +78,8 @@ jobs:
 
       - name: Setup dependencies
         run: |
-          curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o /bin/compress
+          BINARY_DIR="$(dirname $(which ruby))"
+          curl -L https://github.com/vapier/ncompress/releases/download/v4.2.4.6/compress-windows-x64.exe -o "${BINARY_DIR}/compress"
           chmod +x /bin/compress
 
       - name: CI test
