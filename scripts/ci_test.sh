@@ -44,9 +44,9 @@ cd "lzws/build"
 
 # "sudo" may be required for prefix.
 if command -v "sudo" > /dev/null 2>&1; then
-  is_sudo_required=true
+  sudo_prefix="sudo"
 else
-  is_sudo_required=false
+  sudo_prefix=""
 fi
 
 for dictionary in "linked-list" "sparse-array"; do
@@ -69,11 +69,7 @@ for dictionary in "linked-list" "sparse-array"; do
   make clean
   make -j${CPU_COUNT}
 
-  if $is_sudo_required; then
-    sudo make install
-  else
-    make install
-  fi
+  $sudo_prefix make install
 
   bash -cl "\
     cd ../../.. && \
@@ -81,9 +77,5 @@ for dictionary in "linked-list" "sparse-array"; do
     bundle exec rake \
   "
 
-  if $is_sudo_required; then
-    sudo xargs rm < "install_manifest.txt"
-  else
-    xargs rm < "install_manifest.txt"
-  fi
+  $sudo_prefix xargs rm < "install_manifest.txt"
 done
