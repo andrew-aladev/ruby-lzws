@@ -51,7 +51,7 @@ fi
 
 # "dos2unix" may be required for text file handling.
 if command -v "dos2unix" > /dev/null 2>&1; then
-  dos2unix_prefix="dos2unix"
+  dos2unix_prefix="${sudo_prefix} dos2unix"
 else
   dos2unix_prefix=":"
 fi
