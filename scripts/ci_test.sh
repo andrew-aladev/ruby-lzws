@@ -51,9 +51,9 @@ fi
 
 # "dos2unix" may be required for text file handling.
 if command -v "dos2unix" > /dev/null 2>&1; then
-  dos2unix_suffix="| dos2unix"
+  dos2unix_prefix="dos2unix"
 else
-  dos2unix_suffix=""
+  dos2unix_prefix=":"
 fi
 
 for dictionary in "linked-list" "sparse-array"; do
@@ -84,5 +84,6 @@ for dictionary in "linked-list" "sparse-array"; do
     bundle exec rake \
   "
 
-  cat "install_manifest.txt" $dos2unix_suffix | $sudo_prefix xargs rm -f
+  $dos2unix_prefix "install_manifest.txt"
+  cat "install_manifest.txt" | $sudo_prefix xargs rm -f
 done
