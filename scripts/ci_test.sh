@@ -49,6 +49,13 @@ else
   sudo_prefix=""
 fi
 
+# "dos2unix" may be required for text file handling.
+if command -v "dos2unix" > /dev/null 2>&1; then
+  dos2unix_suffix="| dos2unix"
+else
+  dos2unix_suffix=""
+fi
+
 for dictionary in "linked-list" "sparse-array"; do
   echo "dictionary: ${dictionary}"
 
@@ -77,5 +84,5 @@ for dictionary in "linked-list" "sparse-array"; do
     bundle exec rake \
   "
 
-  $sudo_prefix xargs rm < "install_manifest.txt"
+  cat "install_manifest.txt" $dos2unix_suffix | $sudo_prefix xargs rm -f
 done
