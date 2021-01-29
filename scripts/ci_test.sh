@@ -28,7 +28,7 @@ export LIBRARY_PATH="${C_INCLUDE_PATH}:${prefix}/lib"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${prefix}/lib"
 
 # Compiling library from source.
-LZWS_BRANCH="v1.4.1"
+LZWS_BRANCH="v1.4.2"
 
 cd "tmp"
 
