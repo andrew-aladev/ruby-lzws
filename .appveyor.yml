@@ -14,7 +14,7 @@ environment:
       appveyor_build_worker_image: Visual Studio 2019
       CHERE_INVOKING: 1
       MSYSTEM: MINGW64
-      RUBY_VERSION: 27
+      RUBY_VERSION: 30
 
 for:
   -
