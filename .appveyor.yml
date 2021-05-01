@@ -22,6 +22,7 @@ for:
       only:
         - job_name: ubuntu
     init:
+      - sh: sudo apt-get update
       - sh: sudo apt-get install -y ncompress
     test_script:
       - sh: scripts/ci_test.sh
@@ -34,6 +35,7 @@ for:
         - job_name: macos
     init:
       # Using compress from latest ncompress.
+      - sh: brew update
       - sh: brew install ncompress
       - sh: ln -s /usr/local/opt/ncompress/bin/compress /usr/local/bin/compress
     test_script:
