@@ -195,7 +195,7 @@ File maintains both source and destination buffers, it accepts both `source_buff
 
 ## Stream::Writer
 
-Its behaviour is similar to builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.7.0/libdoc/zlib/rdoc/Zlib/GzipWriter.html).
+Its behaviour is similar to builtin [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib/libdoc/zlib/rdoc/Zlib/GzipWriter.html).
 
 Writer maintains destination buffer only, so it accepts `destination_buffer_length` option only.
 
@@ -229,7 +229,7 @@ Set another encodings, `nil` is just for compatibility with `IO`.
 #tell
 ```
 
-See [`IO`](https://ruby-doc.org/core-2.7.0/IO.html) docs.
+See [`IO`](https://ruby-doc.org/core/IO.html) docs.
 
 ```
 #write(*objects)
@@ -239,7 +239,7 @@ See [`IO`](https://ruby-doc.org/core-2.7.0/IO.html) docs.
 #closed?
 ```
 
-See [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.7.0/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
+See [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
 
 ```
 #write_nonblock(object, *options)
@@ -264,11 +264,11 @@ Setting file into nonblocking mode is [not available on Windows](https://github.
 #puts(*objects)
 ```
 
-Typical helpers, see [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib-2.7.0/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
+Typical helpers, see [`Zlib::GzipWriter`](https://ruby-doc.org/stdlib/libdoc/zlib/rdoc/Zlib/GzipWriter.html) docs.
 
 ## Stream::Reader
 
-Its behaviour is similar to builtin [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.7.0/libdoc/zlib/rdoc/Zlib/GzipReader.html).
+Its behaviour is similar to builtin [`Zlib::GzipReader`](https://ruby-doc.org/stdlib/libdoc/zlib/rdoc/Zlib/GzipReader.html).
 
 Reader maintains both source and destination buffers, it accepts both `source_buffer_length` and `destination_buffer_length` options.
 
@@ -303,7 +303,7 @@ Set another encodings.
 #tell
 ```
 
-See [`IO`](https://ruby-doc.org/core-2.7.0/IO.html) docs.
+See [`IO`](https://ruby-doc.org/core/IO.html) docs.
 
 ```
 #read(bytes_to_read = nil, out_buffer = nil)
@@ -313,14 +313,14 @@ See [`IO`](https://ruby-doc.org/core-2.7.0/IO.html) docs.
 #closed?
 ```
 
-See [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.7.0/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
+See [`Zlib::GzipReader`](https://ruby-doc.org/stdlib/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
 
 ```
 #readpartial(bytes_to_read = nil, out_buffer = nil)
 #read_nonblock(bytes_to_read, out_buffer = nil, *options)
 ```
 
-See [`IO`](https://ruby-doc.org/core-2.7.0/IO.html) docs.
+See [`IO`](https://ruby-doc.org/core/IO.html) docs.
 
 ```
 #getbyte
@@ -343,7 +343,7 @@ See [`IO`](https://ruby-doc.org/core-2.7.0/IO.html) docs.
 #ungetline(line)
 ```
 
-Typical helpers, see [`Zlib::GzipReader`](https://ruby-doc.org/stdlib-2.7.0/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
+Typical helpers, see [`Zlib::GzipReader`](https://ruby-doc.org/stdlib/libdoc/zlib/rdoc/Zlib/GzipReader.html) docs.
 
 ## Thread safety
 
