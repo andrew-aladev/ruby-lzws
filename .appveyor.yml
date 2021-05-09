@@ -97,6 +97,31 @@ for:
   -
     matrix:
       only:
+        - job_name: windows-mingw
+    init:
+      - cmd: >-
+          C:\msys64\usr\bin\bash -cl "
+          pacman --sync --noconfirm --needed
+          make
+          git
+          mingw-w64-x86_64-curl
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-gmp
+          mingw-w64-x86_64-libtommath
+          mingw-w64-x86_64-ruby
+          "
+      - cmd: >-
+          C:\msys64\usr\bin\bash -c '
+          curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
+          -o "C:\Windows\System32\compress.exe"
+          '
+    test_script:
+      - cmd: C:\msys64\usr\bin\bash -l "%cd%\scripts\ci_test.sh"
+
+  -
+    matrix:
+      only:
         - job_name: windows-cygwin
     init:
       - cmd: >-
@@ -106,7 +131,7 @@ for:
           --local-package-dir "C:\cygwin64\var\cache\setup"
           --packages "curl,cmake,make,gcc-g++,libgmp-devel,libtommath-devel,git,ruby"
       - cmd: >-
-          C:\cygwin64\bin\bash -cl '
+          C:\cygwin64\bin\bash -c '
           curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
           -o "C:\Windows\System32\compress.exe"
           '
