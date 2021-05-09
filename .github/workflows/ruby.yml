@@ -118,10 +118,8 @@ jobs:
           packages: curl cmake make gcc-g++ libgmp-devel libtommath-devel git ruby-devel
       - name: Setup dependencies
         run: >-
-            C:\cygwin64\bin\bash.exe -c '
             curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
-            -o "C:\Windows\System32\compress.exe"
-            '
+            -o "C:\cygwin64\bin\compress.exe"
       - name: CI test
         run: C:\cygwin64\bin\bash.exe -l "%cd%\scripts\ci_test.sh"
         env:
