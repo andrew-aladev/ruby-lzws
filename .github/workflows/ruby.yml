@@ -94,13 +94,15 @@ jobs:
             mingw-w64-x86_64-libtommath
             mingw-w64-x86_64-ruby
       - name: Setup dependencies
-        run: |
-          C:\msys64\usr\bin\bash.exe -c ' \
-            curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe" \
-            -o "C:\Windows\System32\compress.exe" \
+        run: >-
+            C:\msys64\usr\bin\bash.exe -c '
+            curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
+            -o "C:\Windows\System32\compress.exe"
             '
       - name: CI test
         run: scripts/ci_test.sh
+        env:
+          MSYSTEM: MINGW64
 
   windows-cygwin:
     runs-on: windows-latest
@@ -117,10 +119,10 @@ jobs:
           install-dir: C:\cygwin64
           packages: curl cmake make gcc-g++ libgmp-devel libtommath-devel git ruby
       - name: Setup dependencies
-        run: |
-          C:\cygwin64\bin\bash.exe -c ' \
-            curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe" \
-            -o "C:\Windows\System32\compress.exe" \
+        run: >-
+            C:\cygwin64\bin\bash.exe -c '
+            curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
+            -o "C:\Windows\System32\compress.exe"
             '
       - name: CI test
         run: |
