@@ -95,10 +95,8 @@ jobs:
             mingw-w64-x86_64-ruby
       - name: Setup dependencies
         run: >-
-            C:\msys64\usr\bin\bash.exe -c '
             curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
-            -o "C:\Windows\System32\compress.exe"
-            '
+            -o "/usr/bin/compress.exe"
       - name: CI test
         run: scripts/ci_test.sh
         env:
@@ -117,7 +115,7 @@ jobs:
         with:
           platform: x64
           install-dir: C:\cygwin64
-          packages: curl cmake make gcc-g++ libgmp-devel libtommath-devel git ruby
+          packages: curl cmake make gcc-g++ libgmp-devel libtommath-devel git ruby-devel
       - name: Setup dependencies
         run: >-
             C:\cygwin64\bin\bash.exe -c '
@@ -125,9 +123,7 @@ jobs:
             -o "C:\Windows\System32\compress.exe"
             '
       - name: CI test
-        run: |
-          set "PATH="
-          C:\cygwin64\bin\bash.exe -l "%cd%\scripts\ci_test.sh"
+        run: C:\cygwin64\bin\bash.exe -l "%cd%\scripts\ci_test.sh"
         env:
-          CHERE_INVOKING: 1
+          CYGWIN_NOWINPATH: 1
           SHELLOPTS: igncr
