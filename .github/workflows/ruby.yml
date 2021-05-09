@@ -106,8 +106,11 @@ jobs:
           install-dir: C:\cygwin64
           packages: curl cmake make gcc-g++ libgmp-devel libtommath-devel git ruby
       - name: Setup dependencies
-        run: curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe" \
-          -o "C:\Windows\System32\compress.exe"
+        run: |
+          C:\cygwin64\bin\bash.exe -cl '\
+            curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe" \
+            -o "C:\Windows\System32\compress.exe" \
+          '
       - name: CI test
         run: |
           set "PATH="
