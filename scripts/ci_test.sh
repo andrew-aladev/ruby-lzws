@@ -12,8 +12,10 @@ TMP_SIZE="64"
 ./temp/mount.sh "$TMP_PATH" "$TMP_SIZE"
 
 cd ".."
+ROOT_DIR=$(pwd)
 
-bash -cl "\
+/usr/bin/env bash -cl "\
+  cd \"$ROOT_DIR\" && \
   gem install bundler && \
   bundle install \
 "
@@ -28,7 +30,7 @@ export LIBRARY_PATH="${C_INCLUDE_PATH}:${prefix}/lib"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${prefix}/lib"
 
 # Compiling library from source.
-LZWS_BRANCH="v1.4.2"
+LZWS_BRANCH="v1.5.0"
 
 cd "tmp"
 
@@ -56,34 +58,53 @@ else
   dos2unix_prefix=":"
 fi
 
-for dictionary in "linked-list" "sparse-array"; do
-  echo "dictionary: ${dictionary}"
+DICTIONARIES=("linked-list" "sparse-array")
+BIGNUM_LIBRARIES=("gmp" "tommath")
 
-  find . -depth \( \
-    -name "CMake*" \
-    -o -name "*.cmake" \
-  \) -exec rm -rf {} +
+some_test_passed=false
 
-  cmake ".." \
-    -DCMAKE_INSTALL_PREFIX="$prefix" \
-    -DCMAKE_BUILD_TYPE="RELEASE" \
-    -DLZWS_COMPRESSOR_DICTIONARY="$dictionary" \
-    -DLZWS_CLI=OFF \
-    -DLZWS_TESTS=OFF \
-    -DLZWS_EXAMPLES=OFF \
-    -DLZWS_MAN=OFF
+for dictionary in "${DICTIONARIES[@]}"; do
+  for bignum_library in "${BIGNUM_LIBRARIES[@]}"; do
+    echo "dictionary: ${dictionary}, bignum library: ${bignum_library}"
 
-  make clean
-  make -j${CPU_COUNT}
+    find . -depth \( \
+      -name "CMake*" \
+      -o -name "*.cmake" \
+    \) -exec rm -rf {} +
 
-  $sudo_prefix make install
+    # It may not work on target platform.
+    cmake ".." \
+      -DCMAKE_INSTALL_PREFIX="$prefix" \
+      -DLZWS_COMPRESSOR_DICTIONARY="$dictionary" \
+      -DLZWS_BIGNUM_LIBRARY="$bignum_library" \
+      -DLZWS_SHARED=ON \
+      -DLZWS_STATIC=OFF \
+      -DLZWS_CLI=OFF \
+      -DLZWS_TESTS=OFF \
+      -DLZWS_COVERAGE=OFF \
+      -DLZWS_EXAMPLES=OFF \
+      -DLZWS_MAN=OFF \
+      -DCMAKE_BUILD_TYPE="Release" \
+      || continue
 
-  bash -cl "\
-    cd ../../.. && \
-    bundle exec rake clean && \
-    bundle exec rake \
-  "
+    cmake --build "." --target "clean"
+    cmake --build "." -j${CPU_COUNT} --config "Release"
+    $sudo_prefix cmake --build "." --target "install" --config "Release"
 
-  $dos2unix_prefix "install_manifest.txt"
-  cat "install_manifest.txt" | $sudo_prefix xargs rm -f
+    /usr/bin/env bash -cl "\
+      cd \"$ROOT_DIR\" && \
+      bundle exec rake clean && \
+      bundle exec rake \
+    "
+
+    $dos2unix_prefix "install_manifest.txt"
+    cat "install_manifest.txt" | $sudo_prefix xargs rm -f
+
+    some_test_passed=true
+  done
 done
+
+if [ "$some_test_passed" = false ]; then
+  >&2 echo "At least one test should pass"
+  exit 1
+fi
