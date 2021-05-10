@@ -44,6 +44,9 @@ git clone "https://github.com/andrew-aladev/lzws.git" \
   "lzws"
 cd "lzws/build"
 
+curl -s "https://codecov.io/bash" > "codecov.sh"
+chmod +x "codecov.sh"
+
 # "sudo" may be required for prefix.
 if command -v "sudo" > /dev/null 2>&1; then
   sudo_prefix="sudo"
@@ -96,6 +99,9 @@ for dictionary in "${DICTIONARIES[@]}"; do
       bundle exec rake clean && \
       bundle exec rake \
     "
+
+    # We need to send coverage for extension.
+    ./codecov.sh
 
     $dos2unix_prefix "install_manifest.txt"
     cat "install_manifest.txt" | $sudo_prefix xargs rm -f

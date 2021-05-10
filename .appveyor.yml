@@ -51,48 +51,52 @@ environment:
       SHELLOPTS: igncr
 
 for:
-#   -
-#     matrix:
-#       only:
-#         - job_name: ubuntu
-#     init:
-#       - sh: sudo apt-get update
-#       - sh: sudo apt-get install -y ncompress
-#     test_script:
-#       - sh: scripts/ci_test.sh
-#     after_test:
-#       - sh: bash <(curl -s "https://codecov.io/bash")
+  -
+    matrix:
+      only:
+        - job_name: ubuntu (2.5)
+        - job_name: ubuntu (2.6)
+        - job_name: ubuntu (2.7)
+        # - job_name: ubuntu (3)
+    init:
+      - sh: sudo apt-get update
+      - sh: sudo apt-get install -y libgmp-dev libtommath-dev ncompress
+    test_script:
+      - sh: rvm use "$RUBY_VERSION"
+      - sh: scripts/ci_test.sh
 
-#   -
-#     matrix:
-#       only:
-#         - job_name: macos
-#     init:
-#       # Using compress from latest ncompress.
-#       - sh: brew update
-#       - sh: brew install ncompress
-#       - sh: ln -s /usr/local/opt/ncompress/bin/compress /usr/local/bin/compress
-#     test_script:
-#       - sh: sudo -E scripts/ci_test.sh
-#     after_test:
-#       - sh: bash <(curl -s "https://codecov.io/bash")
+  -
+    matrix:
+      only:
+        - job_name: macos (2.5)
+        - job_name: macos (2.6)
+        - job_name: macos (2.7)
+        # - job_name: macos (3)
+    init:
+      - sh: brew install gmp libtommath ncompress
+      - sh: ln -s /usr/local/opt/ncompress/bin/compress /usr/local/bin/compress
+    test_script:
+      - sh: rvm use "$RUBY_VERSION"
+      - sh: scripts/ci_test.sh
 
-#   -
-#     matrix:
-#       only:
-#         - job_name: windows
-#     init:
-#       - cmd: set "PATH=C:\Ruby%RUBY_VERSION%-x64\bin;%PATH%"
-#       - cmd: >-
-#           C:\msys64\usr\bin\bash -cl '
-#           curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
-#           -o "C:\Windows\System32\compress.exe"
-#           '
-#     test_script:
-#       # Using special mingw prefix.
-#       - cmd: C:\msys64\usr\bin\bash -cl "./scripts/ci_test.sh /mingw64"
-#     after_test:
-#       - cmd: C:\msys64\usr\bin\bash -cl "bash <(curl -s 'https://codecov.io/bash')"
+  -
+    matrix:
+      only:
+        - job_name: windows (2.5)
+        - job_name: windows (2.6)
+        - job_name: windows (2.7)
+        - job_name: windows (3)
+    init:
+      - cmd: >-
+          curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
+          -o "C:\Windows\System32\compress.exe"
+    test_script:
+      - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+      - cmd: git clone "https://github.com/libtom/libtommath.git" --depth 1 && cd "libtommath"
+      - cmd: nmake -f "makefile.msvc" install && cd ..
+      - cmd: set "INCLUDE=C:\devel\include;%INCLUDE%" && set "LIB=C:\devel\lib;%LIB%"
+      - cmd: set "PATH=C:\devel\bin;C:\Ruby%RUBY_VERSION%\bin;%PATH%"
+      - cmd: call "C:\Program Files\Git\bin\bash.exe" -l "%cd%\scripts\ci_test.sh"
 
   -
     matrix:
