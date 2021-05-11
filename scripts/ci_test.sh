@@ -15,8 +15,8 @@ cd ".."
 ROOT_DIR=$(pwd)
 
 # We need to send coverage for extension.
-curl -s "https://codecov.io/bash" > "codecov.sh"
-chmod +x "codecov.sh"
+curl -s "https://codecov.io/bash" > "build/codecov.sh"
+chmod +x "build/codecov.sh"
 
 /usr/bin/env bash -cl "\
   cd \"$ROOT_DIR\" && \
@@ -99,7 +99,7 @@ for dictionary in "${DICTIONARIES[@]}"; do
       cd \"$ROOT_DIR\" && \
       bundle exec rake clean && \
       bundle exec rake && \
-      ./codecov.sh \
+      ./build/codecov.sh \
     "
 
     $dos2unix_prefix "install_manifest.txt"
