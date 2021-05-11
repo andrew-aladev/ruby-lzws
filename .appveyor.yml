@@ -47,7 +47,7 @@ for:
         - job_name: ubuntu (2.7)
         # - job_name: ubuntu (3)
     init:
-      - sh: sudo apt-get install -y gcc llvm clang libgmp-dev libtommath-dev ncompress
+      - sh: sudo apt-get install -y libgmp-dev libtommath-dev ncompress
     test_script:
       - sh: rvm use "$RUBY_VERSION"
       - sh: scripts/ci_test.sh
@@ -60,7 +60,7 @@ for:
         - job_name: macos (2.7)
         # - job_name: macos (3)
     init:
-      - sh: brew install gcc llvm gmp libtommath ncompress
+      - sh: brew install gmp libtommath ncompress
       - sh: ln -s /usr/local/opt/ncompress/bin/compress /usr/local/bin/compress
     test_script:
       - sh: rvm use "$RUBY_VERSION"
@@ -74,10 +74,10 @@ for:
       - cmd: >-
           C:\msys64\usr\bin\bash -cl "
           pacman --sync --noconfirm --needed
-          make
           git
-          mingw-w64-x86_64-curl
+          make
           mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-curl
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-gmp
           mingw-w64-x86_64-libtommath
@@ -99,7 +99,7 @@ for:
           --site "https://mirrors.kernel.org/sourceware/cygwin"
           --root "C:\cygwin64"
           --local-package-dir "C:\cygwin64\var\cache\setup"
-          --packages "curl,cmake,make,gcc-g++,libgmp-devel,libtommath-devel,git,ruby-devel"
+          --packages "cmake,curl,gcc-g++,git,libgmp-devel,libtommath-devel,make,ruby-devel"
       - cmd: >-
           curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
           -o "C:\cygwin64\bin\compress.exe"
