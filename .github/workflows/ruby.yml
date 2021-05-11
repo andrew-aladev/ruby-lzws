@@ -24,6 +24,8 @@ jobs:
         run: sudo apt-get install -y gcc llvm clang libgmp-dev libtommath-dev ncompress
       - name: CI test
         run: scripts/ci_test.sh
+        env:
+          CI: True
 
   macos:
     strategy:
@@ -47,6 +49,8 @@ jobs:
           ln -s /usr/local/opt/ncompress/bin/compress /usr/local/bin/compress
       - name: CI test
         run: scripts/ci_test.sh
+        env:
+          CI: True
 
   windows-mingw:
     runs-on: windows-latest
@@ -75,6 +79,7 @@ jobs:
       - name: CI test
         run: scripts/ci_test.sh
         env:
+          CI: True
           MSYSTEM: MINGW64
 
   windows-cygwin:
@@ -98,5 +103,6 @@ jobs:
       - name: CI test
         run: C:\cygwin64\bin\bash.exe -l "%cd%\scripts\ci_test.sh"
         env:
-          CYGWIN_NOWINPATH: 1
+          CI: True
+          CYGWIN_NOWINPATH: True
           SHELLOPTS: igncr
