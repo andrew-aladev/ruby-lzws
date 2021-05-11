@@ -3,6 +3,7 @@
 
 require "parallel"
 require "securerandom"
+require "shellwords"
 require "tempfile"
 
 module LZWS
@@ -108,11 +109,17 @@ module LZWS
       end
 
       def self.native_compress(source_path, destination_path)
-        system "compress -cf \"#{source_path}\" > \"#{destination_path}\"", :exception => true
+        system(
+          "compress -cf #{Shellwords.escape(source_path)} > #{Shellwords.escape(destination_path)}",
+          :exception => true
+        )
       end
 
       def self.native_decompress(source_path, destination_path)
-        system "compress -cfd \"#{source_path}\" > \"#{destination_path}\"", :exception => true
+        system(
+          "compress -cfd #{Shellwords.escape(source_path)} > #{Shellwords.escape(destination_path)}",
+          :exception => true
+        )
       end
     end
   end
