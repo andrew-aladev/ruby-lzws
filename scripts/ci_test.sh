@@ -14,6 +14,10 @@ TMP_SIZE="64"
 cd ".."
 ROOT_DIR=$(pwd)
 
+# We need to send coverage for extension.
+curl -s "https://codecov.io/bash" > "codecov.sh"
+chmod +x "codecov.sh"
+
 /usr/bin/env bash -cl "\
   cd \"$ROOT_DIR\" && \
   gem install bundler --force && \
@@ -43,9 +47,6 @@ git clone "https://github.com/andrew-aladev/lzws.git" \
   --depth 1 \
   "lzws"
 cd "lzws/build"
-
-curl -s "https://codecov.io/bash" > "codecov.sh"
-chmod +x "codecov.sh"
 
 # "sudo" may be required for prefix.
 if command -v "sudo" > /dev/null 2>&1; then
@@ -97,11 +98,9 @@ for dictionary in "${DICTIONARIES[@]}"; do
     /usr/bin/env bash -cl "\
       cd \"$ROOT_DIR\" && \
       bundle exec rake clean && \
-      bundle exec rake \
+      bundle exec rake && \
+      ./codecov.sh \
     "
-
-    # We need to send coverage for extension.
-    ./codecov.sh
 
     $dos2unix_prefix "install_manifest.txt"
     cat "install_manifest.txt" | $sudo_prefix xargs rm -f
