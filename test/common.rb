@@ -108,11 +108,11 @@ module LZWS
       end
 
       def self.native_compress(source_path, destination_path)
-        system "compress -cf \"#{source_path}\" > \"#{destination_path}\""
+        system "compress -cf \"#{source_path}\" > \"#{destination_path}\"", :exception => true
       end
 
       def self.native_decompress(source_path, destination_path)
-        system "compress -cfd \"#{source_path}\" > \"#{destination_path}\""
+        system "compress -cfd \"#{source_path}\" > \"#{destination_path}\"", :exception => true
       end
     end
   end
