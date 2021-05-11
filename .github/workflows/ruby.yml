@@ -21,13 +21,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
       - name: Setup dependencies
-        run: |
-          sudo apt-get install -y gcc-9 libgmp-dev libtommath-dev ncompress
-          sudo update-alternatives \
-            --install /usr/bin/gcc gcc /usr/bin/gcc-9 100 \
-            --slave /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-9 \
-            --slave /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-9 \
-            --slave /usr/bin/gcov gcov /usr/bin/gcov-9
+        run: sudo apt-get install -y gcc llvm clang libgmp-dev libtommath-dev ncompress
       - name: CI test
         run: scripts/ci_test.sh
 
@@ -49,7 +43,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
       - name: Setup dependencies
         run: |
-          brew install gmp libtommath ncompress
+          brew install gcc llvm gmp libtommath ncompress
           ln -s /usr/local/opt/ncompress/bin/compress /usr/local/bin/compress
       - name: CI test
         run: scripts/ci_test.sh

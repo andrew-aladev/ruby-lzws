@@ -59,12 +59,7 @@ for:
         - job_name: ubuntu (2.7)
         # - job_name: ubuntu (3)
     init:
-      - sh: sudo apt-get install -y gcc-9 libgmp-dev libtommath-dev ncompress
-      - sh: sudo update-alternatives
-          --install /usr/bin/gcc gcc /usr/bin/gcc-9 100
-          --slave /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-9
-          --slave /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-9
-          --slave /usr/bin/gcov gcov /usr/bin/gcov-9
+      - sh: sudo apt-get install -y gcc llvm clang libgmp-dev libtommath-dev ncompress
     test_script:
       - sh: rvm use "$RUBY_VERSION"
       - sh: scripts/ci_test.sh
@@ -77,7 +72,7 @@ for:
         - job_name: macos (2.7)
         # - job_name: macos (3)
     init:
-      - sh: brew install gmp libtommath ncompress
+      - sh: brew install gcc llvm gmp libtommath ncompress
       - sh: ln -s /usr/local/opt/ncompress/bin/compress /usr/local/bin/compress
     test_script:
       - sh: rvm use "$RUBY_VERSION"
