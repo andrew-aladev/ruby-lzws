@@ -110,14 +110,14 @@ module LZWS
 
       def self.native_compress(source_path, destination_path)
         system(
-          "compress -cf #{Shellwords.escape(source_path)} > #{Shellwords.escape(destination_path)}",
+          "compress -cf < #{Shellwords.escape(source_path)} > #{Shellwords.escape(destination_path)}",
           :exception => true
         )
       end
 
       def self.native_decompress(source_path, destination_path)
         system(
-          "compress -cfd #{Shellwords.escape(source_path)} > #{Shellwords.escape(destination_path)}",
+          "compress -cfd < #{Shellwords.escape(source_path)} > #{Shellwords.escape(destination_path)}",
           :exception => true
         )
       end
