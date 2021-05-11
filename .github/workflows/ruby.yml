@@ -48,37 +48,6 @@ jobs:
       - name: CI test
         run: scripts/ci_test.sh
 
-  windows:
-    strategy:
-      matrix:
-        ruby:
-          - 2.5
-          - 2.6
-          - 2.7
-          - 3.0
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: cmd
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-      - name: Setup dependencies
-        run: >-
-            curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
-            -o "C:\Windows\System32\compress.exe"
-      - name: CI test
-        run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          git clone "https://github.com/libtom/libtommath.git" --depth 1 && cd "libtommath"
-          nmake -f "makefile.msvc" install && cd ..
-          set "INCLUDE=C:\devel\include;%INCLUDE%" && set "LIB=C:\devel\lib;%LIB%" && set "PATH=C:\devel\bin;%PATH%"
-          call "C:\Program Files\Git\bin\bash.exe" -l "%cd%\scripts\ci_test.sh"
-
   windows-mingw:
     runs-on: windows-latest
     defaults:
