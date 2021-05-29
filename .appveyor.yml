@@ -99,7 +99,7 @@ for:
           --site "https://mirrors.kernel.org/sourceware/cygwin"
           --root "C:\cygwin64"
           --local-package-dir "C:\cygwin64\var\cache\setup"
-          --packages "cmake,curl,gcc-g++,git,libgmp-devel,libtommath-devel,make,ruby-devel"
+          --packages "gcc-g++,git,cmake,curl,libgmp-devel,libtommath-devel,make,ruby-devel"
       - cmd: >-
           curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
           -o "C:\cygwin64\bin\compress.exe"

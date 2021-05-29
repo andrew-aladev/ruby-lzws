@@ -12,6 +12,7 @@ TMP_SIZE="64"
 ./temp/mount.sh "$TMP_PATH" "$TMP_SIZE"
 
 cd ".."
+
 ROOT_DIR=$(pwd)
 
 # We need to send coverage for extension.
