@@ -86,9 +86,9 @@ for dictionary in "${DICTIONARIES[@]}"; do
       -DLZWS_STATIC=OFF \
       -DLZWS_CLI=OFF \
       -DLZWS_TESTS=OFF \
-      -DLZWS_COVERAGE=OFF \
       -DLZWS_EXAMPLES=OFF \
       -DLZWS_MAN=OFF \
+      -DLZWS_COVERAGE=OFF \
       -DCMAKE_BUILD_TYPE="Release" \
       || continue
 
