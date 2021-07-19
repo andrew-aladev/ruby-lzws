@@ -3,6 +3,7 @@
 
 require "lzws/stream/reader"
 require "lzws/string"
+require "set"
 require "socket"
 require "stringio"
 

@@ -4,6 +4,7 @@
 require "lzws/stream/writer"
 require "lzws/string"
 require "ocg"
+require "set"
 require "socket"
 require "stringio"
 
