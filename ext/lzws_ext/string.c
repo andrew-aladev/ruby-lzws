@@ -15,7 +15,6 @@
 #include "lzws_ext/gvl.h"
 #include "lzws_ext/macro.h"
 #include "lzws_ext/option.h"
-#include "ruby.h"
 
 // -- buffer --
 

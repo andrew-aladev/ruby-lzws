@@ -4,7 +4,6 @@
 #include "lzws_ext/option.h"
 
 #include "lzws_ext/error.h"
-#include "ruby.h"
 
 // -- values --
 

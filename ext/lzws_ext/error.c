@@ -3,8 +3,6 @@
 
 #include "lzws_ext/error.h"
 
-#include "ruby.h"
-
 static inline NORETURN(void raise_error(const char* name, const char* description))
 {
   VALUE module = rb_define_module(LZWS_EXT_MODULE_NAME);

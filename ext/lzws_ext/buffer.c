@@ -5,8 +5,6 @@
 
 #include <lzws/buffer.h>
 
-#include "ruby.h"
-
 VALUE lzws_ext_create_string_buffer(VALUE length)
 {
   return rb_str_new(NULL, NUM2SIZET(length));

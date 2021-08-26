@@ -5,12 +5,10 @@
 
 #include <lzws/buffer.h>
 #include <lzws/compressor/main.h>
-#include <lzws/compressor/state.h>
 
 #include "lzws_ext/error.h"
 #include "lzws_ext/gvl.h"
 #include "lzws_ext/option.h"
-#include "ruby.h"
 
 // -- initialization --
 
