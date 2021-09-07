@@ -36,7 +36,14 @@ require_header(
 )
 require_header(
   "lzws/common.h",
-  :types => %w[lzws_result_t]
+  :constants => %w[
+    LZWS_BIGGEST_MAX_CODE_BIT_LENGTH
+    LZWS_LOWEST_MAX_CODE_BIT_LENGTH
+  ],
+  :types     => %w[
+    lzws_byte_fast_t
+    lzws_result_t
+  ]
 )
 require_header(
   "lzws/compressor/common.h",
@@ -52,13 +59,6 @@ require_header "lzws/compressor/main.h"
 require_header(
   "lzws/compressor/state.h",
   :types => %w[lzws_compressor_state_t]
-)
-require_header(
-  "lzws/common.h",
-  :constants => %w[
-    LZWS_BIGGEST_MAX_CODE_BIT_LENGTH
-    LZWS_LOWEST_MAX_CODE_BIT_LENGTH
-  ]
 )
 require_header(
   "lzws/config.h",
@@ -105,17 +105,17 @@ require_library(
   %w[
     lzws_compress
     lzws_compress_file
-    lzws_compressor_get_initial_state
     lzws_compressor_finish
     lzws_compressor_free_state
+    lzws_compressor_get_initial_state
     lzws_create_source_buffer_for_compressor
     lzws_create_source_buffer_for_decompressor
     lzws_create_destination_buffer_for_compressor
     lzws_create_destination_buffer_for_decompressor
     lzws_decompress
     lzws_decompress_file
-    lzws_decompressor_get_initial_state
     lzws_decompressor_free_state
+    lzws_decompressor_get_initial_state
   ]
 )
 
