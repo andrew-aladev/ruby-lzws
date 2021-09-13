@@ -61,7 +61,7 @@ module LZWS
                 record_separator = "\n".encode text.encoding
 
                 target_text = "".encode text.encoding
-                sources.each { |source| target_text << source + field_separator }
+                sources.each { |source| target_text << (source + field_separator) }
                 target_text << record_separator
 
                 Target.open archive_path, compressor_options do |instance|
@@ -151,7 +151,7 @@ module LZWS
                 end
 
                 target_text = "".encode text.encoding
-                sources.each { |source| target_text << source + newline }
+                sources.each { |source| target_text << (source + newline) }
 
                 Target.open archive_path, compressor_options do |instance|
                   # Puts should ignore additional newlines and process arrays.
