@@ -19,9 +19,7 @@ module LZWS
       .freeze
 
       def self.get_invalid_decompressor_options(buffer_length_names, &block)
-        Validation::INVALID_HASHES.each do |invalid_hash|
-          block.call invalid_hash
-        end
+        Validation::INVALID_HASHES.each(&block)
 
         buffer_length_names.each do |name|
           (Validation::INVALID_NOT_NEGATIVE_INTEGERS - [nil]).each do |invalid_integer|
