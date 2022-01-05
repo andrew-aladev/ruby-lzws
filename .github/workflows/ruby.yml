@@ -83,28 +83,3 @@ jobs:
         env:
           CI: True
           MSYSTEM: MINGW64
-
-  windows-cygwin:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: cmd
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup cygwin
-        uses: egor-tensin/setup-cygwin@v3
-        with:
-          platform: x64
-          install-dir: C:\cygwin64
-          packages: gcc-g++ git cmake curl libgmp-devel libtommath-devel make ruby-devel
-      - name: Setup dependencies
-        run: >-
-            curl -L "https://github.com/vapier/ncompress/releases/download/v5.0/compress-windows-x64.exe"
-            -o "C:\cygwin64\bin\compress.exe"
-      - name: CI test
-        run: C:\cygwin64\bin\bash.exe -l "%cd%\scripts\ci_test.sh"
-        env:
-          CI: True
-          CYGWIN_NOWINPATH: True
-          SHELLOPTS: igncr
