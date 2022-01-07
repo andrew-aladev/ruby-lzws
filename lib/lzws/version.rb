@@ -2,5 +2,5 @@
 # Copyright (c) 2019 AUTHORS, MIT License.
 
 module LZWS
-  VERSION = "1.4.1".freeze
+  VERSION = "1.4.2".freeze
 end
