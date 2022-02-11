@@ -8,6 +8,6 @@
 #define LZWS_EXT_UNUSED(x) x __attribute__((__unused__))
 #else
 #define LZWS_EXT_UNUSED(x) x
-#endif
+#endif // __GNUC__
 
 #endif // LZWS_EXT_MACRO_H
