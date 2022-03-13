@@ -95,9 +95,9 @@ module LZWS
                       end
 
                     ensure
-                      refute decompressor.closed?
+                      refute_predicate decompressor, :closed?
                       decompressor.close(&writer)
-                      assert decompressor.closed?
+                      assert_predicate decompressor, :closed?
                     end
 
                     decompressed_text = decompressed_buffer.string

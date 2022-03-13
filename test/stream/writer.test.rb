@@ -80,9 +80,9 @@ module LZWS
                   assert_equal instance.pos, text.bytesize
                   assert_equal instance.pos, instance.tell
                 ensure
-                  refute instance.closed?
+                  refute_predicate instance, :closed?
                   instance.close
-                  assert instance.closed?
+                  assert_predicate instance, :closed?
                 end
 
                 compressed_text = io.string
@@ -155,7 +155,7 @@ module LZWS
 
                 get_compatible_decompressor_options compressor_options do |decompressor_options|
                   check_text target_text, compressed_text, decompressor_options
-                  assert target_text.valid_encoding?
+                  assert_predicate target_text, :valid_encoding?
                 end
               end
             end
@@ -257,7 +257,7 @@ module LZWS
                     ensure
                       # close
 
-                      refute instance.closed?
+                      refute_predicate instance, :closed?
 
                       if finish_mode[:close_nonblock]
                         loop do
@@ -274,7 +274,7 @@ module LZWS
                         instance.close
                       end
 
-                      assert instance.closed?
+                      assert_predicate instance, :closed?
                     end
                   end
                 end

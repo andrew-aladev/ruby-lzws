@@ -8,7 +8,9 @@ See [lzws library](https://github.com/andrew-aladev/lzws).
 
 ## Installation
 
-Please install lzws library first, use latest 1.4.0+ version.
+Operating systems: GNU/Linux, FreeBSD, OSX, Windows (MinGW).
+
+Dependencies: [lzws](https://github.com/andrew-aladev/lzws) 1.4.0+ version.
 
 ```sh
 gem install ruby-lzws
@@ -353,10 +355,6 @@ You should lock all shared data between threads.
 
 For example: you should not use same compressor/decompressor inside multiple threads.
 Please verify that you are using each processor inside single thread at the same time.
-
-## Operating systems
-
-GNU/Linux, FreeBSD, OSX, Windows (MinGW).
 
 ## CI
 
