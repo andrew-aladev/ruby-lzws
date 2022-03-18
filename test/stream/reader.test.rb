@@ -68,6 +68,16 @@ module LZWS
           assert_raises DecompressorCorruptedSourceError do
             instance.read
           end
+
+          assert_raises ValidateError do
+            instance = target.new Validation::StringIOWithoutRead.new
+            instance.read
+          end
+
+          assert_raises ValidateError do
+            instance = target.new Validation::StringIOWithoutEOF.new
+            instance.read
+          end
         end
 
         def test_read
@@ -317,6 +327,13 @@ module LZWS
           end
         end
 
+        def test_invalid_eof
+          assert_raises ValidateError do
+            instance = target.new Validation::StringIOWithoutEOF.new
+            instance.eof?
+          end
+        end
+
         def test_eof
           compressed_text = String.compress "ab"
           instance        = target.new ::StringIO.new(compressed_text)
@@ -365,6 +382,16 @@ module LZWS
           instance = target.new ::StringIO.new(corrupted_compressed_text)
 
           assert_raises DecompressorCorruptedSourceError do
+            instance.read_nonblock 1
+          end
+
+          assert_raises ValidateError do
+            instance = target.new Validation::StringIOWithoutReadpartial.new
+            instance.readpartial 1
+          end
+
+          assert_raises ValidateError do
+            instance = target.new Validation::StringIOWithoutReadNonblock.new
             instance.read_nonblock 1
           end
         end

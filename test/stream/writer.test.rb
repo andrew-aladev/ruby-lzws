@@ -63,6 +63,26 @@ module LZWS
 
         # -- synchronous --
 
+        def test_invalid_write
+          instance = target.new Validation::StringIOWithoutWrite.new
+
+          assert_raises ValidateError do
+            instance.write ""
+          end
+
+          assert_raises ValidateError do
+            instance.flush
+          end
+
+          assert_raises ValidateError do
+            instance.rewind
+          end
+
+          assert_raises ValidateError do
+            instance.close
+          end
+        end
+
         def test_write
           parallel_compressor_options do |compressor_options|
             TEXTS.each do |text|
@@ -204,6 +224,22 @@ module LZWS
         end
 
         # -- asynchronous --
+
+        def test_invalid_write_nonblock
+          instance = target.new Validation::StringIOWithoutWriteNonblock.new
+
+          assert_raises ValidateError do
+            instance.write_nonblock ""
+          end
+
+          assert_raises ValidateError do
+            instance.flush_nonblock
+          end
+
+          assert_raises ValidateError do
+            instance.close_nonblock
+          end
+        end
 
         def test_write_nonblock
           nonblock_server do |server|
@@ -349,6 +385,14 @@ module LZWS
                 end
               end
             end
+          end
+        end
+
+        def test_invalid_rewind_nonblock
+          instance = target.new Validation::StringIOWithoutWriteNonblock.new
+
+          assert_raises ValidateError do
+            instance.rewind_nonblock
           end
         end
 
