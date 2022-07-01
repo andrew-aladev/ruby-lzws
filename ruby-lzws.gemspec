@@ -18,6 +18,7 @@ GEMSPEC = Gem::Specification.new do |gem|
     "rubygems_mfa_required" => "true"
   }
 
+  gem.add_runtime_dependency "adsp", "~> 1.0"
   gem.add_development_dependency "codecov"
   gem.add_development_dependency "json"
   gem.add_development_dependency "minitar", "~> 0.9"
