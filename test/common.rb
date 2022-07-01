@@ -6,6 +6,8 @@ require "securerandom"
 require "shellwords"
 require "tempfile"
 
+require_relative "coverage_helper"
+
 module LZWS
   module Test
     module Common
