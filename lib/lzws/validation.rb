@@ -4,6 +4,7 @@
 require_relative "error"
 
 module LZWS
+  # LZWS::Validation module.
   module Validation
     def self.validate_bool(value)
       raise ValidateError, "invalid bool" unless value.is_a?(::TrueClass) || value.is_a?(::FalseClass)

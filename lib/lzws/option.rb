@@ -7,6 +7,7 @@ require_relative "error"
 require_relative "validation"
 
 module LZWS
+  # LZWS::Option module.
   module Option
     DEFAULT_BUFFER_LENGTH = 0
 

@@ -102,7 +102,7 @@ module LZWS
           file.write_nonblock "text"
         end
       rescue Errno::EBADF
-        # Nonblock operations with files are not available on Windows.
+        # Nonblock operations may not be available.
         false
       else
         true

@@ -7,6 +7,7 @@ require_relative "../validation"
 
 module LZWS
   module Stream
+    # LZWS::Stream::ReaderHelpers module.
     module ReaderHelpers
       def getbyte
         read 1
@@ -169,6 +170,7 @@ module LZWS
 
       # -- etc --
 
+      # LZWS::Stream::ReaderHelpers::ClassMethods module.
       module ClassMethods
         def open(file_path, *args, &block)
           Validation.validate_string file_path

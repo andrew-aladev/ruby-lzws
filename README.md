@@ -8,7 +8,7 @@ See [lzws library](https://github.com/andrew-aladev/lzws).
 
 ## Installation
 
-Operating systems: GNU/Linux, FreeBSD, OSX, Windows (MinGW).
+Operating systems: GNU/Linux, FreeBSD, OSX.
 
 Dependencies: [lzws](https://github.com/andrew-aladev/lzws) 1.4.0+ version.
 
@@ -255,14 +255,11 @@ Special asynchronous methods missing in `Zlib::GzipWriter`.
 So it is possible to have asynchronous variants for these synchronous methods.
 Behaviour is the same as `IO#write_nonblock` method.
 
-All nonblock operations for file will raise `EBADF` error on Windows.
-Setting file into nonblocking mode is [not available on Windows](https://github.com/ruby/ruby/blob/master/win32/win32.c#L4388).
-
 ```
 #<<(object)
 #print(*objects)
 #printf(*args)
-#putc(object, encoding: ::Encoding::BINARY)
+#putc(object, :encoding => 'ASCII-8BIT')
 #puts(*objects)
 ```
 

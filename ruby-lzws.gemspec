@@ -26,6 +26,7 @@ GEMSPEC = Gem::Specification.new do |gem|
   gem.add_development_dependency "parallel"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "rake-compiler"
+  gem.add_development_dependency "rdoc"
   gem.add_development_dependency "rubocop", "~> 1.31"
   gem.add_development_dependency "rubocop-minitest", "~> 0.20"
   gem.add_development_dependency "rubocop-performance", "~> 1.14"
@@ -33,7 +34,7 @@ GEMSPEC = Gem::Specification.new do |gem|
   gem.add_development_dependency "simplecov"
 
   gem.files =
-    `find {ext,lib} -type f \\( -name "*.rb" -o -name "*.h" -o -name "*.c" \\) -print0`.split("\x0") +
+    `find ext lib -type f \\( -name "*.rb" -o -name "*.h" -o -name "*.c" \\) -print0`.split("\x0") +
     %w[AUTHORS LICENSE README.md]
   gem.require_paths = %w[lib]
   gem.extensions    = %w[ext/extconf.rb]

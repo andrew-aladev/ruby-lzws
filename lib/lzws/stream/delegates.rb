@@ -5,6 +5,7 @@ require "forwardable"
 
 module LZWS
   module Stream
+    # LZWS::Stream::Delegates module.
     module Delegates
       DELEGATES = %i[
         autoclose=

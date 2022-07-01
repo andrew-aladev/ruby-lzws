@@ -7,6 +7,7 @@ require_relative "writer_helpers"
 
 module LZWS
   module Stream
+    # LZWS::Stream::Writer class.
     class Writer < Abstract
       include WriterHelpers
 

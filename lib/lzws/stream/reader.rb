@@ -8,6 +8,7 @@ require_relative "../validation"
 
 module LZWS
   module Stream
+    # LZWS::Stream::Reader class.
     class Reader < Abstract
       include ReaderHelpers
 
