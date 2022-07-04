@@ -94,11 +94,11 @@
       </header>
       <dl>
         <dt id="COMPRESSOR_DEFAULTS">COMPRESSOR_DEFAULTS
-        <dd>
+        <dd><p>Current compressor defaults.</p>
         <dt id="DECOMPRESSOR_DEFAULTS">DECOMPRESSOR_DEFAULTS
-        <dd>
+        <dd><p>Current decompressor defaults.</p>
         <dt id="DEFAULT_BUFFER_LENGTH">DEFAULT_BUFFER_LENGTH
-        <dd>
+        <dd><p>Current default buffer length.</p>
       </dl>
     </section>
 
@@ -117,10 +117,10 @@
         </div>
 
         <div class="method-description">
-          
+          <p>Processes compressor <code>options</code> and <code>buffer_length_names</code>. Option: <code>:source_buffer_length</code> source buffer length. Option: <code>:destination_buffer_length</code> destination buffer length. Option: <code>:gvl</code> enables global VM lock where possible. Option: <code>:max_code_bit_length</code> max code bit length. Option: <code>:block_mode</code> enables block mode. Option: <code>:without_magic_header</code> disables magic header. Option: <code>:msb</code> enables most significant bit mode. Option: <code>:unaligned_bit_groups</code> enables unaligned bit groups. Option: <code>:quiet</code> disables lzws library logging. Returns processed compressor options.</p>
 
           <div class="method-source-code" id="get_compressor_options-source">
-            <pre><span class="ruby-comment"># File lib/lzws/option.rb, line 34</span>
+            <pre><span class="ruby-comment"># File lib/lzws/option.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier ruby-title">get_compressor_options</span>(<span class="ruby-identifier">options</span>, <span class="ruby-identifier">buffer_length_names</span>)
   <span class="ruby-constant">Validation</span>.<span class="ruby-identifier">validate_hash</span> <span class="ruby-identifier">options</span>
 
@@ -172,10 +172,10 @@
         </div>
 
         <div class="method-description">
-          
+          <p>Processes decompressor <code>options</code> and <code>buffer_length_names</code>. Option: <code>:source_buffer_length</code> source buffer length. Option: <code>:destination_buffer_length</code> destination buffer length. Option: <code>:gvl</code> enables global VM lock where possible. Option: <code>:without_magic_header</code> disables magic header. Option: <code>:msb</code> enables most significant bit mode. Option: <code>:unaligned_bit_groups</code> enables unaligned bit groups. Option: <code>:quiet</code> disables lzws library logging. Returns processed decompressor options.</p>
 
           <div class="method-source-code" id="get_decompressor_options-source">
-            <pre><span class="ruby-comment"># File lib/lzws/option.rb, line 72</span>
+            <pre><span class="ruby-comment"># File lib/lzws/option.rb, line 107</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier ruby-title">get_decompressor_options</span>(<span class="ruby-identifier">options</span>, <span class="ruby-identifier">buffer_length_names</span>)
   <span class="ruby-constant">Validation</span>.<span class="ruby-identifier">validate_hash</span> <span class="ruby-identifier">options</span>
 

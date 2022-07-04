@@ -9,28 +9,54 @@ require_relative "validation"
 module LZWS
   # LZWS::Option module.
   module Option
+    # Current default buffer length.
     DEFAULT_BUFFER_LENGTH = 0
 
+    # Current compressor defaults.
     COMPRESSOR_DEFAULTS = {
+      # Enables global VM lock where possible.
       :gvl                  => false,
+      # Max code bit length.
       :max_code_bit_length  => nil,
+      # Disables magic header.
       :without_magic_header => nil,
+      # Enables block mode.
       :block_mode           => nil,
+      # Enables most significant bit mode.
       :msb                  => nil,
+      # Enables unaligned bit groups.
       :unaligned_bit_groups => nil,
+      # Disables lzws library logging.
       :quiet                => nil
     }
     .freeze
 
+    # Current decompressor defaults.
     DECOMPRESSOR_DEFAULTS = {
+      # Enables global VM lock where possible.
       :gvl                  => false,
+      # Disables magic header.
       :without_magic_header => nil,
+      # Enables most significant bit mode.
       :msb                  => nil,
+      # Enables unaligned bit groups.
       :unaligned_bit_groups => nil,
+      # Disables lzws library logging.
       :quiet                => nil
     }
     .freeze
 
+    # Processes compressor +options+ and +buffer_length_names+.
+    # Option: +:source_buffer_length+ source buffer length.
+    # Option: +:destination_buffer_length+ destination buffer length.
+    # Option: +:gvl+ enables global VM lock where possible.
+    # Option: +:max_code_bit_length+ max code bit length.
+    # Option: +:block_mode+ enables block mode.
+    # Option: +:without_magic_header+ disables magic header.
+    # Option: +:msb+ enables most significant bit mode.
+    # Option: +:unaligned_bit_groups+ enables unaligned bit groups.
+    # Option: +:quiet+ disables lzws library logging.
+    # Returns processed compressor options.
     def self.get_compressor_options(options, buffer_length_names)
       Validation.validate_hash options
 
@@ -69,6 +95,15 @@ module LZWS
       options
     end
 
+    # Processes decompressor +options+ and +buffer_length_names+.
+    # Option: +:source_buffer_length+ source buffer length.
+    # Option: +:destination_buffer_length+ destination buffer length.
+    # Option: +:gvl+ enables global VM lock where possible.
+    # Option: +:without_magic_header+ disables magic header.
+    # Option: +:msb+ enables most significant bit mode.
+    # Option: +:unaligned_bit_groups+ enables unaligned bit groups.
+    # Option: +:quiet+ disables lzws library logging.
+    # Returns processed decompressor options.
     def self.get_decompressor_options(options, buffer_length_names)
       Validation.validate_hash options
 

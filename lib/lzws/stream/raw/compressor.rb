@@ -18,6 +18,7 @@ module LZWS
         # Current option class.
         Option = LZWS::Option
 
+        # Flushes raw stream and writes next result using +writer+ proc.
         def flush(&writer)
           do_not_use_after_close
 

@@ -12,10 +12,12 @@ module LZWS
     # Current option class.
     Option = LZWS::Option
 
+    # Bypass native compress.
     def self.native_compress_io(*args)
       LZWS._native_compress_io(*args)
     end
 
+    # Bypass native decompress.
     def self.native_decompress_io(*args)
       LZWS._native_decompress_io(*args)
     end
