@@ -1,15 +1,15 @@
-Wed, 06 Jul 2022 19:56:46 +0300
-lib/lzws.rb	Mon, 12 Oct 2020 12:42:16 +0300
-lib/lzws/error.rb	Fri, 01 Jul 2022 17:10:33 +0300
-lib/lzws/file.rb	Mon, 04 Jul 2022 11:29:22 +0300
-lib/lzws/option.rb	Mon, 04 Jul 2022 12:34:48 +0300
-lib/lzws/stream/raw/compressor.rb	Mon, 04 Jul 2022 11:25:39 +0300
-lib/lzws/stream/raw/decompressor.rb	Mon, 04 Jul 2022 11:23:36 +0300
-lib/lzws/stream/reader.rb	Fri, 01 Jul 2022 18:56:15 +0300
-lib/lzws/stream/writer.rb	Fri, 01 Jul 2022 18:56:32 +0300
-lib/lzws/string.rb	Mon, 04 Jul 2022 11:31:06 +0300
-lib/lzws/validation.rb	Mon, 04 Jul 2022 11:30:21 +0300
-lib/lzws/version.rb	Mon, 18 Apr 2022 17:55:53 +0300
-AUTHORS	Wed, 22 May 2019 12:57:23 +0300
-LICENSE	Wed, 22 May 2019 12:57:23 +0300
-README.md	Fri, 01 Jul 2022 16:35:20 +0300
+Wed, 06 Jul 2022 23:10:16 +0300
+lib/lzws.rb	Tue, 08 Sep 2020 12:21:54 +0300
+lib/lzws/error.rb	Tue, 05 Jul 2022 23:31:53 +0300
+lib/lzws/file.rb	Tue, 05 Jul 2022 23:31:53 +0300
+lib/lzws/option.rb	Tue, 05 Jul 2022 23:31:53 +0300
+lib/lzws/stream/raw/compressor.rb	Tue, 05 Jul 2022 23:31:53 +0300
+lib/lzws/stream/raw/decompressor.rb	Tue, 05 Jul 2022 23:31:53 +0300
+lib/lzws/stream/reader.rb	Tue, 05 Jul 2022 23:31:53 +0300
+lib/lzws/stream/writer.rb	Tue, 05 Jul 2022 23:31:53 +0300
+lib/lzws/string.rb	Tue, 05 Jul 2022 23:31:53 +0300
+lib/lzws/validation.rb	Tue, 05 Jul 2022 23:31:53 +0300
+lib/lzws/version.rb	Thu, 31 Mar 2022 00:11:51 +0300
+AUTHORS	Tue, 08 Sep 2020 12:21:54 +0300
+LICENSE	Tue, 08 Sep 2020 12:21:54 +0300
+README.md	Tue, 05 Jul 2022 23:31:53 +0300
