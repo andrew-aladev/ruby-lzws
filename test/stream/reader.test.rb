@@ -1,13 +1,13 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require "adsp/test/stream/abstract"
 require "lzws/stream/reader"
 require "lzws/string"
 require "set"
 require "socket"
 require "stringio"
 
-require_relative "abstract"
 require_relative "../common"
 require_relative "../minitest"
 require_relative "../option"
@@ -16,7 +16,7 @@ require_relative "../validation"
 module LZWS
   module Test
     module Stream
-      class Reader < Abstract
+      class Reader < ADSP::Test::Stream::Abstract
         Target = LZWS::Stream::Reader
         String = LZWS::String
 
