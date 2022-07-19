@@ -1,112 +1,34 @@
 # Ruby bindings for lzws library.
 # Copyright (c) 2019 AUTHORS, MIT License.
 
+require "adsp/test/stream/raw/decompressor"
 require "lzws/stream/raw/decompressor"
 require "lzws/string"
 
-require_relative "abstract"
 require_relative "../../common"
 require_relative "../../minitest"
 require_relative "../../option"
-require_relative "../../validation"
 
 module LZWS
   module Test
     module Stream
       module Raw
-        class Decompressor < Abstract
+        class Decompressor < ADSP::Test::Stream::Raw::Decompressor
           Target = LZWS::Stream::Raw::Decompressor
+          Option = Test::Option
           String = LZWS::String
 
-          NATIVE_SOURCE_PATH    = Common::NATIVE_SOURCE_PATH
-          NATIVE_ARCHIVE_PATH   = Common::NATIVE_ARCHIVE_PATH
-          TEXTS                 = Common::TEXTS
-          LARGE_TEXTS           = Common::LARGE_TEXTS
-          PORTION_LENGTHS       = Common::PORTION_LENGTHS
-          LARGE_PORTION_LENGTHS = Common::LARGE_PORTION_LENGTHS
-
-          BUFFER_LENGTH_NAMES   = %i[destination_buffer_length].freeze
-          BUFFER_LENGTH_MAPPING = { :destination_buffer_length => :destination_buffer_length }.freeze
-
-          def test_invalid_initialize
-            get_invalid_decompressor_options do |invalid_options|
-              assert_raises ValidateError do
-                Target.new invalid_options
-              end
-            end
-          end
+          NATIVE_ARCHIVE_PATH = Common::NATIVE_ARCHIVE_PATH
+          NATIVE_SOURCE_PATH  = Common::NATIVE_SOURCE_PATH
 
           def test_invalid_read
-            decompressor = Target.new
+            super
 
-            Validation::INVALID_STRINGS.each do |invalid_string|
-              assert_raises ValidateError do
-                decompressor.read invalid_string, &NOOP_PROC
-              end
-            end
-
-            assert_raises ValidateError do
-              decompressor.read ""
-            end
-
+            decompressor              = Target.new
             corrupted_compressed_text = "#{String.compress('1111')}1111".b
 
             assert_raises DecompressorCorruptedSourceError do
               decompressor.read corrupted_compressed_text, &NOOP_PROC
-            end
-
-            decompressor.close(&NOOP_PROC)
-
-            assert_raises UsedAfterCloseError do
-              decompressor.read "", &NOOP_PROC
-            end
-          end
-
-          def test_texts
-            parallel_compressor_options do |compressor_options|
-              TEXTS.each do |text|
-                compressed_text = String.compress text, compressor_options
-
-                PORTION_LENGTHS.each do |portion_length|
-                  get_compatible_decompressor_options compressor_options do |decompressor_options|
-                    decompressed_buffer = ::StringIO.new
-                    decompressed_buffer.set_encoding ::Encoding::BINARY
-
-                    writer       = proc { |portion| decompressed_buffer << portion }
-                    decompressor = Target.new decompressor_options
-
-                    begin
-                      source                 = "".b
-                      compressed_text_offset = 0
-                      index                  = 0
-
-                      loop do
-                        portion = compressed_text.byteslice compressed_text_offset, portion_length
-                        break if portion.nil?
-
-                        compressed_text_offset += portion_length
-                        source << portion
-
-                        bytes_read = decompressor.read source, &writer
-                        source     = source.byteslice bytes_read, source.bytesize - bytes_read
-
-                        decompressor.flush(&writer) if index.even?
-                        index += 1
-                      end
-
-                    ensure
-                      refute_predicate decompressor, :closed?
-                      decompressor.close(&writer)
-                      assert_predicate decompressor, :closed?
-                    end
-
-                    decompressed_text = decompressed_buffer.string
-                    decompressed_text.force_encoding text.encoding
-
-                    assert_equal text, decompressed_text
-                  end
-                end
-              end
             end
           end
 
@@ -157,20 +79,6 @@ module LZWS
 
               assert_equal text, decompressed_text
             end
-          end
-
-          # -----
-
-          def get_invalid_decompressor_options(&block)
-            Option.get_invalid_decompressor_options BUFFER_LENGTH_NAMES, &block
-          end
-
-          def parallel_compressor_options(&block)
-            Common.parallel_options Option.get_compressor_options_generator(BUFFER_LENGTH_NAMES), &block
-          end
-
-          def get_compatible_decompressor_options(compressor_options, &block)
-            Option.get_compatible_decompressor_options compressor_options, BUFFER_LENGTH_MAPPING, &block
           end
         end
 
