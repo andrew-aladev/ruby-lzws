@@ -1,8 +1,8 @@
 # Ruby bindings for lzws library
 
-| AppVeyor | Jenkins | Github actions | Codecov | Gem  |
-| :------: | :-----: | :------------: | :-----: | :--: |
-| [![AppVeyor test status](https://ci.appveyor.com/api/projects/status/github/andrew-aladev/ruby-lzws?branch=master&svg=true)](https://ci.appveyor.com/project/andrew-aladev/ruby-lzws/branch/master) | [![Jenkins test status](http://37.187.122.190:58182/buildStatus/icon?job=ruby-lzws)](http://37.187.122.190:58182/job/ruby-lzws) | [![Github Actions test status](https://github.com/andrew-aladev/ruby-lzws/workflows/test/badge.svg?branch=master)](https://github.com/andrew-aladev/ruby-lzws/actions) | [![Codecov](https://codecov.io/gh/andrew-aladev/ruby-lzws/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-aladev/ruby-lzws) | [![Gem](https://img.shields.io/gem/v/ruby-lzws.svg)](https://rubygems.org/gems/ruby-lzws) |
+| Github actions | Codecov | Gem  |
+| :------------: | :-----: | :--: |
+| [![Github Actions test status](https://github.com/andrew-aladev/ruby-lzws/workflows/test/badge.svg?branch=master)](https://github.com/andrew-aladev/ruby-lzws/actions) | [![Codecov](https://codecov.io/gh/andrew-aladev/ruby-lzws/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-aladev/ruby-lzws) | [![Gem](https://img.shields.io/gem/v/ruby-lzws.svg)](https://rubygems.org/gems/ruby-lzws) |
 
 See [lzws library](https://github.com/andrew-aladev/lzws).
 
